@@ -3,7 +3,7 @@ epics_modules:
   base:
     name: "EPICS Base"
     version: "7.0.8"
-    url: "https://epics-controls.org/download/base/base-7.0.8,tar.gz"
+    url: "https://epics-controls.org/download/base/base-7.0.8.tar.gz"
     release_var: "EPICS_BASE"
     release_sortkey: "99"
     required_rpms:
