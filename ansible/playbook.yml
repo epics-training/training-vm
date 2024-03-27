@@ -3,15 +3,18 @@
   hosts: local
   gather_subset: min
   roles:
-    - role: catrust
-      tags: catrust
-      when: catrust
+    # - role: catrust
+    #   tags: catrust
+    #   when: catrust
       
-    - role: common        #  <- mandatory
-      tags: common
+    # - role: common        #  <- mandatory
+    #   tags: common
 
-    - role: epics-modules
-      tags: epics_modules
-      when: epics_modules
+    # - role: epics-modules
+    #   tags: epics_modules
+    #   when: epics_modules
+    - role: docker
+      tags: docker
 
-  environment: "{{ proxy_env }}"
+
+  #environment: "{{ proxy_env }}"
