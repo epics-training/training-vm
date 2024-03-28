@@ -5,21 +5,11 @@
   become: no
 
 - name: Add Docker GPG Key
-  dnf_key:
-    url: https://download.docker.com/linux/fedora/gpg
-    state: present
-
-- name: Add Docker Repository
-  dnf_repository:
-    name: docker-ce
-    baseurl: https://download.docker.com/linux/fedora/32/$basearch/stable
-    gpgcheck: yes
-    gpgkey: https://download.docker.com/linux/fedora/gpg
-    enabled: yes
+  shell: "dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
 
 - name: Install Docker 1.28.6
   dnf:
-    name: docker-ce-3:19.03.15-3.fc32
+    name: docker-ce-3:19.03.15-3.el9
     state: latest
     update_cache: yes
     allow_downgrade: yes
