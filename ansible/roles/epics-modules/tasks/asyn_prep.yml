@@ -1,0 +1,7 @@
+---
+- name: "{{ epics_modules[item].name }} | Switch configuration to TIRPC"
+  ansible.builtin.lineinfile:
+    path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/CONFIG_SITE"
+    regexp: '#\s*TIRPC=YES'
+    line: 'TIRPC=YES'
+  become: true

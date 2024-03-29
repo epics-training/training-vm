@@ -1,0 +1,7 @@
+---
+- name: "{{ epics_modules[item].name }} | Fix configure/RELEASE to include RELEASE.local"
+  ansible.builtin.lineinfile:
+    path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/RELEASE"
+    search_string: '-include $(TOP)/RELEASE.local'
+    line: '-include $(TOP)/../RELEASE.local'
+  become: true

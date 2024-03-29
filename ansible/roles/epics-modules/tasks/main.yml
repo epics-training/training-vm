@@ -1,5 +1,5 @@
 ---
-- name: Clear rebuild flag
+- name: Clear global rebuild flag
   ansible.builtin.file:
     path: "{{ epics_install_path }}/.flag/REBUILD"
     state: absent

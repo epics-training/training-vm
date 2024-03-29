@@ -3,15 +3,17 @@
 
 # Activate/deactivate optional roles by uncommenting the associated variable below
 # (default settings are defined in all.yml)
-#epics_base: false
+#epics_modules: false
 #catrust: true
 
-# List the EPICS modules that will be built (base is mandatory)
+# List the EPICS modules that will be built in this order (base is mandatory)
 epics_modules_list:
   - base
   - pvxs
 #  - seq
-
+#  - asyn
+#  - adcore
+#  - adsimdetector
 
 # Set proxy, if needed
 #proxy_env:

@@ -6,4 +6,3 @@ catrust: false
 epics_modules_list:
   - base
   - pvxs
-#  - seq
