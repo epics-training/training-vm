@@ -3,7 +3,7 @@
   dnf: 
     name: ['gcc-c++']
     state: latest
-    update_cache: true    
+    update_cache: true
   become: true
 
 - name: Create installation directories
