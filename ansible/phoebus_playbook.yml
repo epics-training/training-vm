@@ -1,0 +1,7 @@
+---
+- name: Set up training VM
+  hosts: local
+  roles:
+    - role: epics-tools
+
+#  environment: "{{ proxy_env }}"

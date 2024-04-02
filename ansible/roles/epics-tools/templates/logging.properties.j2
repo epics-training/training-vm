@@ -1,0 +1,72 @@
+# java.util.logging configuration
+#
+# Read in Launcher via LogManager
+
+handlers = java.util.logging.ConsoleHandler
+
+# Levels: SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL
+# General level 'FINE' to enable logging, which is then fine-tuned below
+.level = INFO
+
+java.util.logging.ConsoleHandler.level = WARNING
+java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+# 1: date, 2: source, 3: logger, 4: level, 5: message, 6:thrown
+# Adding the logger name [%3$s] can be useful to determine which logger to _disable_,
+#
+java.util.logging.SimpleFormatter.format=%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s [%3$s] %5$s%6$s%n
+#
+# but otherwise the source is more useful to locate the originating code.
+# java.util.logging.SimpleFormatter.format=%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s [%2$s] %5$s%6$s%n
+
+# Throttle messages for certain packages
+# Raise back up from 'WARNING' to debug
+
+# Core java and general 3rd party libs
+sun.net.www.protocol.http.HttpURLConnection.level = CONFIG
+javafx.scene.control.level = WARNING
+javafx.css.level = WARNING
+javafx.scene.focus.level = WARNING
+javafx.scene.input.level = WARNING
+javafx.scene.layout.level = WARNING
+com.sun.javafx.webkit.level = WARNING
+com.sun.webkit.level = WARNING
+javafx.scene.web.WebEngine.level = WARNING
+javax.mail.level = WARNING
+javax.activation.level = WARNING
+com.sun.mail.smtp.level = WARNING
+com.sun.speech.freetts.Voice.level = WARNING
+com.sun.speech.freetts.en.PartOfSpeechTagger.level = WARNING
+com.sun.speech.freetts.relp.AudioOutput.level = WARNING
+com.sun.jersey.level = WARNING
+com.cosylab.epics.caj.level = WARNING
+org.epics.pvaccess.client.level = WARNING
+org.apache.kafka.level = WARNING
+
+# Core packages 
+org.phoebus.framework.rdb.level = WARNING
+org.phoebus.framework.workbench.level = WARNING
+org.phoebus.security.level = WARNING
+org.phoebus.ui.javafx.BufferUtil.level = WARNING
+org.phoebus.ui.docking.level = WARNING
+org.phoebus.ui.autocomplete.level = WARNING
+org.phoebus.ui.undo.level = WARNING
+org.phoebus.pv.level = WARNING
+org.phoebus.ui.application.PhoebusApplication.level = WARNING
+org.phoebus.ui.application.ApplicationLauncherService.level = WARNING
+
+# Applications
+org.phoebus.applications.filebrowser.level = WARNING
+org.phoebus.applications.pvtree.level = WARNING
+org.phoebus.applications.viewer3d.level = WARNING
+org.phoebus.archive.reader.level = WARNING
+org.csstudio.javafx.rtplot.level = CONFIG
+org.csstudio.trends.databrowser3.level = WARNING
+org.csstudio.display.builder.level = WARNING
+org.csstudio.display.builder.model.level = WARNING
+org.csstudio.display.builder.representation.level = WARNING
+org.csstudio.display.builder.editor.level = WARNING
+org.csstudio.display.builder.runtime.level = WARNING
+org.phoebus.applications.alarm.level = INFO
+org.phoebus.applications.email.level = WARNING
+org.csstudio.scan.level = WARNING
+

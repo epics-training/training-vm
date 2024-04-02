@@ -1,0 +1,66 @@
+---
+
+# tasks file for cs_studio_phoebus
+- name: Clone and/or update the phoebus repo
+  become: true
+  git:
+    repo: 'https://github.com/ControlSystemStudio/phoebus.git'
+    dest: /opt/epics-tools/lib/phoebus
+    version: "{{ phoebus_version }}"
+    force: yes
+
+- name: Build the documentation and help
+  command: mvn clean verify -P sphinx -N
+  become: true
+  args:
+    chdir: /opt/epics-tools/lib/phoebus/
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+    MVN_HOME: "{{ mvn_home }}"
+    PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+
+- name: Build the common phoebus binaries
+  command: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true
+  become: true
+  args:
+    chdir: /opt/epics-tools/lib/phoebus/
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+    MVN_HOME: "{{ mvn_home }}"
+    PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+
+- name: ensure config directory exists for phoebus
+  become: true
+  file:
+    path: /opt/epics-tools/config
+    state: directory
+    owner:  "{{ epics_services_account }}"
+    group:  "{{ epics_services_account }}"
+
+- name: create run-phoebus
+  become: true
+  template:
+    src: preferences.ini.j2
+    dest: /opt/epics-tools/config/preferences.ini
+    mode: 0755
+    owner: "{{ phoebus_owner }}"
+    group: "{{ phoebus_owner }}"
+
+- name: create run-phoebus
+  become: true
+  template:
+    src: logging.properties.j2
+    dest: /opt/epics-tools/config/logging.properties
+    mode: 0755
+    owner: "{{ phoebus_owner }}"
+    group: "{{ phoebus_owner }}"
+
+- name: create run-phoebus
+  become: true
+  template:
+    src: run-phoebus.sh.j2
+    dest: /usr/local/bin/run-phoebus
+    mode: 0755
+    owner: "{{ phoebus_owner }}"
+    group: "{{ phoebus_owner }}"
+

@@ -1,0 +1,59 @@
+####################### PHOEBUS preferences ########################
+
+# Welcome
+#org.phoebus.ui/welcome=file:/opt/epics-tools/phoebus/products/nsls2-beamlines/target/doc/welcome/welcome.html
+
+#layouts
+org.phoebus.ui/layout_dir=/opt/css//configuration/layouts
+
+# Preferences for the phoebus framework and apps
+org.phoebus.ui/ui_monitor_period=0
+
+# Channel Access
+org.phoebus.pv.ca/addr_list=10.39.59.255
+org.phoebus.pv.ca/auto_addr_list=true
+
+# PVAccess
+org.epics.pva/EPICS_PVA_ADDR_LIST=10.39.59.255
+
+# Subtle shading
+org.csstudio.javafx.rtplot/shady_future=128, 128, 128, 10
+
+# PV throttle (250)
+org.csstudio.display.builder.runtime/update_throttle=250
+
+# Display hesitation to accumulate updates (20)
+org.csstudio.display.builder.representation/update_accumulation_time = 20
+# Pause after updates (100)
+org.csstudio.display.builder.representation/update_delay = 100
+# Line Plot update throttle
+org.csstudio.display.builder.representation/plot_update_delay = 250
+# Image plot update throttle
+org.csstudio.display.builder.representation/image_update_delay = 250
+
+
+# Display Builder
+#org.phoebus.ui/top_resources=
+org.csstudio.display.builder.runtime/probe_display=
+org.csstudio.display.builder.runtime/python_path=
+
+# Logbook
+org.phoebus.logbook/logbook_factory=inmemory
+
+# Olog
+#org.phoebus.olog.api/olog_url=https\://epics-services-tst\:33181
+
+# Channelfinder
+# org.phoebus.channelfinder/serviceURL=https\://channelfinder:8181/ChannelFinder/
+
+# Archived Data
+
+org.csstudio.trends.databrowser3/urls=pbraw\://epics-services-tst:13168/retrieval|tst
+org.csstudio.trends.databrowser3/archives=pbraw\://epics-services-tst:13168/retrieval
+org.csstudio.trends.databrowser3/use_default_archives=false
+# Include to get a prompt for newly started instance
+org.csstudio.trends.databrowser3/prompt_for_raw_data_request = true
+org.csstudio.trends.databrowser3/prompt_for_visibility = true
+
+# Save Restore
+org.phoebus.applications.saveandrestore.client/jmasar.service.url=http://epics-services-tst:23181
