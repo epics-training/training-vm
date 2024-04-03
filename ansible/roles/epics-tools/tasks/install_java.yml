@@ -40,3 +40,27 @@
     group:  "{{ epics_services_account }}"
     extra_opts:
     - --strip-components=1
+
+# Configure proxies for maven
+- name: clear existing proxy configuration
+  become: true
+  community.general.xml:
+    path: "{{ mvn_home }}/conf/settings.xml"
+    namespaces:
+      mvn: http://maven.apache.org/SETTINGS/1.0.0
+    xpath: /mvn:settings/mvn:proxies
+    set_children: []
+  when: proxy_mvn is defined
+
+- name: add proxy configuration
+  become: true
+  community.general.xml:
+    path: "{{ mvn_home }}/conf/settings.xml"
+    namespaces:
+      mvn: http://maven.apache.org/SETTINGS/1.0.0
+    xpath: /mvn:settings/mvn:proxies
+    add_children: "{{ item }}"
+    input_type: xml
+    pretty_print: true
+  loop: "{{ proxy_mvn }}"
+  when: proxy_mvn is defined

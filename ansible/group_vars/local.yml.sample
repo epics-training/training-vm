@@ -15,10 +15,14 @@ epics_modules_list:
 #  - adcore
 #  - adsimdetector
 
-# Set proxy, if needed
+# Set proxies, if needed
 #proxy_env:
 #  http_proxy: http://proxy.example.com:8080
 #  https_proxy: http://proxy.example.com:8080
+
+#proxy_mvn:
+#  - <proxy><id>httpproxy</id><active>true</active><protocol>http</protocol><host>10.0.2.2</host><port>3128</port></proxy>
+#  - <proxy><id>httpsproxy</id><active>true</active><protocol>https</protocol><host>10.0.2.2</host><port>3128</port></proxy>
 
 
 # [catrust] CA certificate to work through corporate firewall with deep inspection
