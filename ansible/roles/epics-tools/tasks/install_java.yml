@@ -3,6 +3,7 @@
 
 # Install open jdk
 - name: ensure java_home directory exists
+  become: true
   file:
     path: "{{ java_home }}"
     state: directory
@@ -10,6 +11,7 @@
     group:  "{{ epics_services_account }}"
 
 - name: install open jdk 17
+  become: true
   ansible.builtin.unarchive:
     src: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz
     dest: "{{ java_home }}"
@@ -21,6 +23,7 @@
 
 # Install open maven
 - name: ensure mvn directory exists
+  become: true
   file:
     path: "{{ mvn_home }}"
     state: directory
@@ -28,6 +31,7 @@
     group:  "{{ epics_services_account }}"
 
 - name: install apache-maven-3.6.0
+  become: true
   ansible.builtin.unarchive:
     src: https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz
     dest: "{{ mvn_home }}"
