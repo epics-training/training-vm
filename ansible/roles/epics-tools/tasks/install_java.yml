@@ -1,10 +1,10 @@
 ---
 # tasks file for epics_tools_libs_jvm
 
-# Install open jdk 17
-- name: ensure jvm directory exists for jdk-17
+# Install open jdk
+- name: ensure java_home directory exists
   file:
-    path: /opt/epics-tools/lib/jvm/jdk-17
+    path: "{{ java_home }}"
     state: directory
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
@@ -12,7 +12,7 @@
 - name: install open jdk 17
   ansible.builtin.unarchive:
     src: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz
-    dest: /opt/epics-tools/lib/jvm/jdk-17
+    dest: "{{ java_home }}"
     remote_src: yes
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
@@ -20,9 +20,9 @@
     - --strip-components=1
 
 # Install open maven
-- name: ensure mvn directory exists for mvn
+- name: ensure mvn directory exists
   file:
-    path: /opt/epics-tools/lib/apache-maven-3.6.0
+    path: "{{ mvn_home }}"
     state: directory
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
@@ -30,7 +30,7 @@
 - name: install apache-maven-3.6.0
   ansible.builtin.unarchive:
     src: https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz
-    dest: /opt/epics-tools/lib/apache-maven-3.6.0
+    dest: "{{ mvn_home }}"
     remote_src: yes
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
