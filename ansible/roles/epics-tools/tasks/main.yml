@@ -1,5 +1,5 @@
 ---
 
-- include: install_java.yml
+- include_tasks: install_java.yml
 
-- include: build_phoebus.yml
+- include_tasks: build_phoebus.yml
