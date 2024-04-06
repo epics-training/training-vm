@@ -9,6 +9,11 @@
 bootstrap_dir=${1%/}
 script_dir=$(dirname $0)
 
+if [ "$(whoami)" == "root" ]; then
+  echo "This script must be run by a regular user (with sudo privileges)."
+  exit 1
+fi
+
 if [ -d "${bootstrap_dir}" ]; then
     shift
 elif [ -d "${script_dir}" ]; then

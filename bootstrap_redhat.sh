@@ -7,6 +7,11 @@
 
 # $1 = repo (default: GitHub)
 
+if [ "$(whoami)" == "root" ]; then
+  echo "This script must be run by a regular user (with sudo privileges)."
+  exit 1
+fi
+
 BOOTSTRAP_DIR="bootstrap"
 BOOTSTRAP_REPO=${1:-"https://github.com/epics-training/training-vm"}
 

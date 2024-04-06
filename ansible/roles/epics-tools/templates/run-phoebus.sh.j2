@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Phoebus launcher for Linux or Mac OS X
+TOP=/opt/epics-tools
+
+export JAVA_HOME=/opt/epics-tools/lib/jvm/jdk-17
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Reduce VIRT memory
+export MALLOC_ARENA_MAX=4
+
+STANDALONE=no
+
+# Passing arguments
+while getopts hsr:p: opt; do
+  case $opt in
+     s) STANDALONE=yes;;
+     r) CS_STUDIO_VERSION="$OPTARG";;
+     p) PHOEBUS_CONFIG="$OPTARG";;
+  esac
+done
+
+# figure out the path to the product jar
+if [[ -z "${PHOEBUS_LAUNCHER}" ]]; then
+  PHOEBUS_LAUNCHER={{ phoebus_launcher }}
+fi
+
+# figure out the path to the configuration settings
+if [[ -z "${PHOEBUS_CONFIG}" ]]; then
+  PHOEBUS_CONFIG=/opt/epics-tools/config/preferences.ini
+fi
+
+# figure out the path to the configuration settings
+if [[ -z "${PHOEBUS_LOGGING}" ]]; then
+  PHOEBUS_LOGGING=/opt/epics-tools/config/logging.properties
+fi
+
+# To get one instance, use server mode
+
+OPT="-server 4918"
+
+JDK_JAVA_OPTIONS=" -DCA_DISABLE_REPEATER=true"
+JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dnashorn.args=--no-deprecation-warning"
+JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Djdk.gtk.verbose=false -Djdk.gtk.version=2 -Dprism.forceGPU={{ force_gpu }}"
+JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dorg.csstudio.javafx.rtplot.update_counter=false"
+export JDK_JAVA_OPTIONS
+
+echo $JDK_JAVA_OPTIONS
+
+${PHOEBUS_LAUNCHER} -settings ${PHOEBUS_CONFIG} -logging ${PHOEBUS_LOGGING} $OPT "$@" &

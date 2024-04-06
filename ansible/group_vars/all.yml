@@ -6,3 +6,6 @@ catrust: false
 epics_modules_list:
   - base
   - pvxs
+
+# Default: no proxy
+proxy_env: {}
