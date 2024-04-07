@@ -1,21 +1,4 @@
 ---
-- name: Determine the current user
-  command: whoami
-  register: whoami
-  become: no
-
-- name: Add Docker GPG Key
-  shell: "dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
-  become: yes
-
-- name: Install Docker
-  dnf:
-    name: docker-ce
-    state: latest
-    update_cache: yes
-    allow_downgrade: yes
-  become: yes
-
 - name: Install Python 3
   dnf:
     name: python3
@@ -27,17 +10,15 @@
     name: python3-pip
     state: present
   become: yes
+
 - name: Install Docker Compose
   pip:
     name: docker-compose
     state: present
-
-- name: Add current user to the docker group
-  ansible.builtin.user:
-    name: "{{ whoami.stdout }}"
-    groups: docker
-    append: yes
-  become: yes
+- name: Install Podman Compose
+  pip:
+    name: podman-compose
+    state: present
 
 - name: Start and enable Docker serve
   ansible.builtin.systemd:
