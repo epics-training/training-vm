@@ -16,6 +16,5 @@
 - name: "{{ epics_modules[item].name }} | Make example IOC include ADCORE/configure/CONFIG_SITE"
   ansible.builtin.lineinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocs/simDetectorIOC/configure/CONFIG_SITE"
-    search_string: '-include $(AREA_DETECTOR)/configure/CONFIG_SITE'
     line: '-include $(ADCORE)/configure/CONFIG_SITE'
   become: true
