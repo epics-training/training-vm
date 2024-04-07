@@ -6,6 +6,10 @@ catrust: false
 epics_modules_list:
   - base
   - pvxs
+#  - seq
+  - asyn
+  - adcore
+  - adsimdetector
 
 # Default: no proxy
 proxy_env: {}
