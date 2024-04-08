@@ -53,8 +53,7 @@
 
 - name: tcp ports facts
   community.general.listen_ports_facts: 
-    - "5064"
-    - "5065"
+
 
 - name: Add ports to firewall
   firewalld:
@@ -71,8 +70,7 @@
 
 - name: tcp ports facts
   community.general.listen_ports_facts: 
-    - "5064"
-    - "5065"
+
 
 - name: Add ports to firewall
   firewalld:
