@@ -14,6 +14,13 @@
     update: yes
   become: no
 
+- name: Create sub-directory (data, user) inside bluesky directory
+  ansible.builtin.file:
+    path: "{{ bluesky_deployment_dir_path }}/{{ item }}"
+    state: directory
+  loop: "{{ sub_directories }}"
+  become: no
+
 - name: Create history.sqlite file
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}/history.sqlite"
