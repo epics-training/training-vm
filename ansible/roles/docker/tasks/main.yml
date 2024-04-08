@@ -38,4 +38,4 @@
     enabled: yes
 
 - name: set alias to docker
-  command: echo "alias docker=podman" > ~/.bashrc
+  command: echo "alias docker=podman" > "{{ lookup('env','HOME') }}/.bashrc"

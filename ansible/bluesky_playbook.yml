@@ -1,0 +1,11 @@
+---
+- name: Set up Bluesky
+  hosts: local
+  roles:
+     - role: docker
+       tags: docker
+       
+     - role: bluesky
+       tags: bluesky
+
+#  environment: "{{ proxy_env }}"
