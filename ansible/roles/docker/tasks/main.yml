@@ -4,11 +4,13 @@
     name: python3
     state: present
   become: yes
+
 - name: Install podman docker
   dnf:
     name: podman-docker
     state: present
   become: yes
+
 - name: Install pip3
   dnf:
     name: python3-pip
@@ -30,12 +32,14 @@
     name: podman
     state: started
     enabled: yes
+  become: yes
 
 - name: enable podman-restart
   ansible.builtin.systemd:
     name: podman-restart
     state: started
     enabled: yes
+  become: yes
 
 - name: Add TCP and UDP protocols
   firewalld:
@@ -47,6 +51,7 @@
   loop:
     - tcp
     - udp
+  become: yes
 
 - name: tcp ports facts
   community.general.listen_ports_facts: 
@@ -60,6 +65,7 @@
     permanent: true
   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
   register: ports_added_to_firewalld
+  become: yes
 
 - name: print Ports Added
   debug:
@@ -67,7 +73,6 @@
 
 - name: tcp ports facts
   community.general.listen_ports_facts: 
-
 
 - name: Add ports to firewall
   firewalld:
@@ -77,5 +82,5 @@
     permanent: true
   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
   register: ports_added_to_firewalld
-
+  become: yes
 
