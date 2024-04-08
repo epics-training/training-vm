@@ -52,10 +52,12 @@
     - udp
 
 - name: tcp ports facts
-  listen_ports_facts: 5064, 5065
-
+  listen_ports_facts: 
+    - "5064"
+    - "5065"
+    
 - name: Add ports to firewall
-  firewalld:
+  community.general.firewalld:
     port: "{{ item }}/tcp"
     state: enabled
     immediate: true
@@ -68,10 +70,12 @@
     var: ports_added_to_firewalld
 
 - name: tcp ports facts
-  listen_ports_facts: 5064, 5065
+  listen_ports_facts: 
+    - "5064"
+    - "5065"
 
 - name: Add ports to firewall
-  firewalld:
+  community.general.firewalld:
     port: "{{ item }}/udp"
     state: enabled
     immediate: true
