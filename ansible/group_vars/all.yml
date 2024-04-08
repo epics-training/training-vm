@@ -1,15 +1,12 @@
 # Default configuration for the available roles
 epics_modules: true
 catrust: false
+epics_tools: true
 
 # Default configuration for the EPICS modules to build
 epics_modules_list:
-#  - base
-#  - pvxs
-#  - seq
-#  - asyn
-#  - adcore
-#  - adsimdetector
+  - base
+  - pvxs
 
 # Default: no proxy
 proxy_env: {}
