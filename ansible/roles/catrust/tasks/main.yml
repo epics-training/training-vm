@@ -35,5 +35,4 @@
     value: UnsafeLegacyRenegotiation
     state: present
   become: true
-
   
