@@ -41,7 +41,7 @@
   command: echo "alias docker=podman" > "{{ lookup('env','HOME') }}/.bashrc"
 
 - name: Add TCP and UDP protocols
-  firewalld:
+  community.general.firewalld:
     zone: public
     permanent: yes
     state: enabled
@@ -52,10 +52,10 @@
     - udp
 
 - name: tcp ports facts
-  listen_ports_facts: 
+  community.general.listen_ports_facts: 
     - "5064"
     - "5065"
-    
+
 - name: Add ports to firewall
   community.general.firewalld:
     port: "{{ item }}/tcp"
@@ -70,7 +70,7 @@
     var: ports_added_to_firewalld
 
 - name: tcp ports facts
-  listen_ports_facts: 
+  community.general.listen_ports_facts: 
     - "5064"
     - "5065"
 
