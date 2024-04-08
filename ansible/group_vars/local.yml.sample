@@ -12,6 +12,10 @@ epics_modules_list:
   - pvxs
 #  - seq
 #  - asyn
+#  - autosave
+#  - busy
+#  - sscan
+#  - calc
 #  - adcore
 #  - adsimdetector
 
@@ -21,8 +25,8 @@ epics_modules_list:
 #  https_proxy: http://proxy.example.com:8080
 
 #proxy_mvn:
-#  - <proxy><id>httpproxy</id><active>true</active><protocol>http</protocol><host>10.0.2.2</host><port>3128</port></proxy>
-#  - <proxy><id>httpsproxy</id><active>true</active><protocol>https</protocol><host>10.0.2.2</host><port>3128</port></proxy>
+#  - <proxy><id>httpproxy</id><active>true</active><protocol>http</protocol><host>proxy.example.com</host><port>8080</port></proxy>
+#  - <proxy><id>httpsproxy</id><active>true</active><protocol>https</protocol><host>proxy.example.com</host><port>8080</port></proxy>
 
 
 # [catrust] CA certificate to work through corporate firewall with deep packet inspection

@@ -10,6 +10,12 @@
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
 
+- name: Check if Java installation exists
+  stat:
+    path: "{{ java_home }}/bin/java"
+  register: java_installation
+  changed_when: false
+
 - name: install open jdk 17
   become: true
   ansible.builtin.unarchive:
@@ -20,6 +26,7 @@
     group:  "{{ epics_services_account }}"
     extra_opts:
     - --strip-components=1
+  when: java_installation.stat.exists == false
 
 # Install open maven
 - name: ensure mvn directory exists
@@ -29,6 +36,12 @@
     state: directory
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
+
+- name: Check if Maven installation exists
+  stat:
+    path: "{{ mvn_home }}/bin/mvn"
+  register: mvn_installation
+  changed_when: false
 
 - name: install apache-maven-3.6.0
   become: true
@@ -40,6 +53,7 @@
     group:  "{{ epics_services_account }}"
     extra_opts:
     - --strip-components=1
+  when: mvn_installation.stat.exists == false
 
 # Configure proxies for maven
 - name: clear existing proxy configuration

@@ -5,11 +5,11 @@
     search_string: '-include $(TOP)/RELEASE.local'
     line: '-include $(TOP)/../RELEASE.local'
   become: true
-  
+
 - name: "{{ epics_modules[item].name }} | Add configuration to configure/CONFIG_SITE"
   ansible.builtin.blockinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/CONFIG_SITE"
-    marker: "\n# {mark} ANSIBLE MANAGED BLOCK"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
     block: |
       WITH_ZLIB = YES
       WITH_TIFF = YES
@@ -17,4 +17,15 @@
       WITH_PVA = YES
       XML2_INCLUDE += /usr/include/libxml2
   become: true
-  
+
+- name: "{{ epics_modules[item].name }} | Common plugins st.cmd snippet"
+  ansible.builtin.template:
+    src: commonPlugins.cmd.j2
+    dest: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocBoot/commonPlugins.cmd"
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Common plugins autoSaveRestore configuration"
+  ansible.builtin.template:
+    src: commonPlugin_settings.req.j2
+    dest: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocBoot/commonPlugin_settings.req"
+  become: true

@@ -1,5 +1,5 @@
 epics_modules:
-  
+
   base:
     name: "EPICS Base"
     version: "7.0.8"
@@ -28,14 +28,14 @@ epics_modules:
     name: "SNL Sequencer"
     version: "2.2.9"
     url: "https://github.com/epics-modules/sequencer/archive/refs/tags/R2-2-9.tar.gz"
-    release_var: "SNLSEQ"
+    release_var: "SNCSEQ"
     release_sortkey: "10"
     required_rpms:
       - re2c
 
   asyn:
     name: "ASYN"
-    version : "4.44.2"
+    version: "4.44.2"
     url: "https://github.com/epics-modules/asyn/archive/refs/tags/R4-44-2.tar.gz"
     release_var: "ASYN"
     release_sortkey: "10"
@@ -45,6 +45,34 @@ epics_modules:
     enable_repos:
       - crb
     pre_hook: asyn_prep.yml
+
+  autosave:
+    name: "autoSaveRestore"
+    version: "5.11"
+    url: "https://github.com/epics-modules/autosave/archive/refs/tags/R5-11.tar.gz"
+    release_var:  "AUTOSAVE"
+    release_sortkey: "10"
+
+  busy:
+    name: "Busy Record"
+    version: "1.7.4"
+    url: "https://github.com/epics-modules/busy/archive/refs/tags/R1-7-4.tar.gz"
+    release_var: "BUSY"
+    release_sortkey: "10"
+
+  sscan:
+    name: "SScan module"
+    version: "2.11.6"
+    url: "https://github.com/epics-modules/sscan/archive/refs/tags/R2-11-6.tar.gz"
+    release_var: "SSCAN"
+    release_sortkey: "10"
+
+  calc:
+    name: "Calc module (misc records)"
+    version: "3.7.5"
+    url: "https://github.com/epics-modules/calc/archive/refs/tags/R3-7-5.tar.gz"
+    release_var: "CALC"
+    release_sortkey: "10"
 
   adcore:
     name: "AreaDetector - Core"

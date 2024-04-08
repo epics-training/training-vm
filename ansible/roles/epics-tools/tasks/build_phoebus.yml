@@ -8,6 +8,7 @@
     dest: /opt/epics-tools/lib/phoebus
     version: "{{ phoebus_version }}"
     force: yes
+  register: phoebus_repo
 
 - name: Build the documentation and help
   command: mvn clean verify -P sphinx -N
@@ -18,6 +19,7 @@
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: phoebus_repo.changed | bool
 
 - name: Build the common phoebus binaries
   command: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true
@@ -28,6 +30,7 @@
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: phoebus_repo.changed | bool
 
 - name: ensure config directory exists for phoebus
   become: true
@@ -63,4 +66,3 @@
     mode: 0755
     owner: "{{ phoebus_owner }}"
     group: "{{ phoebus_owner }}"
-
