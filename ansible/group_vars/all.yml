@@ -4,12 +4,12 @@ catrust: false
 
 # Default configuration for the EPICS modules to build
 epics_modules_list:
-  - base
-  - pvxs
+#  - base
+#  - pvxs
 #  - seq
-  - asyn
-  - adcore
-  - adsimdetector
+#  - asyn
+#  - adcore
+#  - adsimdetector
 
 # Default: no proxy
 proxy_env: {}
