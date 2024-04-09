@@ -27,4 +27,5 @@ if [ ! -d ${bootstrap_dir}/ansible ]; then
     exit 1
 fi
 
-exec ansible-playbook -i ${bootstrap_dir}/ansible/hosts ${bootstrap_dir}/ansible/playbook.yml "$@"
+ansible-galaxy install -r ${bootstrap_dir}/requirements.yml || true
+ansible-playbook -i ${bootstrap_dir}/ansible/hosts ${bootstrap_dir}/ansible/playbook.yml "$@"
