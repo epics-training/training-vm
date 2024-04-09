@@ -37,9 +37,6 @@
     state: started
     enabled: yes
 
-- name: set alias to docker
-  command: echo "alias docker=podman" > "{{ lookup('env','HOME') }}/.bashrc"
-
 - name: Add TCP and UDP protocols
   firewalld:
     zone: public
