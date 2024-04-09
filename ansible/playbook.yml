@@ -20,5 +20,7 @@
 
     - role: docker
       tags: docker
+    - role: bluesky
+      tags: bluesky
 
   environment: "{{ proxy_env }}"

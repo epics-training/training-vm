@@ -1,0 +1,82 @@
+---
+- name: Ensure bluesky directory exists
+  ansible.builtin.file:
+    path: "{{ bluesky_deployment_dir_path }}"
+    state: directory
+  become: no
+
+- name: Clone bluesky-container from GitLab repository
+  ansible.builtin.git:
+    repo: "{{ bluesky_container_repo_url }}"
+    dest: "{{ bluesky_deployment_dir_path }}"
+    version: "{{ bluesky_container_branch }}"
+    clone: yes
+    update: yes
+  become: no
+
+- name: Create history.sqlite file
+  ansible.builtin.file:
+    path: "{{ bluesky_deployment_dir_path }}/history.sqlite"
+    state: touch
+  become: no
+
+- name: Ensure the script is executable
+  ansible.builtin.file:
+    path: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
+    mode: "0755"
+  become: no
+
+# Check if .bluesky_config file exists
+- name: Check if the .bluesky_config file exists
+  ansible.builtin.stat:
+    path: "{{ home_directory }}/.bluesky_config"
+  register: file_stat
+
+# Delete .bluesky_config file if exists
+- name: Delete the .bluesky_config file if it exists
+  ansible.builtin.file:
+    path: "{{ home_directory }}/.bluesky_config"
+    state: absent
+  when: file_stat.stat.exists | default(false)
+
+# Create .bluesky_config file
+- name: Create an empty .bluesky_config file
+  ansible.builtin.file:
+    path: "{{ home_directory }}/.bluesky_config"
+    state: touch
+  become: no
+
+# Add content to .bluesky_config file
+- name: Add content to .bluesky_config file
+  ansible.builtin.lineinfile:
+    path: "{{ home_directory }}/.bluesky_config"
+    line: |
+      # Bluesky deployment
+      alias bluesky_start="{{ bluesky_container_repo_dest }}/run_bluesky.sh"
+      # End of Bluesky deployment
+  become: no
+
+# Add content to .bashrc only once; use a marker to facilitate delete during the execution of "undeploy_bluesky.yml"
+- name: Add a block to .bashrc only once
+  ansible.builtin.blockinfile:
+    path: "{{ bashrc_path }}" # Path to the .bashrc
+    block: |
+      if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bluesky_config" ]; then
+          source "$HOME/.bluesky_config"
+      fi
+    marker: "# {mark} Execute additional configuration stored in '.bluesky_config' file"
+    create: yes # Ensures the block is created if it doesn't exist
+    state: present
+  become: no
+
+- name: Build the IOC image
+  docker_image:
+    name: "blueskytraining:latest"
+    source: build
+    build:
+      path: "{{ bluesky_deployment_dir_path }}"
+
+- name: Run docker-compose
+  command: docker compose up -d
+  args:
+    chdir: "{{ bluesky_deployment_dir_path }}"
