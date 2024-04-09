@@ -6,6 +6,8 @@
 #epics_modules: false
 #catrust: true
 #epics_tools: false
+#docker: false
+#bluesky: false
 
 # List the EPICS modules that will be built in this order (base is mandatory)
 epics_modules_list:

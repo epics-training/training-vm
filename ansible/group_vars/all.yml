@@ -2,6 +2,8 @@
 epics_modules: true
 catrust: false
 epics_tools: true
+docker: true
+bluesky: true
 
 # Default configuration for the EPICS modules to build
 epics_modules_list:

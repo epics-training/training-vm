@@ -18,4 +18,12 @@
       tags: epics_tools
       when: epics_tools
 
+    - role: docker
+      tags: docker
+      when: docker
+
+    - role: bluesky
+      tags: bluesky
+      when: bluesky
+
   environment: "{{ proxy_env }}"
