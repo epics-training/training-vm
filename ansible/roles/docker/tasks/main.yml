@@ -1,28 +1,13 @@
 ---
-- name: Install Python 3
+- name: Install RPM prerequisites
   dnf:
-    name: python3
+    name:
+      - podman-docker
+      - python3-pip
     state: present
   become: yes
 
-- name: Install podman docker
-  dnf:
-    name: podman-docker
-    state: present
-  become: yes
-
-- name: Install pip3
-  dnf:
-    name: python3-pip
-    state: present
-  become: yes
-
-- name: Install Docker Compose
-  pip:
-    name: docker-compose
-    state: present
-
-- name: Install Podman Compose
+- name: Install PIP prerequisites
   pip:
     name: podman-compose
     state: present
