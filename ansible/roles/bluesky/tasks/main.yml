@@ -77,12 +77,9 @@
     state: present
   become: no
 
-- name: Build a Docker formatted image
+- name: Pull an image from Docker hub
   containers.podman.podman_image:
-    name: blueskytraining
-    path: "{{ bluesky_deployment_dir_path }}"
-    build:
-      format: docker
+    name: docker.io/mbajdel136/blueskytraining
 
 - name: Run docker-compose
   command: podman-compose up -d
