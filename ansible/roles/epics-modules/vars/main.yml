@@ -140,6 +140,6 @@ epics_modules:
     name: "AreaDetector - pvaDriver"
     version: "1.6"
     url: "https://github.com/areaDetector/pvaDriver/archive/refs/tags/R1-6.tar.gz"
-    release_var: "ADPVADRIVER"
+    release_var: "PVADRIVER"
     release_sortkey: "10"
     pre_hook: adpvadriver_prep.yml
