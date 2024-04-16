@@ -98,7 +98,7 @@
 
 - name: "{{ epics_modules[item].name }} | Create epics-tools.sh fragment"
   copy:
-    content: "PATH={{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/bin/linux-x86_64:$PATH\n"
+    content: "PATH={{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/bin/linux-{{ ansible_facts['architecture'] }}:$PATH\n"
     dest: "{{ epics_install_path }}/epics-tools.sh.d/{{ epics_modules[item].release_sortkey }}-{{ item }}"
   become: true
   when: epics_modules[item].add_to_path is defined
