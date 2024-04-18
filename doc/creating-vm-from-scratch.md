@@ -5,6 +5,9 @@ for the EPICS Training from scratch.
 The recipe was set up using VirtualBox 7.0.14 on Windows 10,
 but it should work similarly on other versions and host systems.
 
+*This will not work for Silicon based Macs. Follow
+[these instructions](/doc/creating-vm-from-scratch-apple-silicon.md) for an altnernative.*
+
 ## Create the VM
 
 Create a new virtual machine, using the Rocky Linux 9.3 iso image.
