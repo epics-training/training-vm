@@ -6,11 +6,34 @@
     line: '-include $(TOP)/../RELEASE.local'
   become: true
 
+- name: "{{ epics_modules[item].name }} | Fix configure/CONFIG_SITE to include BUILD_IOCS"
+  ansible.builtin.lineinfile:
+    path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/CONFIG_SITE"
+    line: 'BUILD_IOCS = YES'
+    insertafter: EOF
+    state: present
+  become: true
+
 - name: "{{ epics_modules[item].name }} | Fix example IOC configure/RELEASE to include RELEASE.local"
   ansible.builtin.lineinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocs/simDetectorIOC/configure/RELEASE"
     search_string: '-include $(TOP)/RELEASE.local'
-    line: '-include $(TOP)/../RELEASE.local'
+    line: '-include $(TOP)/../../../RELEASE.local'
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Fix example IOC configure/RELEASE to include RELEASE.local"
+  ansible.builtin.lineinfile:
+    path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocs/simDetectorNoIOC/configure/RELEASE"
+    search_string: '-include $(TOP)/RELEASE.local'
+    line: '-include $(TOP)/../../../RELEASE.local'
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Fix example IOC add a configuration to configure/CONFIG_SITE"
+  ansible.builtin.lineinfile:
+    path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/iocs/simDetectorNoIOC/configure/CONFIG_SITE"
+    line: 'XML2_INCLUDE += /usr/include/libxml2'
+    insertafter: EOF
+    state: present
   become: true
 
 - name: "{{ epics_modules[item].name }} | Make example IOC include ADCORE/configure/CONFIG_SITE"

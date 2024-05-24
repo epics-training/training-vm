@@ -69,7 +69,9 @@
   when: epics_modules[item].pre_hook is defined
 
 - name: "{{ epics_modules[item].name }} | Build from sources (this may take a while)"
-  command: make -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
+  command: >
+    make -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}"
+    {{ 'all clean' if item != 'adsimdetector' else 'all' }}
   register: build_result
   become: true
   when: epics_module_flag.stat.exists == false
