@@ -16,16 +16,20 @@
   register: java_installation
   changed_when: false
 
-- name: install open jdk 17
+- name: Set architecture specific variable
+  set_fact:
+    custom_architecture: "{{ 'x64' if ansible_facts['architecture'] == 'x86_64' else ansible_facts['architecture'] }}"
+
+- name: Install OpenJDK 17
   become: true
   ansible.builtin.unarchive:
-    src: "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_{{ ansible_facts['architecture'] }}_linux_hotspot_17.0.10_7.tar.gz"
+    src: "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_{{ custom_architecture }}_linux_hotspot_17.0.10_7.tar.gz"
     dest: "{{ java_home }}"
     remote_src: yes
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
     extra_opts:
-    - --strip-components=1
+      - --strip-components=1
   when: java_installation.stat.exists == false
 
 - name: Add CA certificate to java trust store
