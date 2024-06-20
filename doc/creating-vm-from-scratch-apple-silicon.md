@@ -21,19 +21,27 @@ new virtual machine. This will require the `arm64 / aarch64` version
 of [Rocky Linux 9](https://rockylinux.org/download/).
 It was tested to work with the boot image, but other images probably work, too.
 
+It was also tested with Ubuntu, but the below instructions follow the installation
+using Rocky Linux / RPM package manager.
+
 Follow the steps:
 
 1. Create VM
 2. Choose Virtualization
 3. Choose Linux
-4. Select the Rocky Linux aarch64 image
-5. Set at least 4096 MB of RAM and two cores
-6. Set the space size to at least 20 GB
-7. Continue
-8. Set a name for the VM and save
+4. (Optional) Choose Apple Virtualization
+5. Select the Rocky Linux aarch64 image
+6. Set at least 4096 MB of RAM and two cores
+7. Set the space size to at least 20 GB
+8. Continue
+9. Set a name for the VM and save
 
 More CPUs and memory always helps -
 going lower than these values is not recommended.
+
+In regard to the virtualization option between Apple and QEMU: Both works.
+Apple virtualization provides better adjustment to screen resolution and seems
+more responsive.
 
 ## Set up Linux
 
@@ -47,6 +55,18 @@ Create a user (we used epics-dev as the "EPICS Developer")
 select "Make this user administrator" (which enables sudo).
 We did not set a password, which is fine for a personal VM
 that you run on your own computer/laptop.
+
+## Installation
+
+Depending on the options you chose, the installation will take
+some time. Once it is finished and you restart the VM, the freshly
+installed Linux system should boot.
+
+*For currently unknown reasons you might end up with a VM
+which does not boot into the installed Linux but will still
+only allow to boot into the provided installtion image. See
+the discussion in [PR #14](https://github.com/epics-training/training-vm/pull/14)
+for more details.*
 
 ## Update the system
 
