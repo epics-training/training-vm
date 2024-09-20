@@ -3,11 +3,15 @@
   hosts: local
   gather_subset: min
   roles:
+    - role: initial_setup
+      tags: initial_setup
+      when: initial_setup
+
     - role: catrust
       tags: catrust
       when: catrust
 
-    - role: common        #  <- mandatory
+    - role: common #  <- mandatory
       tags: common
 
     - role: epics-modules

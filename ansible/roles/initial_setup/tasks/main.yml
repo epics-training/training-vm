@@ -1,0 +1,60 @@
+---
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  become: yes
+
+- name: Install Development Tools
+  dnf:
+    name:
+      - dkms
+      - kernel-devel
+      - kernel-headers
+      - "@Development Tools"
+  become: yes
+
+# note I cannot convince 'dnf' above to run this style of dnf command
+# which adds 'GNOME' qualifier to the group package install
+- name: Install GNOME
+  command: dnf groupinstall -y "Basic Desktop" GNOME
+  become: yes
+
+- name: Change default target to graphical.target
+  file:
+    src: /usr/lib/systemd/system/graphical.target
+    dest: /etc/systemd/system/default.target
+    state: link
+  become: yes
+
+- name: create user
+  ansible.builtin.user:
+    name: "epics-dev"
+    shell: /bin/bash
+    createhome: yes
+    groups: wheel
+    password: ""
+    comment: "EPICS Developer"
+  become: yes
+
+- name: Make users passwordless for sudo in group wheel
+  lineinfile:
+    path: /etc/sudoers
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  become: yes
+
+- name: remove services that fail in virtualbox - mcelog
+  ansible.builtin.systemd:
+    name: mcelog
+    state: stopped
+    enabled: no
+  become: yes
+
+- name: remove services that fail in virtualbox - systemd-vconsole
+  ansible.builtin.systemd:
+    name: systemd-vconsole-setup
+    state: stopped
+    enabled: no
+  become: yes

@@ -33,3 +33,10 @@
     modification_time: preserve
     access_time: preserve
   become: yes
+
+- name: quiet compose warning
+  lineinfile:
+    path: /usr/share/containers/containers.conf
+    regexp: ".*compose_warning_logs.*"
+    line: "compose_warning_logs = true"
+  become: yes
