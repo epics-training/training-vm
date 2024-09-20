@@ -10,71 +10,78 @@ Vagrant.configure("2") do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
-  config.vm.define "training" do |training|
+  config.vm.define "local" do |local|
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
     # start with official Rocky Linux 9 box
-    # training.vm.box = "rockylinux/9"
-    training.vm.box = "generic/rocky9"
+    # local.vm.box = "rockylinux/9"
+    local.vm.box = "generic/rocky9"
     # resize the original base image disk size
-    training.vm.disk :disk, size: "150GB", primary: true
+    local.vm.disk :disk, size: "150GB", primary: true
 
     # Create a private network, which allows host-only access to the machine
     # using a specific IP.
-    # training.vm.network "private_network", ip: "192.168.33.10"
+    # local.vm.network "private_network", ip: "192.168.33.10"
 
     # Create a public network, which generally matched to bridged network.
     # Bridged networks make the machine appear as another physical device on
     # your network.
-    # training.vm.network "public_network"
+    # local.vm.network "public_network"
 
     # Share an additional folder to the guest VM. The first argument is
     # the path on the host to the actual folder. The second argument is
     # the path on the guest to mount the folder. And the optional third
     # argument is a set of non-required options.
-    # training.vm.synced_folder "../data", "/vagrant_data"
+    # local.vm.synced_folder "../data", "/vagrant_data"
 
     # Disable the default share of the current code directory. Doing this
     # provides improved isolation between the vagrant box and your host
     # by making sure your Vagrantfile isn't accessible to the vagrant box.
     # If you use this you may want to enable additional shared subfolders as
     # shown above.
-    training.vm.synced_folder ".", "/vagrant", disabled: true
+    local.vm.synced_folder ".", "/vagrant", disabled: true
 
     # Provider-specific configuration so you can fine-tune various
     # backing providers for Vagrant. These expose provider-specific options.
     # in this case for VirtualBox:
-    training.vm.provider "virtualbox" do |vb|
-      vb.name = "epics-training2"
-      # Display the VirtualBox GUI when booting the machine
+    local.vm.provider "virtualbox" do |vb|
+      vb.name = "epics-training"
       vb.gui = true
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
-      vb.customize ["modifyvm", :id, "--cpus", "6"]
+      vb.customize ["modifyvm", :id, "--cpus", "4"]
       vb.customize ["modifyvm", :id, "--vram", "256"]
-
-      # Customize the amount of memory on the VM:
-      vb.memory = "2048"
+      vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+      vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+      vb.memory = "4096"
     end
     #
     # View the documentation for the provider you are using for more
     # information on available options.
 
-    # Enable provisioning with a shell script. Add in interctive desktop
+    # Provisioning with a shell script.
+    #
     # TODO - this should be ansible but should not get used by the default
-    # so as not to interfere with the original install from scratch instructions
-    training.vm.provision "shell", inline: <<-SHELL
-      sudo dnf update
-      sudo dnf group install -y "Development Tools"
-      sudo dnf group install -y "Workstation"
-      sudo systemctl set-default graphical
-      sudo adduser epics-dev -c"EPICS Developer" -p ""
-      # idempotent add to sudoers
-      sudo sed -i '/epics-dev/d' /etc/sudoers
-      sudo bash -c "echo 'epics-dev    ALL=(ALL)      NOPASSWD: ALL'  >> /etc/sudoers"
+    # playbook so as not to interfere with the original, manual
+    # 'install from scratch' instructions.
+    local.vm.provision "shell", inline: <<-SHELL
+      # installs from manual instructions
+      dnf install -y epel-release
+      dnf update -y --refresh
+      dnf install -y dkms kernel-devel kernel-headers
+
+      # install gnome desktop
+      dnf group install -y "Development Tools"
+      dnf group install -y "Workstation"
+      systemctl set-default graphical
+
+      # add a user for the EPICS developer
+      adduser epics-dev -c"EPICS Developer" -p ""
+      sed -i '/epics-dev/d' /etc/sudoers
+      bash -c "echo 'epics-dev    ALL=(ALL)      NOPASSWD: ALL'  >> /etc/sudoers"
     SHELL
 
-    # Enable provisioning with Ansible.
-    training.vm.provision "ansible" do |ansible|
+    # Provisioning with Ansible.
+    local.vm.provision "ansible" do |ansible|
       ansible.playbook = "../ansible/playbook.yml"
     end
   end

@@ -29,13 +29,19 @@ vagrant up
 
 When you reboot the VM it will come up with graphical UI and you can login with username epics-dev.
 
+Finally:
+```bash
+# from inside the VM
+eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap_redhat.sh)"
+```
+see [creating-vm-from-scratch.md](creating-vm-from-scratch.md) for details regarding the bootstrap script.
+
 ## Troubleshooting
 
 If there is a failure in the ansible steps and you have fixed the issue, re-run the ansible playbook by running `vagrant provision`.
 
 Get rid of the VM by running
 ```
-vagrant halt
 vagrant destroy
 ```
 
