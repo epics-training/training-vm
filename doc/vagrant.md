@@ -24,6 +24,7 @@ Setup the required tools on your host machine:
 ```bash
 git clone git@github.com:epics-training/training-vm.git
 cd training-vm/vagrant
+vagrant plugin install vagrant-reload
 vagrant up
 ```
 
