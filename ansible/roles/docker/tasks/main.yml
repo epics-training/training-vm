@@ -1,30 +1,33 @@
 ---
+- name: Add docker repository
+  ansible.builtin.yum_repository:
+    name: docker-ce-stable
+    description: official docker stable rpm repo
+    baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+    gpgkey: https://download.docker.com/linux/fedora/gpg
+  become: yes
+
 - name: Install RPM prerequisites
   dnf:
     name:
       - podman-docker
-      - python3-pip
+      - dnf-plugins-core
+      - docker-compose-plugin
     state: present
   become: yes
 
-- name: Install PIP prerequisites
-  pip:
-    name: podman-compose
-    state: present
+# linger allows us to set up rootless podman daemons
+- name: Check epics-dev for lingering
+  include_tasks:
+    file: linger.yml
+  with_items: epics-dev
 
 - name: Start and enable podman
   ansible.builtin.systemd:
     name: podman
     state: started
     enabled: yes
-  become: yes
-
-- name: enable podman-restart
-  ansible.builtin.systemd:
-    name: podman-restart
-    state: started
-    enabled: yes
-  become: yes
+    scope: user
 
 - name: Create /etc/containers/nodocker to quiet warning message
   ansible.builtin.file:
