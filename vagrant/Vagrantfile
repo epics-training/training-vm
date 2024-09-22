@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
       vb.customize ["modifyvm", :id, "--cpus", "4"]
       vb.customize ["modifyvm", :id, "--vram", "256"]
-      vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+      # vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
       vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
       vb.memory = "4096"
     end
@@ -54,34 +54,16 @@ Vagrant.configure("2") do |config|
     # resize the original base image disk size
     local.vm.disk :disk, size: "150GB", primary: true
 
-    # expand the root partition to fill the disk
+    # expand the root partition to fill the disk (btrfs specific so not in ansible)
     local.vm.provision "shell", inline: <<-SHELL
       growpart /dev/sda 4
       btrfs filesystem resize 1:max /
     SHELL
 
-    # initial installs from manual instructions
-    # TODO - this should be ansible but should not get used by the default
-    # playbook so as not to interfere with the original, manual
-    # 'install from scratch' instructions.
-    local.vm.provision "shell", inline: <<-SHELL
-      dnf update -y --refresh
-      dnf install -y dkms kernel-devel kernel-headers
-
-      # install gnome desktop
-      dnf group install -y "Development Tools"
-      dnf -y group install "Basic Desktop" GNOME
-      systemctl set-default graphical
-
-      # add a user for the EPICS developer
-      adduser epics-dev -c"EPICS Developer" -p ""
-      sed -i '/epics-dev/d' /etc/sudoers
-      bash -c "echo 'epics-dev    ALL=(ALL)      NOPASSWD: ALL'  >> /etc/sudoers"
-    SHELL
-
-    # Provisioning with Ansible.
+    # Provisioning for the EPICS training with initial vagrant VM setup.
     local.vm.provision "ansible" do |ansible|
       ansible.playbook = "../ansible/playbook.yml"
+      ansible.extra_vars = { initial_setup: "true" }
     end
   end
 end
