@@ -1,4 +1,10 @@
 ---
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  become: yes
+
 - name: Install Development Tools
   dnf:
     name:
