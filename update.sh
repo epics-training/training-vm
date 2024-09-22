@@ -7,7 +7,6 @@
 # - tries the first command line arg or "." as location for the collection
 # - remaining command line args are passed through to ansible-playbook call
 
-# - runs 'git pull --recurse-submodules' on the collection
 # - runs ansible
 
 collection_dir=${1%/}
@@ -36,7 +35,6 @@ else
     slug=""
 fi
 
-( cd ${collection_dir}; git checkout --recurse-submodules ${slug}; git pull --recurse-submodules )
 
 if [ ! -e "${collection_dir}/vm-setup/ansible/group_vars/local.yml" ]; then
     ln -s "../../../local.yml" "${collection_dir}/vm-setup/ansible/group_vars/local.yml"
