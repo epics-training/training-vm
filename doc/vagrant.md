@@ -15,6 +15,7 @@ Advantages:
 
 Setup the required tools on your host machine:
 1. Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+   - WARNING: VirtualBox 7.1 is not compatible with Vagrant 2.4.1, use VirtualBox 7.0 until Vagrant 2.4.2 is released.
 1. Install [Vagrant](https://www.vagrantup.com/downloads.html)
 1. Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#pipx-install)
 1. Install [git](https://git-scm.com/downloads)
