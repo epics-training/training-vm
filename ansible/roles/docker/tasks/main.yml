@@ -1,6 +1,6 @@
 ---
 - name: Install RPM prerequisites
-  dnf:
+  ansible.builtin.apt module:
     name:
       - podman-docker
       - python3-pip

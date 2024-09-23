@@ -1,7 +1,7 @@
 ---
 - name: Install common packages
-  dnf: 
-    name: ['gcc-c++']
+  ansible.builtin.apt module:
+    name: ["gcc-c++"]
     state: latest
     update_cache: true
   become: true
@@ -10,7 +10,7 @@
   file:
     path: "{{item}}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   loop:
     - "{{ epics_install_path }}"

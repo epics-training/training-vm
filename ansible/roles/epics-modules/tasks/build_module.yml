@@ -1,11 +1,11 @@
 ---
 - name: "{{ epics_modules[item].name }} | Install required dependencies"
-  dnf:
-    name: "{{ epics_modules[item].required_rpms }}"
+  ansible.builtin.apt module:
+    name: "{{ epics_modules[item].required_packages }}"
     enablerepo: "{{ epics_modules[item].enable_repos | default('[]') }}"
     state: present
   become: true
-  when: epics_modules[item].required_rpms is defined
+  when: epics_modules[item].required_packages is defined
 
 - name: "{{ epics_modules[item].name }} | Check global rebuild flag"
   stat:
@@ -54,7 +54,7 @@
     remote_src: true
     extra_opts:
       - --transform
-      - "s|^[^/]*|{{ item }}-{{ epics_modules[item].version }}|"    # normalize source path
+      - "s|^[^/]*|{{ item }}-{{ epics_modules[item].version }}|" # normalize source path
   become: true
   when: epics_module_flag.stat.exists == false
 
@@ -62,7 +62,7 @@
   ansible.builtin.lineinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/RELEASE"
     state: absent
-    regexp: '^SUPPORT='
+    regexp: "^SUPPORT="
   become: true
 
 - name: "{{ epics_modules[item].name }} | Run pre-build hook"
