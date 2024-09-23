@@ -2,10 +2,18 @@
 - name: Set up training VM
   hosts: local
   gather_subset: min
+
+  vars:
+    dev_user: "epics_dev"
+
   roles:
     - role: initial_setup
       tags: initial_setup
       when: initial_setup
+
+    - role: docker
+      tags: docker
+      when: docker
 
     - role: catrust
       tags: catrust
@@ -21,10 +29,6 @@
     - role: epics-tools
       tags: epics_tools
       when: epics_tools
-
-    - role: docker
-      tags: docker
-      when: docker
 
     - role: bluesky
       tags: bluesky

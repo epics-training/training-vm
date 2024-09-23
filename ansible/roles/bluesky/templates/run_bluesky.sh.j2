@@ -42,7 +42,7 @@ cleanup() {
     echo "Removing container $target_container and exiting..."
     docker container rm -f "$target_container"
     echo "Stopping context containers"
-    ( cd {{ bluesky_deployment_dir_path }}; podman-compose down )
+    ( cd {{ bluesky_deployment_dir_path }}; docker compose down )
     # Add further cleanup steps if necessary
     exit 1
 }
@@ -59,14 +59,14 @@ case "$command_to_run" in
         echo "Stopping and removing bluesky"
         docker container rm -f "$target_container"
         echo "Stopping context containers"
-        ( cd {{ bluesky_deployment_dir_path }}; podman-compose down )
+        ( cd {{ bluesky_deployment_dir_path }}; docker compose down )
         ;;
     "sh")
         deploy_container sh
         ;;
     *)
         echo "Starting context containers"
-        ( cd {{ bluesky_deployment_dir_path }}; podman-compose up -d )        
+        ( cd {{ bluesky_deployment_dir_path }}; docker compose up -d )        
         # If no command specified, deploy the container
         deploy_container bluesky_start_root
         ;;

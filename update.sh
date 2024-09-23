@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # update.sh
 
 # Update script that tries to pull the training VM to the appropriate latest versions
@@ -12,7 +12,7 @@
 
 collection_dir=${1%/}
 
-if [ "$(whoami)" == "root" ]; then
+if [[ "$(whoami)" == "root" ]]; then
   echo "This script must be run by a regular user (with sudo privileges)."
   exit 1
 fi

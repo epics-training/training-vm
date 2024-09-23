@@ -1,42 +1,29 @@
 ---
-- name: Install RPM prerequisites
-  dnf:
-    name:
-      - podman-docker
-      - python3-pip
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+  become: yes
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+  become: yes
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: [docker-ce, docker-ce-cli, containerd.io]
     state: present
   become: yes
 
-- name: Install PIP prerequisites
-  pip:
-    name: podman-compose
+- name: create docker group
+  group:
+    name: docker
     state: present
-
-- name: Start and enable podman
-  ansible.builtin.systemd:
-    name: podman
-    state: started
-    enabled: yes
   become: yes
 
-- name: enable podman-restart
-  ansible.builtin.systemd:
-    name: podman-restart
-    state: started
-    enabled: yes
-  become: yes
-
-- name: Create /etc/containers/nodocker to quiet warning message
-  ansible.builtin.file:
-    path: /etc/containers/nodocker
-    state: touch
-    modification_time: preserve
-    access_time: preserve
-  become: yes
-
-- name: quiet compose warning
-  lineinfile:
-    path: /usr/share/containers/containers.conf
-    regexp: ".*compose_warning_logs.*"
-    line: "compose_warning_logs = true"
+- name: add user to docker group
+  user:
+    name: "{{ dev_user }}"
+    groups: docker
+    append: yes
   become: yes

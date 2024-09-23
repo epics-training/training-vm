@@ -11,6 +11,8 @@
 BOOTSTRAP_DIR="bootstrap"
 COLLECTION_DIR="training"
 COLLECTION_REPO=${1:-"https://github.com/epics-training/training-collection"}
+# supply this environment variable to use a different repository for training-vm
+VM_REPO=${VM_REPO:-none}
 
 if [ "$(whoami)" == "root" ]; then
     echo "This script must be run by a regular user (with sudo privileges)."
@@ -39,7 +41,7 @@ fi
 if ! command -v ansible >/dev/null; then
     packages="${packages}ansible"
 fi
-if [ "${packages}" ]; then    
+if [ "${packages}" ]; then
     echo "Installing prerequisites: ${packages}..."
     sudo dnf update
     sudo dnf install -y ${packages}
@@ -63,6 +65,13 @@ fi
 # Set bootstrap soft link
 if [ ! -e "${BOOTSTRAP_DIR}" ]; then
     ln -s "${COLLECTION_DIR}/vm-setup" "${BOOTSTRAP_DIR}"
+fi
+
+if [ "${VM_REPO}" != "none" ]; then
+    echo "Switching training-vm repository to ${VM_REPO}..."
+    rm -fr ${COLLECTION_DIR}/vm-setup
+    git clone ${VM_REPO} ${COLLECTION_DIR}/vm-setup
+    sed -i ${COLLECTION_DIR}/vm-setup/update.sh -e "/recurse-submodules/d"
 fi
 
 # Point out missing local.yml configuration

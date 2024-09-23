@@ -1,8 +1,9 @@
 # Default configuration for the available roles
+initial_setup: false
+docker: true # for rootful this needs to happen before first reboot
 epics_modules: true
 catrust: false
 epics_tools: true
-docker: false
 bluesky: false
 
 # Default configuration for the EPICS modules to build

@@ -1,16 +1,9 @@
 ---
-- name: Install common packages
-  dnf: 
-    name: ['gcc-c++']
-    state: latest
-    update_cache: true
-  become: true
-
 - name: Create installation directories
   file:
     path: "{{item}}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   loop:
     - "{{ epics_install_path }}"
@@ -18,3 +11,6 @@
     - "{{ epics_install_path }}/epics-tools.sh.d"
     - "{{ epics_install_path }}/.flag"
     - "{{ opi_install_path }}"
+
+- name: gather facts especially cpu cores
+  ansible.builtin.setup:

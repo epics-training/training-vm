@@ -24,16 +24,23 @@ Setup the required tools on your host machine:
 
 ```bash
 git clone git@github.com:epics-training/training-vm.git
+vagrant plugin install vagrant-vbguest
 cd training-vm/vagrant
-vagrant up
+# start the VM and run the ansible playbook (adjust CPUS to your host)
+VAGRANT_VM_CPUS=14 vagrant up
+# add in the guest additions and reboot to launch the graphical UI
+vagrant vbguest --auto-reboot
 ```
+vbguest step may wait indefinitely for the VM to reboot. If it does, you can manually reboot the VM from the VirtualBox GUI using ACPI shutdown.
 
-When you reboot the VM it will come up with graphical UI and you can login with username epics-dev.
+You can login with username epics-dev, no password.
+
+Before publishing an OVA file, adjust CPUs to a more friendly value for the end user's host machines.
 
 Finally:
 ```bash
 # from inside the VM
-eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap_redhat.sh)"
+eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap.sh)"
 ```
 see [creating-vm-from-scratch.md](creating-vm-from-scratch.md) for details regarding the bootstrap script.
 
@@ -49,4 +56,4 @@ vagrant destroy
 ## Skrinking the VM into a small appliance file
 
 TODO
-This will describe how to zero unused blocks and make a small appliance file.
+This will describe how to zero unused blocks and make a smaller appliance file.

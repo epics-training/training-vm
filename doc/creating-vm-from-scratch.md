@@ -1,5 +1,7 @@
 # Creating the EPICS Training VM
 
+TODO - requires rework for Debian
+
 These instructions describe how to generate the VirtualBox VM
 for the EPICS Training from scratch.
 The recipe was set up using VirtualBox 7.0.14 on Windows 10,

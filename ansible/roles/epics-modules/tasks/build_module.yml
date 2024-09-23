@@ -1,11 +1,10 @@
 ---
 - name: "{{ epics_modules[item].name }} | Install required dependencies"
-  dnf:
-    name: "{{ epics_modules[item].required_rpms }}"
-    enablerepo: "{{ epics_modules[item].enable_repos | default('[]') }}"
+  ansible.builtin.apt:
+    name: "{{ epics_modules[item].required_packages }}"
     state: present
   become: true
-  when: epics_modules[item].required_rpms is defined
+  when: epics_modules[item].required_packages is defined
 
 - name: "{{ epics_modules[item].name }} | Check global rebuild flag"
   stat:
@@ -54,7 +53,7 @@
     remote_src: true
     extra_opts:
       - --transform
-      - "s|^[^/]*|{{ item }}-{{ epics_modules[item].version }}|"    # normalize source path
+      - "s|^[^/]*|{{ item }}-{{ epics_modules[item].version }}|" # normalize source path
   become: true
   when: epics_module_flag.stat.exists == false
 
@@ -62,7 +61,7 @@
   ansible.builtin.lineinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/RELEASE"
     state: absent
-    regexp: '^SUPPORT='
+    regexp: "^SUPPORT="
   become: true
 
 - name: "{{ epics_modules[item].name }} | Run pre-build hook"
@@ -70,10 +69,13 @@
   when: epics_modules[item].pre_hook is defined
 
 - name: "{{ epics_modules[item].name }} | Build from sources (this may take a while)"
-  command: make -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
+  command: make {{ epics_modules[item]. args | default('') }} -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
   register: build_result
   become: true
   when: epics_module_flag.stat.exists == false
+  # the -j cpus occasionally fails !!
+  retries: 1
+  until: build_result.rc == 0
 
 - name: "{{ epics_modules[item].name }} | Run post-build hook"
   include_tasks: "{{ epics_modules[item].post_hook }}"

@@ -12,7 +12,7 @@
     version: "{{ bluesky_container_branch }}"
     clone: yes
     update: yes
-    force: true       # required for update with WORKAROUND (see below)
+    force: true # required for update with WORKAROUND (see below)
   become: no
 
 - name: Create sub-directory (data, user) inside bluesky directory
@@ -32,7 +32,7 @@
   ansible.builtin.template:
     src: run_bluesky.sh.j2
     dest: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
-    mode: '755'
+    mode: "755"
   become: no
 
 - name: Ensure the script is executable
@@ -86,62 +86,68 @@
   become: no
 
 - name: Build a Docker formatted image
-  containers.podman.podman_image:
+  community.docker.docker_image:
     name: blueskytraining
-    path: "{{ bluesky_deployment_dir_path }}"
+    source: build
     build:
-      format: docker
+      path: "{{ bluesky_deployment_dir_path }}"
 
 # Needed to determine the used ports further down
 - name: Start context containers
-  command: podman-compose up -d
+  command: docker compose up -d
   args:
     chdir: "{{ bluesky_deployment_dir_path }}"
 
-- name: Add TCP and UDP protocols
-  firewalld:
-    zone: public
-    permanent: yes
-    state: enabled
-    immediate: yes
-    protocol: "{{ item }}"
-  loop:
-    - tcp
-    - udp
-  become: yes
+# the firewall is not running by default and ansible firewalld is not tested
+# for debian distros
 
-- name: tcp ports facts
-  community.general.listen_ports_facts:
+# - name: Add TCP and UDP protocols
+#   firewalld:
+#     zone: public
+#     permanent: yes
+#     state: enabled
+#     immediate: yes
+#     protocol: "{{ item }}"
+#     offline: false
+#   loop:
+#     - tcp
+#     - udp
+#   become: yes
 
-- name: Add ports to firewall
-  firewalld:
-    port: "{{ item }}/tcp"
-    state: enabled
-    immediate: true
-    permanent: true
-  loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
-  register: ports_added_to_firewalld
-  become: yes
+# - name: tcp ports facts
+#   community.general.listen_ports_facts:
 
-- name: print Ports Added
-  debug:
-    var: ports_added_to_firewalld
+# - name: Add ports to firewall
+#   firewalld:
+#     port: "{{ item }}/tcp"
+#     state: enabled
+#     immediate: true
+#     permanent: true
+#     offline: false
+#   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
+#   register: ports_added_to_firewalld
+#   become: yes
 
-- name: tcp ports facts
-  community.general.listen_ports_facts:
+# - name: print Ports Added
+#   debug:
+#     var: ports_added_to_firewalld
 
-- name: Add ports to firewall
-  firewalld:
-    port: "{{ item }}/udp"
-    state: enabled
-    immediate: true
-    permanent: true
-  loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
-  register: ports_added_to_firewalld
-  become: yes
+# - name: tcp ports facts
+#   community.general.listen_ports_facts:
+
+# - name: Add ports to firewall
+#   firewalld:
+#     port: "{{ item }}/udp"
+#     state: enabled
+#     immediate: true
+#     permanent: true
+#     offline: false
+#   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
+#   register: ports_added_to_firewalld
+#   become: yes
 
 # Cleanup to avoid interaction with other training modules
 - name: Stop context containers
-  command: podman-compose down
+  command: docker compose down
   args:
     chdir: "{{ bluesky_deployment_dir_path }}"
