@@ -1,5 +1,7 @@
 # Creating the EPICS Training VM for Apple Silicon
 
+TODO - requires rework for Debian
+
 These instructions explain how to set up the EPICS training VM
 on Apple Silicon Mac.
 Differing from the normal VM,

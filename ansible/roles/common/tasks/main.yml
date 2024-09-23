@@ -1,11 +1,4 @@
 ---
-- name: Install common packages
-  ansible.builtin.apt module:
-    name: ["gcc-c++"]
-    state: latest
-    update_cache: true
-  become: true
-
 - name: Create installation directories
   file:
     path: "{{item}}"

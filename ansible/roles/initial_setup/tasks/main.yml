@@ -1,19 +1,18 @@
 ---
 - name: Upgrade all packages
-  ansible.builtin.apt module:
+  ansible.builtin.apt:
     name: "*"
     state: latest
+    update_cache: yes
   become: yes
 
-- name: Install Development Tools
-  ansible.builtin.apt module:
+- name: Install Dev Tools and Gnome
+  ansible.builtin.apt:
     name:
-      - dkms
-      - kernel-devel
-      - kernel-headers
       - build-essential
-      - vannila-gnome-desktop
-      - vannila-gnome-default-settings
+      - git
+      - python3-dev
+      - gnome-core
   become: yes
 
 - name: Change default target to graphical.target
@@ -25,10 +24,9 @@
 
 - name: create user
   ansible.builtin.user:
-    name: "epics-dev"
+    name: epics-dev
     shell: /bin/bash
     createhome: yes
-    groups: wheel
     password: ""
     comment: "EPICS Developer"
   become: yes
@@ -36,21 +34,7 @@
 - name: Make users passwordless for sudo in group wheel
   lineinfile:
     path: /etc/sudoers
-    regexp: "^%wheel"
-    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    regexp: "^%epics-dev"
+    line: "%epics-dev ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
-  become: yes
-
-- name: remove services that fail in virtualbox - mcelog
-  ansible.builtin.systemd:
-    name: mcelog
-    state: stopped
-    enabled: no
-  become: yes
-
-- name: remove services that fail in virtualbox - systemd-vconsole
-  ansible.builtin.systemd:
-    name: systemd-vconsole-setup
-    state: stopped
-    enabled: no
   become: yes

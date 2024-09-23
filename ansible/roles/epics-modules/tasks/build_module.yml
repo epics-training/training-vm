@@ -1,8 +1,7 @@
 ---
 - name: "{{ epics_modules[item].name }} | Install required dependencies"
-  ansible.builtin.apt module:
+  ansible.builtin.apt:
     name: "{{ epics_modules[item].required_packages }}"
-    enablerepo: "{{ epics_modules[item].enable_repos | default('[]') }}"
     state: present
   become: true
   when: epics_modules[item].required_packages is defined
@@ -70,10 +69,13 @@
   when: epics_modules[item].pre_hook is defined
 
 - name: "{{ epics_modules[item].name }} | Build from sources (this may take a while)"
-  command: make -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
+  command: make -j {{ cpus }} -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
   register: build_result
   become: true
   when: epics_module_flag.stat.exists == false
+  # the -j cpus occasionally fails !!
+  retries: 3
+  until: build_result.rc == 0
 
 - name: "{{ epics_modules[item].name }} | Run post-build hook"
   include_tasks: "{{ epics_modules[item].post_hook }}"

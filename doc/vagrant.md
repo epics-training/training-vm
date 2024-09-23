@@ -24,6 +24,7 @@ Setup the required tools on your host machine:
 
 ```bash
 git clone git@github.com:epics-training/training-vm.git
+vagrant plugin install vagrant-vbguest
 cd training-vm/vagrant
 vagrant up
 ```
@@ -33,7 +34,7 @@ When you reboot the VM it will come up with graphical UI and you can login with 
 Finally:
 ```bash
 # from inside the VM
-eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap_redhat.sh)"
+eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap.sh)"
 ```
 see [creating-vm-from-scratch.md](creating-vm-from-scratch.md) for details regarding the bootstrap script.
 
