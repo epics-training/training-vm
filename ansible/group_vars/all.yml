@@ -1,4 +1,5 @@
 # Default configuration for the available roles
+initial_setup: false
 epics_modules: true
 catrust: false
 epics_tools: true

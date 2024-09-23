@@ -71,6 +71,7 @@ if [ "${VM_REPO}" != "none" ]; then
     echo "Switching training-vm repository to ${VM_REPO}..."
     rm -fr ${COLLECTION_DIR}/vm-setup
     git clone ${VM_REPO} ${COLLECTION_DIR}/vm-setup
+    sed -i ${COLLECTION_DIR}/vm-setup/update.sh -e "/recurse-submodules/d"
 fi
 
 # Point out missing local.yml configuration

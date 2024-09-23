@@ -12,6 +12,9 @@
       - build-essential
       - git
       - python3-dev
+      - vim
+      - curl
+      - ansible
       - gnome-core
   become: yes
 
