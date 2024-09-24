@@ -2,8 +2,8 @@
 - name: "{{ epics_modules[item].name }} | Fix configure/RELEASE to include RELEASE.local"
   ansible.builtin.lineinfile:
     path: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/RELEASE"
-    search_string: '-include $(TOP)/RELEASE.local'
-    line: '-include $(TOP)/../RELEASE.local'
+    search_string: "-include $(TOP)/RELEASE.local"
+    line: "-include $(TOP)/../RELEASE.local"
   become: true
 
 - name: "{{ epics_modules[item].name }} | Add configuration to configure/CONFIG_SITE"
@@ -17,6 +17,8 @@
       WITH_HDF5 = YES
       WITH_PVA = YES
       XML2_INCLUDE += /usr/include/libxml2
+      HDF5_INCLUDE  = /usr/include/hdf5/serial/
+      HDF5_LIB      = /usr/lib/x86_64-linux-gnu/hdf5/serial/
   become: true
 
 - name: "{{ epics_modules[item].name }} | Common plugins st.cmd snippet"

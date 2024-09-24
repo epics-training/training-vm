@@ -1,15 +1,27 @@
 # Default configuration for the available roles
 initial_setup: false
-epics_modules: true
+epics_modules: false
 catrust: false
-epics_tools: true
-docker: false
-bluesky: false
+epics_tools: false
+docker: true
+bluesky: true
 
 # Default configuration for the EPICS modules to build
 epics_modules_list:
   - base
   - pvxs
+  - p4p
+  # - pvapy
+  - seq
+  - asyn
+  - opcua
+  - autosave
+  - busy
+  - sscan
+  - calc
+  - adcore
+  - adsimdetector
+  - adpvadriver
 
 # Default: no proxy
 proxy_env: {}

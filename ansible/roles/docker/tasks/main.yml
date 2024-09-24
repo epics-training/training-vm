@@ -1,30 +1,34 @@
 ---
-- name: Install RPM prerequisites
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+  become: yes
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+  become: yes
+
+- name: Install Podman and Docker Compose
   ansible.builtin.apt:
     name:
-      - podman-docker
-      - python3-pip
+      - podman
+      - docker-compose-plugin
     state: present
   become: yes
 
-- name: Install PIP prerequisites
-  pip:
-    name: podman-compose
-    state: present
+# linger allows us to set up rootless podman daemons
+- name: Check epics-dev for lingering
+  include_tasks:
+    file: linger.yml
+  with_items: epics-dev
 
 - name: Start and enable podman
   ansible.builtin.systemd:
     name: podman
     state: started
     enabled: yes
-  become: yes
-
-- name: enable podman-restart
-  ansible.builtin.systemd:
-    name: podman-restart
-    state: started
-    enabled: yes
-  become: yes
+    scope: user
 
 - name: Create /etc/containers/nodocker to quiet warning message
   ansible.builtin.file:

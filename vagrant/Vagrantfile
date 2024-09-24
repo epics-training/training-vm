@@ -10,6 +10,10 @@ Vagrant.configure("2") do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
+  if Vagrant.has_plugin?("vagrant-vbguest") then
+    config.vbguest.auto_update = false
+  end
+
   config.vm.define "local" do |local|
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
@@ -40,11 +44,13 @@ Vagrant.configure("2") do |config|
     # Provider-specific configuration so you can fine-tune various
     # backing providers for Vagrant. These expose provider-specific options.
     # in this case for VirtualBox:
+
+    cpus = ENV['VAGRANT_VM_CPUS'] || 2
     local.vm.provider "virtualbox" do |vb|
       vb.name = "epics-training"
       vb.gui = true
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
-      vb.customize ["modifyvm", :id, "--cpus", "4"]
+      vb.customize ["modifyvm", :id, "--cpus", cpus]
       vb.customize ["modifyvm", :id, "--vram", "256"]
       # vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
       vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
