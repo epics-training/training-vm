@@ -36,8 +36,6 @@ else
     slug=""
 fi
 
-( cd ${collection_dir}; git checkout --recurse-submodules ${slug}; git pull --recurse-submodules )
-
 if [ ! -e "${collection_dir}/vm-setup/ansible/group_vars/local.yml" ]; then
     ln -s "../../../local.yml" "${collection_dir}/vm-setup/ansible/group_vars/local.yml"
 fi

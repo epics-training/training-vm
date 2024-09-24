@@ -9,38 +9,21 @@
     repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
   become: yes
 
-- name: Install Podman and Docker Compose
+- name: Install Docker
   ansible.builtin.apt:
-    name:
-      - podman
-      - docker-compose-plugin
+    name: [docker-ce, docker-ce-cli, containerd.io]
     state: present
   become: yes
 
-# linger allows us to set up rootless podman daemons
-- name: Check epics-dev for lingering
-  include_tasks:
-    file: linger.yml
-  with_items: epics-dev
-
-- name: Start and enable podman
-  ansible.builtin.systemd:
-    name: podman
-    state: started
-    enabled: yes
-    scope: user
-
-- name: Create /etc/containers/nodocker to quiet warning message
-  ansible.builtin.file:
-    path: /etc/containers/nodocker
-    state: touch
-    modification_time: preserve
-    access_time: preserve
+- name: create docker group
+  group:
+    name: docker
+    state: present
   become: yes
 
-- name: quiet compose warning
-  lineinfile:
-    path: /usr/share/containers/containers.conf
-    regexp: ".*compose_warning_logs.*"
-    line: "compose_warning_logs = true"
+- name: add user to docker group
+  user:
+    name: '{{ ansible_user_id }}'
+    groups: docker
+    append: yes
   become: yes
