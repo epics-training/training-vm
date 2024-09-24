@@ -7,6 +7,10 @@
       tags: initial_setup
       when: initial_setup
 
+    - role: docker
+      tags: docker
+      when: docker
+
     - role: catrust
       tags: catrust
       when: catrust
@@ -21,10 +25,6 @@
     - role: epics-tools
       tags: epics_tools
       when: epics_tools
-
-    - role: docker
-      tags: docker
-      when: docker
 
     - role: bluesky
       tags: bluesky

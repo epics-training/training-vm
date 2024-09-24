@@ -40,16 +40,3 @@
     line: "%epics-dev ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
   become: yes
-
-- name: create docker group
-  group:
-    name: docker
-    state: present
-  become: yes
-
-- name: add user to docker group
-  user:
-    name: "{{ ansible_user_id }}"
-    groups: docker
-    append: yes
-  become: yes
