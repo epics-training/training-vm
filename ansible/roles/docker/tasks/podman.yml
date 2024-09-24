@@ -1,0 +1,38 @@
+---
+- name: Add docker repository
+  ansible.builtin.yum_repository:
+    name: docker-ce-stable
+    description: official docker stable rpm repo
+    baseurl: https://download.docker.com/linux/{{ 'centos' if ansible_distribution == 'Rocky' else ansible_distribution | lower }}/$releasever/$basearch/stable
+    gpgkey: https://download.docker.com/linux/{{ 'centos' if ansible_distribution == 'Rocky' else ansible_distribution | lower }}/gpg
+  become: yes
+
+- name: Install RPM prerequisites
+  dnf:
+    name:
+      - podman-docker
+      - dnf-plugins-core
+      - docker-compose-plugin
+    state: present
+  become: yes
+
+# linger allows us to set up rootless podman daemons
+- name: Check epics-dev for lingering
+  include_tasks:
+    file: linger.yml
+  with_items: "{{ dev_user }}"
+
+- name: Start and enable podman
+  ansible.builtin.systemd:
+    name: podman
+    state: started
+    enabled: yes
+    scope: user
+
+- name: Create /etc/containers/nodocker to quiet warning message
+  ansible.builtin.file:
+    path: /etc/containers/nodocker
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  become: yes

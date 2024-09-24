@@ -1,10 +1,18 @@
 ---
-- name: "{{ epics_modules[item].name }} | Install required dependencies"
+- name: "{{ epics_modules[item].name }} | Install required deb dependencies"
   ansible.builtin.apt:
-    name: "{{ epics_modules[item].required_packages }}"
+    name: "{{ epics_modules[item].required_debs }}"
     state: present
   become: true
-  when: epics_modules[item].required_packages is defined
+  when: is_debian and epics_modules[item].required_debs is defined
+
+- name: "{{ epics_modules[item].name }} | Install required rpm dependencies"
+  dnf:
+    name: "{{ epics_modules[item].required_rpms }}"
+    enablerepo: "{{ epics_modules[item].enable_repos | default('[]') }}"
+    state: present
+  become: true
+  when: is_redhat and epics_modules[item].required_rpms is defined
 
 - name: "{{ epics_modules[item].name }} | Check global rebuild flag"
   stat:
@@ -74,7 +82,7 @@
   become: true
   when: epics_module_flag.stat.exists == false
   # the -j cpus occasionally fails !!
-  retries: 1
+  retries: 2
   until: build_result.rc == 0
 
 - name: "{{ epics_modules[item].name }} | Run post-build hook"

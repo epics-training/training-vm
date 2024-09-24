@@ -1,0 +1,10 @@
+---
+- name: Check if user is lingering
+  stat:
+    path: "/var/lib/systemd/linger/{{ item }}"
+  register: user_lingering
+
+- name: Enable lingering if needed
+  command: "loginctl enable-linger {{ item }}"
+  when: not user_lingering.stat.exists
+  become: yes

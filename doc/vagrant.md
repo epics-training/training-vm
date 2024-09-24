@@ -27,7 +27,9 @@ git clone git@github.com:epics-training/training-vm.git
 vagrant plugin install vagrant-vbguest
 cd training-vm/vagrant
 # start the VM and run the ansible playbook (adjust CPUS to your host)
-VAGRANT_VM_CPUS=14 vagrant up
+VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=debian vagrant up
+# OR
+VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=fedora vagrant up
 # add in the guest additions and reboot to launch the graphical UI
 vagrant vbguest --auto-reboot
 ```

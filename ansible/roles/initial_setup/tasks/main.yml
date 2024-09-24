@@ -5,6 +5,14 @@
     state: latest
     update_cache: yes
   become: yes
+  when: is_debian
+
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  become: yes
+  when: is_redhat
 
 - name: Install Dev Tools and Gnome
   ansible.builtin.apt:
@@ -16,13 +24,39 @@
       - ansible
       - gnome-core
   become: yes
+  when: is_debian
+
+- name: Install Development Tools
+  dnf:
+    name:
+      - vim
+      - dkms
+      - kernel-devel
+      - kernel-headers
+      - "@Development Tools"
+  become: yes
+  when: is_redhat
+
+# note I cannot convince 'dnf' above to run this style of dnf command
+# which adds 'GNOME' qualifier to the group package install
+- name: Install GNOME
+  command: dnf groupinstall -y "Basic Desktop" GNOME
+  become: yes
+  when: is_redhat
 
 - name: Change default target to graphical.target
   file:
     src: /usr/lib/systemd/system/graphical.target
     dest: /etc/systemd/system/default.target
     state: link
-  become: yes
+  become: true
+
+- name: Make XOrg the default display manager
+  ansible.builtin.lineinfile:
+    path: "{{ gdm_config }}"
+    search_string: "DefaultSession"
+    line: "DefaultSession=gnome-xorg.desktop"
+  become: true
 
 - name: create user
   ansible.builtin.user:

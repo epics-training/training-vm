@@ -1,4 +1,18 @@
 ---
+- name: Check distro has been identified
+  ansible.builtin.assert:
+    that:
+      - is_debian or is_redhat
+    fail_msg: "Unkown distro {{ ansible_distribution }}"
+
+- name: Install common packages
+  dnf:
+    name: ["gcc-c++"]
+    state: latest
+    update_cache: true
+  become: true
+  when: is_redhat
+
 - name: Create installation directories
   file:
     path: "{{item}}"

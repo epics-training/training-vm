@@ -10,6 +10,17 @@ bluesky: false
 epics_modules_list:
   - base
   - pvxs
+  - p4p
+  - asyn
+  - seq
+  - opcua
+  - autosave
+  - busy
+  - sscan
+  - calc
+  - adcore
+  - adsimdetector
+  - adpvadriver
 
 # Default: no proxy
 proxy_env: {}

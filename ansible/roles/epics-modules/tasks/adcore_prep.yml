@@ -17,8 +17,10 @@
       WITH_HDF5 = YES
       WITH_PVA = YES
       XML2_INCLUDE += /usr/include/libxml2
+      {%- if is_debian %}
       HDF5_INCLUDE  = /usr/include/hdf5/serial/
       HDF5_LIB      = /usr/lib/x86_64-linux-gnu/hdf5/serial/
+      {%- endif %}
   become: true
 
 - name: "{{ epics_modules[item].name }} | Common plugins st.cmd snippet"

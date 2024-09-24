@@ -3,9 +3,6 @@
   hosts: local
   gather_subset: min
 
-  vars:
-    dev_user: "epics_dev"
-
   roles:
     - role: initial_setup
       tags: initial_setup
