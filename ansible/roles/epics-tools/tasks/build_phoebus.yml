@@ -1,13 +1,12 @@
 ---
-
 # tasks file for cs_studio_phoebus
 - name: Clone and/or update the phoebus repo
   become: true
   git:
-    repo: 'https://github.com/ControlSystemStudio/phoebus.git'
+    repo: "https://github.com/ControlSystemStudio/phoebus.git"
     dest: /opt/epics-tools/lib/phoebus
     version: "{{ phoebus_version }}"
-    force: yes
+    force: true
   register: phoebus_repo
 
 - name: Build the documentation and help
@@ -37,8 +36,8 @@
   file:
     path: /opt/epics-tools/config
     state: directory
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
 
 - name: create phoebus preferences
   become: true

@@ -7,8 +7,8 @@
   file:
     path: "{{ java_home }}"
     state: directory
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
 
 - name: Check if Java installation exists
   stat:
@@ -21,11 +21,11 @@
   ansible.builtin.unarchive:
     src: "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_{{ (ansible_facts['architecture'] == 'x86_64') | ternary('x64', ansible_facts['architecture']) }}_linux_hotspot_17.0.10_7.tar.gz"
     dest: "{{ java_home }}"
-    remote_src: yes
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
     extra_opts:
-    - --strip-components=1
+      - --strip-components=1
   when: java_installation.stat.exists == false
 
 - name: Add CA certificate to java trust store
@@ -47,8 +47,8 @@
   file:
     path: "{{ mvn_home }}"
     state: directory
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
 
 - name: Check if Maven installation exists
   stat:
@@ -61,11 +61,11 @@
   ansible.builtin.unarchive:
     src: https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz
     dest: "{{ mvn_home }}"
-    remote_src: yes
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
     extra_opts:
-    - --strip-components=1
+      - --strip-components=1
   when: mvn_installation.stat.exists == false
 
 # Configure proxies for maven
