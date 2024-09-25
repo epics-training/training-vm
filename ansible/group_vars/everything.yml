@@ -1,0 +1,31 @@
+# A configuration to be symlinked to local.yml in order to
+# test all of the roles and modules
+#
+# For use by CI and completists
+
+epics_modules: true
+catrust: false
+epics_tools: true
+docker: true
+bluesky: true
+
+# List the EPICS modules that will be built in this order (base is mandatory)
+epics_modules_list:
+  - base
+  - pvxs
+  # Two alternative Python wrappers
+  # TODO temporary guards for currently broken combinations
+  - "{{ 'p4p' if ansible_python.version.minor < 12 else 'skip' }}"
+  - "{{ 'pvapy' if is_redhat >= 12 else 'skip' }}"
+  - seq
+  - asyn
+  - opcua
+  # AreaDetector dependencies
+  - autosave
+  - busy
+  - sscan
+  - calc
+  - adcore
+  # TODO Fedora xmllib2 is too new for (ADCore missing XmlGetGlobal)
+  - "{{ 'adsimdetector' if ansible_distribution != 'Fedora' else 'skip' }}"
+  - "{{ 'adpvadriver' if ansible_distribution != 'Fedora' else 'skip' }}"

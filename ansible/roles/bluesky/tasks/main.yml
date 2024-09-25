@@ -3,43 +3,37 @@
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}"
     state: directory
-  become: no
 
 - name: Clone bluesky-container from GitLab repository
   ansible.builtin.git:
     repo: "{{ bluesky_container_repo_url }}"
     dest: "{{ bluesky_deployment_dir_path }}"
     version: "{{ bluesky_container_branch }}"
-    clone: yes
-    update: yes
+    clone: true
+    update: true
     force: true # required for update with WORKAROUND (see below)
-  become: no
 
 - name: Create sub-directory (data, user) inside bluesky directory
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}/{{ item }}"
     state: directory
   loop: "{{ sub_directories }}"
-  become: no
 
 - name: Create history.sqlite file
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}/history.sqlite"
     state: touch
-  become: no
 
 - name: "WORKAROUND: use templated run_bluesky.sh"
   ansible.builtin.template:
     src: run_bluesky.sh.j2
     dest: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
     mode: "755"
-  become: no
 
 - name: Ensure the script is executable
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
     mode: "0755"
-  become: no
 
 # Check if .bluesky_config file exists
 - name: Check if the .bluesky_config file exists
@@ -59,7 +53,6 @@
   ansible.builtin.file:
     path: "{{ home_directory }}/.bluesky_config"
     state: touch
-  become: no
 
 # Add content to .bluesky_config file
 - name: Add content to .bluesky_config file
@@ -70,7 +63,6 @@
       alias bluesky_start="{{ bluesky_container_repo_dest }}/run_bluesky.sh"
       alias podman=docker
       # End of Bluesky deployment
-  become: no
 
 # Add content to .bashrc only once; use a marker to facilitate delete during the execution of "undeploy_bluesky.yml"
 - name: Add a block to .bashrc only once
@@ -81,9 +73,8 @@
           source "$HOME/.bluesky_config"
       fi
     marker: "# {mark} Execute additional configuration stored in '.bluesky_config' file"
-    create: yes # Ensures the block is created if it doesn't exist
+    create: true # Ensures the block is created if it doesn't exist
     state: present
-  become: no
 
 - name: Build a Docker image
   community.docker.docker_image:
@@ -91,7 +82,7 @@
     source: build
     build:
       path: "{{ bluesky_deployment_dir_path }}"
-    when: is_debian
+  when: is_debian
 
 - name: Build a Podman image
   containers.podman.podman_image:
@@ -99,7 +90,7 @@
     path: "{{ bluesky_deployment_dir_path }}"
     build:
       format: docker
-    when: is_redhat
+  when: is_redhat
 
 # Needed to determine the used ports further down
 - name: Start context containers
@@ -114,9 +105,9 @@
 - name: Configure the firewall
   include_tasks:
     file: firewalld.yml
-  when: ansible_facts.services['firewalld'].state == 'running'
+  when: ('filewalld' in ansible_facts.services) and (ansible_facts.services['firewalld'].state == 'running')
 
-# Cleanup to avoid interaction with other training modules
+# Cleanup to avoid interaction with other traini ng modules
 - name: Stop context containers
   command: "{{ docker }} compose down"
   args:

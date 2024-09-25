@@ -1,47 +1,74 @@
 ---
-- name: Upgrade all packages
+- name: Validate the partition variables
+  ansible.builtin.debug:
+    msg: "rootdisk:{{ root_disk }}, root_part:{{ root_partition }} fs_type:{{ root_fs_type }}, all_partitions:{{ partitions }}, no:{{ last_partition_no }}"
+
+- name: Install growpart
+  ansible.builtin.apt:
+    name: cloud-guest-utils
+  become: true
+  when: is_debian
+
+- name: Install growpart
+  dnf:
+    name: cloud-utils-growpart
+  become: true
+  when: is_redhat
+
+- name: growpart the root partition to fill all available space
+  ansible.builtin.shell:
+    cmd: "growpart /dev/{{ root_disk }} {{ last_partition_no }}"
+  become: true
+  # growpart fails if the partition is already grown
+  ignore_errors: true
+
+- name: Grow xfs root filesystem to fill all available space
+  ansible.builtin.shell:
+    cmd: xfs_growfs {{ root_partition }}
+  when: root_fs_type == 'xfs'
+  become: true
+
+- name: Grow btrfs root filesystem to fill all available space
+  ansible.builtin.shell:
+    cmd: btrfs filesystem resize 1:max /
+  when: root_fs_type == 'btrfs'
+  become: true
+
+- name: APT Upgrade all packages
   ansible.builtin.apt:
     name: "*"
     state: latest
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
   when: is_debian
 
-- name: Upgrade all packages
+- name: RPM Upgrade all packages
   ansible.builtin.dnf:
     name: "*"
     state: latest
-  become: yes
+  become: true
   when: is_redhat
 
-- name: Install Dev Tools and Gnome
+- name: APT Install Dev Tools and Gnome
   ansible.builtin.apt:
     name:
       - build-essential
       - git
       - vim
       - curl
-      - ansible
       - gnome-core
-  become: yes
+  become: true
   when: is_debian
 
-- name: Install Development Tools
+- name: RPM Install Development Tools
   dnf:
     name:
-      - vim
-      - dkms
-      - kernel-devel
-      - kernel-headers
       - "@Development Tools"
-  become: yes
-  when: is_redhat
-
-# note I cannot convince 'dnf' above to run this style of dnf command
-# which adds 'GNOME' qualifier to the group package install
-- name: Install GNOME
-  command: dnf groupinstall -y "Basic Desktop" GNOME
-  become: yes
+      - git
+      - vim
+      - curl
+      - "@Workstation"
+  become: true
   when: is_redhat
 
 - name: Change default target to graphical.target
@@ -51,21 +78,22 @@
     state: link
   become: true
 
-- name: Make XOrg the default display manager
-  ansible.builtin.lineinfile:
-    path: "{{ gdm_config }}"
-    search_string: "DefaultSession"
-    line: "DefaultSession=gnome-xorg.desktop"
-  become: true
+# does not seem to work and the location of gdm config is different in different distros
+# - name: Make XOrg the default display manager
+#   ansible.builtin.lineinfile:
+#     path: "{{ gdm_config }}"
+#     search_string: "DefaultSession"
+#     line: "DefaultSession=gnome-xorg.desktop"
+#   become: true
 
 - name: create user
   ansible.builtin.user:
     name: "{{ dev_user }}"
     shell: /bin/bash
-    createhome: yes
+    createhome: true
     password: ""
     comment: "EPICS Developer"
-  become: yes
+  become: true
 
 - name: Make users passwordless for sudo in group wheel
   lineinfile:
@@ -73,4 +101,4 @@
     regexp: "^%{{ dev_user }}"
     line: "%{{ dev_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
-  become: yes
+  become: true

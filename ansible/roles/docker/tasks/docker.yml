@@ -2,28 +2,28 @@
 - name: Add Docker GPG key
   apt_key:
     url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
-  become: yes
+  become: true
 
 - name: Add Docker APT repository
   apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
-  become: yes
+  become: true
 
 - name: Install Docker
   ansible.builtin.apt:
     name: [docker-ce, docker-ce-cli, containerd.io]
     state: present
-  become: yes
+  become: true
 
 - name: create docker group
   group:
     name: docker
     state: present
-  become: yes
+  become: true
 
 - name: add user to docker group
   user:
     name: "{{ dev_user }}"
     groups: docker
-    append: yes
-  become: yes
+    append: true
+  become: true

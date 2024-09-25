@@ -3,24 +3,13 @@ initial_setup: false
 docker: true # for rootful this needs to happen before first reboot
 epics_modules: true
 catrust: false
-epics_tools: true
+epics_tools: false
 bluesky: false
 
 # Default configuration for the EPICS modules to build
 epics_modules_list:
   - base
   - pvxs
-  - p4p
-  - asyn
-  - seq
-  - opcua
-  - autosave
-  - busy
-  - sscan
-  - calc
-  - adcore
-  - adsimdetector
-  - adpvadriver
 
-# Default: no proxy
+# Default: false proxy
 proxy_env: {}

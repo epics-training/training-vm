@@ -8,6 +8,7 @@
 - name: Build EPICS Modules
   include_tasks: build_module.yml
   loop: "{{ epics_modules_list }}"
+  when: item != 'skip'
 
 - name: "Copy .bob files under {{ epics_install_path }} to {{ opi_install_path }}"
   ansible.builtin.shell:

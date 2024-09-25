@@ -18,54 +18,40 @@ Vagrant.configure("2") do |config|
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
 
-    distro = ENV['VAGRANT_VM_BOX'] || "debian"
-    if distro == 'fedora' then
-      local.vm.box = "fedora/40-cloud-base"
+    # resize the original base image disk size
+    local.vm.disk :disk, size: "150GB", primary: true
 
-      # resize the original base image disk size
-      local.vm.disk :disk, size: "150GB", primary: true
+    distro_name = ENV['VAGRANT_VM_BOX'] || "debian"
 
-      # expand the root partition to fill the disk (btrfs specific so not in ansible)
-      local.vm.provision "shell", inline: <<-SHELL
-        growpart /dev/sda 4
-        btrfs filesystem resize 1:max /
-      SHELL
-      use_apt = "false"
-    elsif distro == 'debian' then
-      local.vm.box = "debian/bookworm64"
-      installer = "(apt-get update ; apt-get install -y ansible)"
-      use_apt = "true"
-    end
+    distros = {
+      'fedora': {
+        box: "fedora/40-cloud-base",
+        installer: "dnf",
+      },
+      'rocky': {
+        box: "rockylinux/9",
+        installer: "dnf",
+      },
+      'debian': {
+        box: "debian/bookworm64",
+        installer: "apt",
+      },
+      'ubuntu': {
+        box: "ubuntu/focal64",
+        installer: "apt",
+      },
+    }
 
-    # Create a private network, which allows host-only access to the machine
-    # using a specific IP.
-    # local.vm.network "private_network", ip: "192.168.33.10"
+    distro = distros[distro_name.to_sym]
+    local.vm.box = distro[:box]
+    installer = distro[:installer]
 
-    # Create a public network, which generally matched to bridged network.
-    # Bridged networks make the machine appear as another physical device on
-    # your network.
-    # local.vm.network "public_network"
-
-    # Share an additional folder to the guest VM. The first argument is
-    # the path on the host to the actual folder. The second argument is
-    # the path on the guest to mount the folder. And the optional third
-    # argument is a set of non-required options.
-    # local.vm.synced_folder "../data", "/vagrant_data"
-
-    # Disable the default share of the current code directory. Doing this
-    # provides improved isolation between the vagrant box and your host
-    # by making sure your Vagrantfile isn't accessible to the vagrant box.
-    # If you use this you may want to enable additional shared subfolders as
-    # shown above.
     local.vm.synced_folder ".", "/vagrant", disabled: true
+    local.vm.synced_folder "../ansible", "/ansible"
 
-    # Provider-specific configuration so you can fine-tune various
-    # backing providers for Vagrant. These expose provider-specific options.
-    # in this case for VirtualBox:
-
-    cpus = ENV['VAGRANT_VM_CPUS'] || 2
+    cpus = ENV['VAGRANT_VM_CPUS'] || 4
     local.vm.provider "virtualbox" do |vb|
-      vb.name = "epics-training"
+      vb.name = "epics-training-" + distro_name
       vb.gui = true
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
       vb.customize ["modifyvm", :id, "--cpus", cpus]
@@ -77,17 +63,20 @@ Vagrant.configure("2") do |config|
       vb.memory = "4096"
     end
 
-    local.vm.synced_folder "../ansible", "/ansible"
-
     # Install and run guest-side Ansible
-    local.vm.provision "shell", :args => [use_apt], inline: <<-SHELL
-      if [ "$1" == "true" ]; then
-        apt-get update; apt-get install -y ansible
-      else
-        dnf install -y ansible
+    args = ENV['VAGRANT_VM_ARGS'] || ""
+    local.vm.provision "shell", :args => [installer, args], inline: <<-SHELL
+
+      if [ "$1" == "apt" ]; then
+        apt-add-repository ppa:ansible/ansible
+        apt-get update; apt-get install -y ansible python3-jmespath
+      elif [ "$1" == "dnf" ]; then
+        dnf install -y epel-release && dnf update -y --refresh
+        dnf install -y ansible python3-jmespath
       fi
+
       ansible-galaxy install -r /ansible/requirements.yml || true
-      ansible-playbook -i /ansible/hosts -t initial_setup -e initial_setup=true /ansible/playbook.yml
+      ansible-playbook -i /ansible/hosts $2 -e initial_setup=true /ansible/playbook.yml
     SHELL
 
   end

@@ -1,15 +1,15 @@
 - name: Add TCP and UDP protocols
   firewalld:
     zone: public
-    permanent: yes
+    permanent: true
     state: enabled
-    immediate: yes
+    immediate: true
     protocol: "{{ item }}"
     offline: false
   loop:
     - tcp
     - udp
-  become: yes
+  become: true
 
 - name: tcp ports facts
   community.general.listen_ports_facts:
@@ -23,7 +23,7 @@
     offline: false
   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
   register: ports_added_to_firewalld
-  become: yes
+  become: true
 
 - name: print Ports Added
   debug:
@@ -41,4 +41,4 @@
     offline: false
   loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
   register: ports_added_to_firewalld
-  become: yes
+  become: true

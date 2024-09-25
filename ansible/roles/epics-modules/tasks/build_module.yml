@@ -1,12 +1,12 @@
 ---
-- name: "{{ epics_modules[item].name }} | Install required deb dependencies"
+- name: "{{ epics_modules[item].name }} | Install required DEB dependencies"
   ansible.builtin.apt:
     name: "{{ epics_modules[item].required_debs }}"
     state: present
   become: true
   when: is_debian and epics_modules[item].required_debs is defined
 
-- name: "{{ epics_modules[item].name }} | Install required rpm dependencies"
+- name: "{{ epics_modules[item].name }} | Install required RPM dependencies"
   dnf:
     name: "{{ epics_modules[item].required_rpms }}"
     enablerepo: "{{ epics_modules[item].enable_repos | default('[]') }}"
@@ -77,7 +77,7 @@
   when: epics_modules[item].pre_hook is defined
 
 - name: "{{ epics_modules[item].name }} | Build from sources (this may take a while)"
-  command: make {{ epics_modules[item]. args | default('') }} -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
+  command: make {{ epics_modules[item].args | default('') }} -C "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}" all clean
   register: build_result
   become: true
   when: epics_module_flag.stat.exists == false

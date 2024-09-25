@@ -5,7 +5,7 @@
     description: official docker stable rpm repo
     baseurl: https://download.docker.com/linux/{{ 'centos' if ansible_distribution == 'Rocky' else ansible_distribution | lower }}/$releasever/$basearch/stable
     gpgkey: https://download.docker.com/linux/{{ 'centos' if ansible_distribution == 'Rocky' else ansible_distribution | lower }}/gpg
-  become: yes
+  become: true
 
 - name: Install RPM prerequisites
   dnf:
@@ -14,7 +14,7 @@
       - dnf-plugins-core
       - docker-compose-plugin
     state: present
-  become: yes
+  become: true
 
 # linger allows us to set up rootless podman daemons
 - name: Check epics-dev for lingering
@@ -26,8 +26,10 @@
   ansible.builtin.systemd:
     name: podman
     state: started
-    enabled: yes
+    enabled: true
     scope: user
+  become: true
+  become_user: "{{ dev_user }}"
 
 - name: Create /etc/containers/nodocker to quiet warning message
   ansible.builtin.file:
@@ -35,4 +37,4 @@
     state: touch
     modification_time: preserve
     access_time: preserve
-  become: yes
+  become: true

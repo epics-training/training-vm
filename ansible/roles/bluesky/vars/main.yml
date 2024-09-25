@@ -11,4 +11,4 @@ sub_directories:
   - "data"
   - "user_scripts"
 
-bashrc_path: "{{ lookup('env','HOME') }}/.bashrc"
+bashrc_path: "/home/{{ dev_user }}/.bashrc"

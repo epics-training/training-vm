@@ -1,7 +1,6 @@
 ---
 - name: Set up training VM
   hosts: local
-  gather_subset: min
 
   roles:
     - role: initial_setup
@@ -30,5 +29,7 @@
     - role: bluesky
       tags: bluesky
       when: bluesky
+      become: true
+      become_user: "{{ dev_user }}"
 
   environment: "{{ proxy_env }}"

@@ -7,4 +7,4 @@
 - name: Enable lingering if needed
   command: "loginctl enable-linger {{ item }}"
   when: not user_lingering.stat.exists
-  become: yes
+  become: true
