@@ -1,7 +1,10 @@
 # Default configuration for the available roles
+
+# minimal defaults for fast testing - copy local.yml.sample or everything.yml
+# to local.yml and adjust as needed
 initial_setup: false
 docker: true # for rootful this needs to happen before first reboot
-epics_modules: true
+epics_modules_build: false
 catrust: false
 epics_tools: false
 bluesky: false

@@ -3,7 +3,7 @@
 #
 # For use by CI and completists
 
-epics_modules: true
+epics_modules_build: true
 catrust: false
 epics_tools: true
 docker: true

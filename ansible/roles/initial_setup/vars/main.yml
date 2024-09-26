@@ -4,3 +4,30 @@ root_partition: "{{ ansible_mounts|json_query('[?mount == `/`].device') | first 
 root_fs_type: "{{ ansible_mounts|json_query('[?mount == `/`].fstype') | first }}"
 partitions: "{{ ansible_devices[root_disk].partitions.keys() | list | sort }}"
 last_partition_no: "{{ ansible_devices[root_disk].partitions.keys() | list | length }}"
+
+distros:
+  Fedora:
+    gnome_group: "Fedora Workstation"
+    gdm_config: "/etc/gdm/custom.conf"
+    installer: "dnf"
+  Rocky:
+    gnome_group: "Workstation"
+    gdm_config: "/etc/gdm/custom.conf"
+    installer: "dnf"
+  Debian:
+    gnome_group: "gnome-core"
+    gdm_config: "/etc/gdm3/daemon.conf"
+    installer: "apt"
+  Ubuntu:
+    gnome_group: "gnome-core"
+    gdm_config: "/etc/gdm3/custom.conf"
+    installer: "apt"
+
+distro: "{{ distros[ansible_distribution] }}"
+
+is_debian: '{{ distro.installer == "apt" }}'
+is_redhat: '{{ distro.installer == "dnf" }}'
+
+docker: "{{ 'docker' if is_debian else 'podman' }}"
+
+dev_user: "epics_dev"

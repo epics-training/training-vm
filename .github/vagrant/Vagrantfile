@@ -1,0 +1,24 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "local" do |local|
+
+    require_relative '../../vagrant/common'
+
+    # resize the original base image disk size
+    local.vm.disk :disk, size: "150GB", primary: true
+
+    local.vm.synced_folder ".", "/vagrant", disabled: true
+    local.vm.synced_folder "../../ansible", "/ansible"
+
+    local.vm.box = @box
+
+    local.vm.provider "libvirt"
+
+    # Install and run guest-side Ansible
+    local.vm.provision "shell", inline: @install_script
+
+  end
+end

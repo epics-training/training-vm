@@ -22,17 +22,17 @@ Setup the required tools on your host machine:
 
 ## Steps
 
+Supported distributions are: debian, fedora, rocky, ubuntu.
+
 ```bash
 git clone git@github.com:epics-training/training-vm.git
 vagrant plugin install vagrant-vbguest
 cd training-vm/vagrant
 # start the VM and run the ansible playbook (adjust CPUS to your host)
 VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=debian vagrant up
-# OR
-VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=fedora vagrant up
-# add in the guest additions and reboot to launch the graphical UI
 vagrant vbguest --auto-reboot
 ```
+
 vbguest step may wait indefinitely for the VM to reboot. If it does, you can manually reboot the VM from the VirtualBox GUI using ACPI shutdown.
 
 You can login with username epics-dev, no password.

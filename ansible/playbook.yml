@@ -7,10 +7,6 @@
       tags: initial_setup
       when: initial_setup
 
-    - role: docker
-      tags: docker
-      when: docker
-
     - role: catrust
       tags: catrust
       when: catrust
@@ -18,9 +14,13 @@
     - role: common #  <- mandatory
       tags: common
 
+    - role: docker
+      tags: docker
+      when: docker
+
     - role: epics-modules
       tags: epics_modules
-      when: epics_modules
+      when: epics_modules_build
 
     - role: epics-tools
       tags: epics_tools

@@ -1,6 +1,6 @@
 # Creating the EPICS Training VM
 
-TODO - requires rework for Debian
+TODO - requires rework for multi-distro
 
 These instructions describe how to generate the VirtualBox VM
 for the EPICS Training from scratch.

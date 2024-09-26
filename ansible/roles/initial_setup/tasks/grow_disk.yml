@@ -1,0 +1,44 @@
+# steps to grow the root disk to fill all available space
+# assumes the root disk has extra space available and the
+# root partition is the last partition
+
+- name: Validate variables
+  ansible.builtin.debug:
+    msg: |
+      rootdisk:{{ root_disk }}, root_part:{{ root_partition }} fs_type:{{ root_fs_type }}, all_partitions:{{ partitions }}, no:{{ last_partition_no }}
+      DISTROS:{{ distros }}
+      DISTRO:{{ distro }}
+      is_redhat:{{ is_redhat }}, is_debian:{{ is_debian }}
+
+- name: APT Install growpart
+  ansible.builtin.apt:
+    name: cloud-guest-utils
+    state: latest
+    update_cache: true
+  become: true
+  when: is_debian
+
+- name: DNF Install growpart
+  dnf:
+    name: cloud-utils-growpart
+  become: true
+  when: is_redhat
+
+- name: growpart the root partition to fill all available space
+  ansible.builtin.shell:
+    cmd: "growpart /dev/{{ root_disk }} {{ last_partition_no }}"
+  become: true
+  # growpart fails if the partition is already grown
+  ignore_errors: true
+
+- name: Grow xfs root filesystem to fill all available space
+  ansible.builtin.shell:
+    cmd: xfs_growfs {{ root_partition }}
+  when: root_fs_type == 'xfs'
+  become: true
+
+- name: Grow btrfs root filesystem to fill all available space
+  ansible.builtin.shell:
+    cmd: btrfs filesystem resize 1:max /
+  when: root_fs_type == 'btrfs'
+  become: true

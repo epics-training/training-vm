@@ -1,60 +1,34 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
+
 Vagrant.configure("2") do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
+  # docs at https://docs.vagrantup.com.
 
   if Vagrant.has_plugin?("vagrant-vbguest") then
     config.vbguest.auto_update = false
   end
 
   config.vm.define "local" do |local|
+
+    require_relative 'common'
+
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
 
     # resize the original base image disk size
     local.vm.disk :disk, size: "150GB", primary: true
 
-    distro_name = ENV['VAGRANT_VM_BOX'] || "debian"
-
-    distros = {
-      'fedora': {
-        box: "fedora/40-cloud-base",
-        installer: "dnf",
-      },
-      'rocky': {
-        box: "rockylinux/9",
-        installer: "dnf",
-      },
-      'debian': {
-        box: "debian/bookworm64",
-        installer: "apt",
-      },
-      'ubuntu': {
-        box: "ubuntu/focal64",
-        installer: "apt",
-      },
-    }
-
-    distro = distros[distro_name.to_sym]
-    local.vm.box = distro[:box]
-    installer = distro[:installer]
-
     local.vm.synced_folder ".", "/vagrant", disabled: true
     local.vm.synced_folder "../ansible", "/ansible"
 
-    cpus = ENV['VAGRANT_VM_CPUS'] || 4
+    local.vm.box = @box
+
     local.vm.provider "virtualbox" do |vb|
-      vb.name = "epics-training-" + distro_name
+      # vb.name = "epics-training-" + distro_name
       vb.gui = true
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
-      vb.customize ["modifyvm", :id, "--cpus", cpus]
+      vb.customize ["modifyvm", :id, "--cpus", @cpus]
       vb.customize ["modifyvm", :id, "--vram", "256"]
       # vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
       vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
@@ -64,20 +38,7 @@ Vagrant.configure("2") do |config|
     end
 
     # Install and run guest-side Ansible
-    args = ENV['VAGRANT_VM_ARGS'] || ""
-    local.vm.provision "shell", :args => [installer, args], inline: <<-SHELL
-
-      if [ "$1" == "apt" ]; then
-        apt-add-repository ppa:ansible/ansible
-        apt-get update; apt-get install -y ansible python3-jmespath
-      elif [ "$1" == "dnf" ]; then
-        dnf install -y epel-release && dnf update -y --refresh
-        dnf install -y ansible python3-jmespath
-      fi
-
-      ansible-galaxy install -r /ansible/requirements.yml || true
-      ansible-playbook -i /ansible/hosts $2 -e initial_setup=true /ansible/playbook.yml
-    SHELL
+    local.vm.provision "shell", inline: @install_script
 
   end
 end
