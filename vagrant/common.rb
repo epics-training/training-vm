@@ -37,5 +37,4 @@ args = ENV['VAGRANT_VM_ARGS'] || ""
       fi
 
       ansible-galaxy install -r /ansible/requirements.yml || true
-      ansible-playbook -i /ansible/hosts -e initial_setup=true '"+ args +"' /ansible/playbook.yml
-"
+      ansible-playbook -i /ansible/hosts -e initial_setup=true /ansible/playbook.yml "+ args
