@@ -82,7 +82,7 @@
   become: true
   when: epics_module_flag.stat.exists == false
   # the -j cpus occasionally fails !!
-  retries: 2
+  retries: 4
   until: build_result.rc == 0
 
 - name: "{{ epics_modules[item].name }} | Run post-build hook"
