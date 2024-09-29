@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     local.vm.synced_folder ".", "/vagrant", disabled: true
     local.vm.synced_folder "../ansible", "/ansible"
 
-    local.vm.box = @box
+    local.vm.box = @distro[:box]
 
     local.vm.provider "virtualbox" do |vb|
       # vb.name = "epics-training-" + distro_name
@@ -38,7 +38,10 @@ Vagrant.configure("2") do |config|
     end
 
     # Install and run guest-side Ansible
-    local.vm.provision "shell", inline: @install_script
-
+    install_script = File.read("../initial_setup.sh")
+    local.vm.provision "shell" do |s|
+      s.inline = install_script
+      s.env = { ansible_args: ENV['VAGRANT_ANSIBLE_ARGS'] || "", installer: @distro[:installer] }
+    end
   end
 end

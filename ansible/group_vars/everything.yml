@@ -1,7 +1,7 @@
-# A configuration to be symlinked to local.yml in order to
+# A configuration to be copied to local.yml in order to
 # test all of the roles and modules
 #
-# For use by CI and completists
+# For use in fully testing VMs
 
 epics_modules_build: true
 catrust: false
@@ -16,7 +16,7 @@ epics_modules_list:
   # Two alternative Python wrappers
   # TODO temporary guards for currently broken combinations
   - "{{ 'p4p' if ansible_python.version.minor < 12 else 'skip' }}"
-  - "{{ 'pvapy' if is_redhat >= 12 else 'skip' }}"
+  - "{{ 'pvapy' if is_redhat else 'skip' }}"
   - seq
   - asyn
   - opcua
@@ -25,7 +25,7 @@ epics_modules_list:
   - busy
   - sscan
   - calc
-  - adcore
   # TODO Fedora xmllib2 is too new for (ADCore missing XmlGetGlobal)
+  - "{{ 'adcore' if ansible_distribution != 'Fedora' else 'skip' }}"
   - "{{ 'adsimdetector' if ansible_distribution != 'Fedora' else 'skip' }}"
   - "{{ 'adpvadriver' if ansible_distribution != 'Fedora' else 'skip' }}"

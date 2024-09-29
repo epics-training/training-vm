@@ -1,0 +1,19 @@
+name: Docker Build
+
+on:
+  workflow_call:
+
+jobs:
+  docker-up:
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu, rocky, debian, fedora]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run intial setup and ansible inside a container
+        run: |
+          ./.github/test_docker.sh ${{ matrix.distro }}
