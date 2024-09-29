@@ -6,7 +6,7 @@
 
 - name: expand the root disk
   include_tasks: grow_disk.yml
-  when: in_container == false
+  when: not in_container
 
 - name: APT Upgrade all packages
   ansible.builtin.apt:
@@ -52,7 +52,7 @@
     dest: /etc/systemd/system/default.target
     state: link
   become: true
-  when: in_container == false
+  when: not in_container
 
 - name: Make XOrg the default display manager
   ansible.builtin.lineinfile:
@@ -60,7 +60,7 @@
     search_string: "WaylandEnable"
     line: "WaylandEnable=false"
   become: true
-  when: in_container == false
+  when: not in_container
 
 - name: create user
   ansible.builtin.user:

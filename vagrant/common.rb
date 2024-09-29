@@ -20,6 +20,11 @@ distros = {
   },
 }
 
+if not distros.key?(distro_name.to_sym)
+  print "Unknown distro: #{distro_name}, supported distros: #{distros.keys}\n"
+  exit 1
+end
+
 @distro = distros[distro_name.to_sym]
 @cpus = ENV['VAGRANT_VM_CPUS'] || 4
 

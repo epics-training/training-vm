@@ -22,8 +22,7 @@
       tags: bluesky
       when: bluesky
       become: true
-      # for CI use the root user so that we have permissions on docker outside
-      become_user: "{{ 'root' if in_container else dev_user}}"
+      become_user: "{{ dev_user}}"
 
     - role: epics-modules
       tags: epics_modules
