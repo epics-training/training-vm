@@ -21,15 +21,18 @@
   include_tasks:
     file: linger.yml
   with_items: "{{ dev_user }}"
+  when: not in_container
 
 - name: Start and enable podman
   ansible.builtin.systemd:
     name: podman
     state: started
     enabled: true
-    scope: user
+    scope: "user"
   become: true
   become_user: "{{ dev_user }}"
+  # don't start podman service in container - use the host's docker socket instead
+  when: not in_container
 
 - name: Create /etc/containers/nodocker to quiet warning message
   ansible.builtin.file:

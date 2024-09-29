@@ -8,7 +8,7 @@ jobs:
   check:
     uses: ./.github/workflows/_check.yml
 
-  vagrant:
+  docker_build:
     needs: check
     if: needs.check.outputs.branch-pr == ''
-    uses: ./.github/workflows/_vagrant_up.yml
+    uses: ./.github/workflows/_docker_build.yml

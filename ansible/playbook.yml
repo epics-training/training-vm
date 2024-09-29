@@ -18,6 +18,12 @@
       tags: docker
       when: docker
 
+    - role: bluesky
+      tags: bluesky
+      when: bluesky
+      become: true
+      become_user: "{{ dev_user}}"
+
     - role: epics-modules
       tags: epics_modules
       when: epics_modules_build
@@ -25,11 +31,5 @@
     - role: epics-tools
       tags: epics_tools
       when: epics_tools
-
-    - role: bluesky
-      tags: bluesky
-      when: bluesky
-      become: true
-      become_user: "{{ dev_user }}"
 
   environment: "{{ proxy_env }}"

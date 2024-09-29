@@ -16,3 +16,6 @@ epics_modules_list:
 
 # Default: false proxy
 proxy_env: {}
+
+# when building inside a container during CI this is set to true
+in_container: false

@@ -1,6 +1,12 @@
 ---
+- name: Print all available facts for debugging
+  # 'cd ansible; ansible localhost -m ansible.builtin.setup' will show this info
+  ansible.builtin.debug:
+    var: ansible_facts
+
 - name: expand the root disk
   include_tasks: grow_disk.yml
+  when: not in_container
 
 - name: APT Upgrade all packages
   ansible.builtin.apt:
@@ -24,6 +30,7 @@
       - git
       - vim
       - curl
+      - sudo
       - "{{ distro.gnome_group }}"
   become: true
   when: is_debian
@@ -32,10 +39,10 @@
   dnf:
     name:
       - "@Development Tools"
-      - git
       - vim
-      - curl
+      - sudo
       - "@{{ distro.gnome_group }}"
+    allowerasing: true # fix version conflicts for curl and coreutils on Rocky
   become: true
   when: is_redhat
 
@@ -45,6 +52,7 @@
     dest: /etc/systemd/system/default.target
     state: link
   become: true
+  when: not in_container
 
 - name: Make XOrg the default display manager
   ansible.builtin.lineinfile:
@@ -52,6 +60,7 @@
     search_string: "WaylandEnable"
     line: "WaylandEnable=false"
   become: true
+  when: not in_container
 
 - name: create user
   ansible.builtin.user:
@@ -68,4 +77,11 @@
     regexp: "^%{{ dev_user }}"
     line: "%{{ dev_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
+  become: true
+
+- name: ensure that python refers to python3 (fixes issue with Rocky container)
+  ansible.builtin.file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
   become: true
