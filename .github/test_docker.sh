@@ -11,6 +11,17 @@
 set -ex
 this_dir=$(realpath $(dirname $0))
 
+# to run these tests locally with podman - expose a user socket for podman:-
+#   systemctl --user start podman.socket
+#   systemctl --user enable podman.socket
+#   export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
+if [[ -z $DOCKER_HOST ]]; then
+    HOST_DOCKER_HOST=/var/run/docker.sock
+else
+    # remove the unix:// prefix for mounting the socket into a container
+    HOST_DOCKER_HOST=${DOCKER_HOST#unix://}
+fi
+
 # use ci.yml to drive the roles and modules built in the CI
 cp $this_dir/../ansible/group_vars/ci.yml $this_dir/../ansible/group_vars/local.yml
 
@@ -30,7 +41,7 @@ esac
 # container name
 name="epics-dev-$1"
 # container mounts
-docker="-v /var/run/docker.sock:/var/run/docker.sock -e DOCKER_HOST=unix://"
+docker="-v $HOST_DOCKER_HOST:/var/run/docker.sock -e DOCKER_HOST=unix://"
 ansible="-v $this_dir/../ansible:/ansible"
 setup="-v $this_dir/../initial_setup.sh:/initial_setup.sh"
 # container environment variables
