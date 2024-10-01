@@ -30,4 +30,4 @@ is_redhat: '{{ distro.installer == "dnf" }}'
 
 docker: "{{ 'docker' if is_debian else 'podman' }}"
 
-dev_user: "epics_dev"
+dev_user: "epics-dev"

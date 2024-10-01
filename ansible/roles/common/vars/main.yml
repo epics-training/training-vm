@@ -1,9 +1,2 @@
 epics_install_path: "/opt/epics"
 opi_install_path: "/opt/opi"
-
-is_debian: "{{ ansible_distribution in ['Debian', 'Ubuntu', 'Deepin', 'Kali Linux'] }}"
-is_redhat: "{{ ansible_distribution in ['Redhat', 'Fedora', 'Rocky', 'Centos', 'AlmaLinux', 'Oracle Linux'] }}"
-docker: "{{ 'docker' if is_debian else 'podman' }}"
-gdm_config: "{{'/etc/gdm3/daemon.conf' if is_debian else '/etc/gdm/custom.conf' }}"
-
-dev_user: "epics_dev"
