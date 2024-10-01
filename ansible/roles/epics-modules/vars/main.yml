@@ -39,8 +39,8 @@ epics_modules:
 
   p4p:
     name: "p4p"
-    version: "4.1.12"
-    url: "https://github.com/epics-base/p4p/archive/refs/tags/4.1.12.tar.gz"
+    version: "4.2.0"
+    url: "https://github.com/epics-base/p4p/archive/refs/tags/4.2.0.tar.gz"
     release_var: "P4P"
     release_sortkey: "10"
     required_debs:
@@ -60,8 +60,8 @@ epics_modules:
 
   pvapy:
     name: "pvaPy"
-    version: "5.4.1"
-    url: "https://github.com/epics-base/pvaPy/archive/refs/tags/5.4.1.tar.gz"
+    version: "5.3.1"
+    url: "https://github.com/epics-base/pvaPy/archive/refs/tags/5.3.1.tar.gz"
     release_var: "PVAPY"
     release_sortkey: "10"
     required_debs:

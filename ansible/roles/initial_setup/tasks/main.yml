@@ -1,4 +1,8 @@
 ---
+- name: Validate variables
+  ansible.builtin.debug:
+    msg: "modules to build: {{ epics_modules_list }}"
+
 - name: Print all available facts for debugging
   # 'cd ansible; ansible localhost -m ansible.builtin.setup' will show this info
   ansible.builtin.debug:
