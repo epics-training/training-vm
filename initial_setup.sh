@@ -3,6 +3,7 @@ set -xe
 
 if [[ "$installer" == "apt" ]]; then
     if [[ $(cat /etc/os-release) =~ Ubuntu ]] ; then
+        apt-get update; apt-get install -y software-properties-common
         add-apt-repository ppa:ansible/ansible
     fi
     apt-get update; apt-get install -y ansible python3-jmespath
