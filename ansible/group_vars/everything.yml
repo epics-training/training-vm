@@ -14,7 +14,7 @@ epics_modules_list:
   - base
   - pvxs
   # Two alternative Python wrappers
-  - "{{ 'p4p' if ansible_distribution != 'Ubuntu' else 'skip' }}"
+  - p4p
   # pvapy does not like python 3.12, debian has boost version issues
   - "{{ 'pvapy' if ansible_distribution == 'Rocky' else 'skip' }}"
   - seq
