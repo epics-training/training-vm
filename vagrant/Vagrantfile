@@ -9,39 +9,49 @@ Vagrant.configure("2") do |config|
     config.vbguest.auto_update = false
   end
 
-  config.vm.define "local" do |local|
+  require_relative 'common'
 
-    require_relative 'common'
+  @distros.each do |distro|
 
-    # Every Vagrant development environment requires a box. You can search for
-    # boxes at https://vagrantcloud.com/search.
-
-    # resize the original base image disk size
-    local.vm.disk :disk, size: "150GB", primary: true
-
-    local.vm.synced_folder ".", "/vagrant", disabled: true
-    local.vm.synced_folder "../ansible", "/ansible"
-
-    local.vm.box = @distro[:box]
-
-    local.vm.provider "virtualbox" do |vb|
-      # vb.name = "epics-training-" + distro_name
-      vb.gui = true
-      vb.customize ["modifyvm", :id, "--ioapic", "on"]
-      vb.customize ["modifyvm", :id, "--cpus", @cpus]
-      vb.customize ["modifyvm", :id, "--vram", "256"]
-      # vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
-      vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
-      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
-      vb.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
-      vb.memory = "4096"
+    # dont't create this VM unless the distro has been selected for creation
+    if distro[:name]== @distro_name or @distro_name == 'all'
+      print "processing #{distro[:name]} #{distro} ...\n"
+    else
+      print "skipping '#{distro[:name]}'\n"
+      next
     end
 
-    # Install and run guest-side Ansible
-    install_script = File.read("../initial_setup.sh")
-    local.vm.provision "shell" do |s|
-      s.inline = install_script
-      s.env = { ansible_args: ENV['VAGRANT_ANSIBLE_ARGS'] || "", installer: @distro[:installer] }
+    config.vm.define distro[:name] do |this|
+
+      # resize the original base image disk size
+      this.vm.disk :disk, size: "150GB", primary: true
+
+      this.vm.synced_folder ".", "/vagrant", disabled: true
+      this.vm.synced_folder "../ansible", "/ansible"
+
+      this.vm.box = distro[:box]
+      this.vm.hostname = distro[:name]
+      this.vm.network "private_network", ip: distro[:ip]
+
+      this.vm.provider "virtualbox" do |vb|
+        vb.name = "epics-training-" + distro[:name]
+        vb.gui = true
+        vb.customize ["modifyvm", :id, "--ioapic", "on"]
+        vb.customize ["modifyvm", :id, "--cpus", @cpus]
+        vb.customize ["modifyvm", :id, "--vram", "256"]
+        # vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+        vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+        vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+        vb.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
+        vb.memory = "4096"
+      end
+
+      # Install and run guest-side Ansible
+      install_script = File.read("../initial_setup.sh")
+      this.vm.provision "shell" do |s|
+        s.inline = install_script
+        s.env = { ansible_args: @ansible_args, installer: distro[:installer] }
+      end
     end
   end
 end
