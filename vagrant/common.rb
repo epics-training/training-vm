@@ -1,5 +1,4 @@
 # environment parameters
-@distro_names = (ENV['VAGRANT_VM_BOX'] || "rocky").split(',')
 @cpus = ENV['VAGRANT_VM_CPUS'] || 4
 @ansible_args = ENV['VAGRANT_ANSIBLE_ARGS'] || ""
 
@@ -25,12 +24,3 @@
     name: "ubuntu"
   },
 ]
-
-choices = ["fedora", "rocky", "debian", "ubuntu", "all"]
-
-if not @distro_names.all? { |e| choices.include?(e) }
-  print "ERROR: allowed values for VAGRANT_VM_BOX are comma separate distros #{choices} or 'all'"
-  exit 1
-else
-  print "INFO: VAGRANT_VM_BOX is #{@distro_names}"
-end
