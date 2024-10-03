@@ -20,16 +20,16 @@ Setup the required tools on your host machine:
 
 ## Initial Installation
 
-Supported distributions are: debian, fedora, rocky, ubuntu. Set the environment variables `VAGRANT_VM_BOX` to the chosen distrubution and `VAGRANT_VM_CPUS` to the number of CPUS to use in the VM before running `vagrant up`.
+Supported distributions are: debian, fedora, rocky, ubuntu. Set the environment variables `VAGRANT_VM_BOX` to the chosen distrubution and `VAGRANT_VM_CPUS` to the number of CPUS to use in the VM before running `vagrant up`. `VAGRANT_VM_BOX` can also be set to a comma separated list of distributions or `all`.
 
-The defaults are `VAGRANT_VM_BOX=debian` and `VAGRANT_VM_CPUS=4`.
+The defaults are `VAGRANT_VM_BOX=rocky` and `VAGRANT_VM_CPUS=4`.
 
 ```bash
 git clone git@github.com:epics-training/training-vm.git
 vagrant plugin install vagrant-vbguest
 cd training-vm/vagrant
 # start the VM and run the ansible playbook (adjust CPUS to your host)
-VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=debian vagrant up
+VAGRANT_VM_CPUS=14 VAGRANT_VM_BOX=debian,rocky vagrant up
 vagrant vbguest --auto-reboot
 ```
 

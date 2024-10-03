@@ -1,30 +1,26 @@
+# environment parameters
+@cpus = ENV['VAGRANT_VM_CPUS'] || 4
+@ansible_args = ENV['VAGRANT_ANSIBLE_ARGS'] || ""
 
-distro_name = ENV['VAGRANT_VM_BOX'] || "debian"
-
-distros = {
-  'fedora': {
+@distros = [
+  {
     box: "fedora/40-cloud-base",
     installer: "dnf",
+    name: "fedora"
   },
-  'rocky': {
+  {
     box: "rockylinux/9",
     installer: "dnf",
+    name: "rocky"
   },
-  'debian': {
+  {
     box: "debian/bookworm64",
     installer: "apt",
+    name: "debian"
   },
-  'ubuntu': {
+  {
     box: "ubuntu/focal64",
     installer: "apt",
+    name: "ubuntu"
   },
-}
-
-if not distros.key?(distro_name.to_sym)
-  print "Unknown distro: #{distro_name}, supported distros: #{distros.keys}\n"
-  exit 1
-end
-
-@distro = distros[distro_name.to_sym]
-@cpus = ENV['VAGRANT_VM_CPUS'] || 4
-
+]
