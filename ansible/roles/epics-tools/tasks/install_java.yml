@@ -56,10 +56,10 @@
   register: mvn_installation
   changed_when: false
 
-- name: install apache-maven-3.6.0
+- name: install apache-maven-3.6.3
   become: true
   ansible.builtin.unarchive:
-    src: https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz
+    src: https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
     dest: "{{ mvn_home }}"
     remote_src: true
     owner: "{{ epics_services_account }}"
