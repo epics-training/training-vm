@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
   @distros.each do |distro|
 
     # dont't create this VM unless the distro has been selected for creation
-    if distro[:name]== @distro_name or @distro_name == 'all'
+    if @distro_names.include?(distro[:name]) or @distro_names.include?("all")
       print "processing #{distro[:name]} #{distro} ...\n"
     else
       print "skipping '#{distro[:name]}'\n"
@@ -31,7 +31,6 @@ Vagrant.configure("2") do |config|
 
       this.vm.box = distro[:box]
       this.vm.hostname = distro[:name]
-      this.vm.network "private_network", ip: distro[:ip]
 
       this.vm.provider "virtualbox" do |vb|
         vb.name = "epics-training-" + distro[:name]
