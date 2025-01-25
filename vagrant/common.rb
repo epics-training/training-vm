@@ -19,7 +19,7 @@
     name: "debian"
   },
   {
-    box: "ubuntu/focal64",
+    box: "bento/ubuntu-24.04",
     installer: "apt",
     name: "ubuntu"
   },
