@@ -1,4 +1,4 @@
-home_directory: "~"
+home_directory: "/home/{{ dev_user }}"
 
 bluesky_deploy_dir_name: ".bluesky"
 bluesky_deployment_dir_path: "{{ home_directory }}/{{ bluesky_deploy_dir_name }}"
@@ -12,3 +12,5 @@ sub_directories:
   - "user_scripts"
 
 bashrc_path: "{{ home_directory }}/.bashrc"
+bluesky_docker_image: "registry.hzdr.de/hzb/bluesky/tutorials/bluesky_training"
+bluesky_docker_image_tag: "latest"
