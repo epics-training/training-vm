@@ -32,7 +32,7 @@ deploy_container() {
     -v {{ bluesky_deployment_dir_path }}/history.sqlite:/opt/bluesky/ipython/profile_root/history.sqlite \
     -v {{ bluesky_deployment_dir_path }}/images:/opt/bluesky/data/images \
     --device=/dev/dri:/dev/dri \
-    blueskytraining:latest \
+    {{ bluesky_docker_image }}:{{ bluesky_docker_image_tag }} \
     sh -c "python3 -m pip install -e /opt/bluesky/beamlinetools && $1"
 }
 
