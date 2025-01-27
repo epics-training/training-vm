@@ -92,9 +92,7 @@
   when: ansible_distribution in ["Rocky", "Fedora"]
 
 - name: Restart Docker service (Ubuntu/Debian)
-  ansible.builtin.service:
-    name: docker
-    state: restarted
+  ansible.builtin.command: "sudo systemctl restart docker"
   when: ansible_distribution in ["Ubuntu", "Debian"]
 
 - name: Restart Podman service (Rocky/Fedora)
@@ -115,6 +113,11 @@
   include_tasks:
     file: firewalld.yml
   when: ('filewalld' in ansible_facts.services) and (ansible_facts.services['firewalld'].state == 'running')
+
+- name: Configure UFW
+  include_tasks:
+    file: ufw.yml
+  when: ('ufw' in ansible_facts.services) and (ansible_facts.services['ufw'].state == 'running')
 
 # Cleanup to avoid interaction with other traini ng modules
 - name: Stop context containers

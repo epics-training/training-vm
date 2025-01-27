@@ -1,0 +1,40 @@
+- name: Set UFW default policies
+  ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+  become: true
+  become_method: sudo
+  become_user: root
+
+- name: Allow SSH port 22
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+  become: true
+  become_method: sudo
+  become_user: root
+
+- name: Allow EPICS ports
+  ufw:
+    rule: allow
+    port: '{{ item.port }}'
+    proto: '{{ item.proto }}'
+  loop:
+    - { port: '5064', proto: 'tcp' }
+    - { port: '5065', proto: 'tcp' }
+    - { port: '5064', proto: 'udp' }
+    - { port: '5065', proto: 'udp' }
+  become: true
+  become_method: sudo
+  become_user: root
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+  become: true
+  become_method: sudo
+  become_user: root
