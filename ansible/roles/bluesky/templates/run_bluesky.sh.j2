@@ -25,17 +25,24 @@ deploy_container() {
     docker run --privileged -it --name blueskytraining \
     --env DISPLAY=${DISPLAY} \
     --network host \
+    --env PYTHONPATH=/opt/bluesky/beamlinetools:$PYTHONPATH \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v {{ bluesky_deployment_dir_path }}/beamlinetools-1:/opt/bluesky/beamlinetools \
-    -v {{ bluesky_deployment_dir_path }}/data:/opt/bluesky/data \
-    -v {{ bluesky_deployment_dir_path }}/user_scripts:/opt/bluesky/user_scripts \
-    -v {{ bluesky_deployment_dir_path }}/history.sqlite:/opt/bluesky/ipython/profile_root/history.sqlite \
-    -v {{ bluesky_deployment_dir_path }}/images:/opt/bluesky/data/images \
+    -v ./beamlinetools-1:/opt/bluesky/beamlinetools \
+    -v ./tutorials/:/opt/bluesky/tutorials \
+    -v ./data:/opt/bluesky/data \
+    -v ./user_scripts:/opt/bluesky/user_scripts \
+    -v ./history.sqlite:/opt/bluesky/ipython/profile_root/history.sqlite \
+    -v ./images:/opt/bluesky/data/images \
     --device=/dev/dri:/dev/dri \
     {{ bluesky_docker_image }}:{{ bluesky_docker_image_tag }} \
-    sh -c "python3 -m pip install -e /opt/bluesky/beamlinetools && $1"
+    sh -c "sudo chown -R jovyan:users /opt/bluesky && \
+           cd /opt/bluesky && \
+           export PYTHONPATH=/opt/bluesky/beamlinetools:$PYTHONPATH && \
+           python3 -m pip install -e beamlinetools && \
+           python3 -m pip install -e /opt/bluesky/tutorials/bluesky-tutorial-utils && \
+           jupyter lab --ip '0.0.0.0' --no-browser --NotebookApp.token='' --NotebookApp.password='' & \
+           $1"
 }
-
 
 # Cleanup function
 cleanup() {
