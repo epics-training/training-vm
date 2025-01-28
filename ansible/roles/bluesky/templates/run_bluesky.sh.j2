@@ -38,9 +38,9 @@ deploy_container() {
     sh -c "sudo chown -R jovyan:users /opt/bluesky && \
            cd /opt/bluesky && \
            export PYTHONPATH=/opt/bluesky/beamlinetools:$PYTHONPATH && \
-           python3 -m pip install -e beamlinetools && \
-           python3 -m pip install -e /opt/bluesky/tutorials/bluesky-tutorial-utils && \
-           jupyter lab --ip '0.0.0.0' --no-browser --NotebookApp.token='' --NotebookApp.password='' & \
+           python3 -m pip install -e beamlinetools > /dev/null 2>&1 && \
+           python3 -m pip install -e /opt/bluesky/tutorials/bluesky-tutorial-utils > /dev/null 2>&1 && \
+           jupyter lab --ip '0.0.0.0' --no-browser --NotebookApp.token='' --NotebookApp.password='' > /dev/null 2>&1 & \
            $1"
 }
 
