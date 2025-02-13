@@ -1,0 +1,56 @@
+---
+- name: "{{ epics_modules[item].name }} | Prepare extras installation dir"
+  file:
+    path: "/opt/opcua"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Download the open62541 client SDK"
+  get_url:
+    url: "https://github.com/open62541/open62541/archive/refs/tags/v1.3.15.tar.gz"
+    dest: "/tmp/open62541-1.3.15.tar.gz"
+
+- name: "{{ epics_modules[item].name }} | Extract open62541 client SDK"
+  unarchive:
+    src: "/tmp/open62541-1.3.15.tar.gz"
+    dest: "/opt/opcua"
+    owner: root
+    group: root
+    remote_src: true
+    extra_opts:
+      - --transform
+      - "s|^[^/]*|open62541|" # normalize source path
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Prepare open62541 build dir"
+  file:
+    path: "/opt/opcua/open62541/build"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Build open62541 (cmake)"
+  ansible.builtin.command:
+    chdir: "/opt/opcua/open62541/build"
+    cmd: cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_ENABLE_ENCRYPTION=OPENSSL
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Build open62541 (make)"
+  ansible.builtin.command:
+    cmd: make {{ epics_modules[item].args | default('') }} install
+    chdir: "/opt/opcua/open62541/build"
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Download the demo server"
+  get_url:
+    url: "https://github.com/epics-training/opcua-support/releases/download/v1.0/server_demo.tar.gz"
+    dest: "/opt/opcua/server_demo.tar.gz"
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Download the UaExpert client"
+  get_url:
+    url: "https://github.com/epics-training/opcua-support/releases/download/v1.0/ua_expert.AppImage"
+    dest: "/opt/opcua/uaexpert.AppImage"
+    mode: "555"
+  become: true

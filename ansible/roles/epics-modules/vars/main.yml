@@ -183,13 +183,18 @@ epics_modules:
     pre_hook: adpvadriver_prep.yml
 
   opcua:
-    name: "OPC UA Support"
+    name: "OPC UA Support (open62541)"
     version: "0.10.0"
-    url: "https://github.com/epics-modules/opcua/releases/download/v0.10.0/BDIST_opcua-0.10.0_Base-7.0.8.1_rhel9.tar.gz"
-    exclude:
-      - opcuaExampleIoc
-      - HOW_TO.md
+    url: "https://github.com/epics-modules/opcua/archive/refs/tags/v0.10.0.tar.gz"
     release_var: "OPCUA"
     release_sortkey: "10"
-    post_hook: opcua_post.yml
+    required_debs:
+      - cmake
+      - libssl-dev
+      - libxml2-dev
+    required_rpms:
+      - cmake
+      - openssl-devel
+      - libxml2-devel
+    pre_hook: opcua_prep.yml
     args: -j {{ ansible_facts.processor_vcpus }}
