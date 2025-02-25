@@ -24,12 +24,6 @@
     path: "{{ bluesky_deployment_dir_path }}/history.sqlite"
     state: touch
 
-- name: "WORKAROUND: use templated run_bluesky.sh"
-  ansible.builtin.template:
-    src: run_bluesky.sh.j2
-    dest: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
-    mode: "755"
-
 - name: Ensure the script is executable
   ansible.builtin.file:
     path: "{{ bluesky_deployment_dir_path }}/run_bluesky.sh"
