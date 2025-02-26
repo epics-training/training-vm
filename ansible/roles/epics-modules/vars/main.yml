@@ -1,8 +1,8 @@
 epics_modules:
   base:
     name: "EPICS Base"
-    version: "7.0.8.1"
-    url: "https://github.com/epics-base/epics-base/releases/download/R7.0.8.1/base-7.0.8.1.tar.gz"
+    version: "7.0.9"
+    url: "https://github.com/epics-base/epics-base/releases/download/R7.0.9/base-7.0.9.tar.gz"
     release_var: "EPICS_BASE"
     release_sortkey: "99"
     add_to_path: true
