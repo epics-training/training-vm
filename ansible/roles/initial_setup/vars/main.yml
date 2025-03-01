@@ -10,18 +10,22 @@ distros:
     gnome_group: "Fedora Workstation"
     gdm_config: "/etc/gdm/custom.conf"
     installer: "dnf"
+    lib_dirname: "lib64"
   Rocky:
     gnome_group: "Workstation"
     gdm_config: "/etc/gdm/custom.conf"
     installer: "dnf"
+    lib_dirname: "lib64"
   Debian:
     gnome_group: "gnome-core"
     gdm_config: "/etc/gdm3/daemon.conf"
     installer: "apt"
+    lib_dirname: "lib"
   Ubuntu:
     gnome_group: "gnome-core"
     gdm_config: "/etc/gdm3/custom.conf"
     installer: "apt"
+    lib_dirname: "lib"
 
 distro: "{{ distros[ansible_distribution] }}"
 

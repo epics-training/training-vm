@@ -54,3 +54,9 @@
     dest: "/opt/opcua/uaexpert.AppImage"
     mode: "555"
   become: true
+
+- name: "{{ epics_modules[item].name }} | CONFIG_SITE.local"
+  ansible.builtin.template:
+    src: opcua_CONFIG_SITE.local.j2
+    dest: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/CONFIG_SITE.local"
+  become: true
