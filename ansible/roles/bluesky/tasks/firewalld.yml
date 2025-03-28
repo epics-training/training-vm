@@ -10,35 +10,30 @@
     - tcp
     - udp
   become: true
+  become_user: root
 
-- name: tcp ports facts
-  community.general.listen_ports_facts:
-
-- name: Add ports to firewall
+- name: Add TCP ports to firewall
   firewalld:
     port: "{{ item }}/tcp"
     state: enabled
     immediate: true
     permanent: true
     offline: false
-  loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
-  register: ports_added_to_firewalld
+  loop:
+    - 5064
+    - 5065
   become: true
+  become_user: root
 
-- name: print Ports Added
-  debug:
-    var: ports_added_to_firewalld
-
-- name: tcp ports facts
-  community.general.listen_ports_facts:
-
-- name: Add ports to firewall
+- name: Add UDP ports to firewall
   firewalld:
     port: "{{ item }}/udp"
     state: enabled
     immediate: true
     permanent: true
     offline: false
-  loop: "{{ ansible_facts.tcp_listen  | map(attribute='port') | sort | list }}"
-  register: ports_added_to_firewalld
+  loop:
+    - 5064
+    - 5065
   become: true
+  become_user: root
