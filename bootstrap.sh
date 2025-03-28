@@ -45,12 +45,15 @@ COLLECTION_REPO=${COLLECTION_REPO:-"https://github.com/epics-training/training-c
 # if SLUG is not set, read it from SLUGFILE or ask for it
 if [ ! "${SLUG}" ]; then
     if [ ! -e "${SLUGFILE}" ]; then
-        echo "Please specify the slug (short name) of the event that you"
-        echo "want to configure this machine for."
-        echo "See ${COLLECTION_REPO} branches for valid strings."
-        echo "Leaving it empty will use the default branch with all available submodules."
+        slugs=$(git ls-remote --heads ${COLLECTION_REPO} | awk -F / '{ print $3 }')
+        echo "Using collection repo at ${COLLECTION_REPO}"
+        echo "Please specify the slug (short name) of the event"
+        echo "that you want to configure this machine for."
+        echo "Valid strings (branches in the collection repo) are:"
+        echo $slugs
+        echo "Leaving the slug empty will use the default branch with all available submodules."
         echo "For development, you can switch submodules to use direct checkouts"
-        echo "through settings in the 'bootstrap_setup' file."
+        echo "using settings in the 'bootstrap_setup' file."
         echo "The slug will be written to ${SLUGFILE}."
         read -p "Event name []: " SLUG
         TMP_FILE=$(mktemp -q /tmp/epics.XXXXXX)
