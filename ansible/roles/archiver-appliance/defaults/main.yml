@@ -1,0 +1,4 @@
+# Defaults for archiver-appliance
+---
+archiver_appliance_home: "/opt/epics-tools/lib/archiver-appliance"
+archiver_appliance_version: "2.0.7"

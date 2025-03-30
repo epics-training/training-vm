@@ -36,4 +36,8 @@
       tags: oac_tree
       when: oac_tree
 
+    - role: archiver-appliance
+      tags: archiver_appliance
+      when: archiver_appliance
+
   environment: "{{ proxy_env }}"

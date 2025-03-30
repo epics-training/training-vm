@@ -9,6 +9,7 @@ epics_modules_build: true
 #catrust: true
 #epics_tools: true
 #oac_tree: true
+#archiver_appliance: true
 #bluesky: true
 
 # List the EPICS modules that will be built in this order (base is mandatory)

@@ -7,6 +7,7 @@ epics_modules_build: true
 catrust: false
 epics_tools: true
 oac_tree: true
+archiver_appliance: true
 docker: true
 bluesky: true
 

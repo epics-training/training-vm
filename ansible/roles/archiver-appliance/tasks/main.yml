@@ -1,0 +1,33 @@
+# Download and install the archiver appliance
+---
+- name: Ensure archiver_appliance_home directory exists
+  become: true
+  file:
+    path: "{{ archiver_appliance_home }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Check if Archiver-Appliance installation exists
+  become: true
+  stat:
+    path: "{{ archiver_appliance_home }}/engine.war"
+  register: archiver_appliance_installation
+  changed_when: false
+
+- name: Download Archiver-Appliance
+  ansible.builtin.unarchive:
+    src: "https://github.com/archiver-appliance/epicsarchiverap/releases/download/{{ archiver_appliance_version }}/default-package.zip"
+    dest: "/tmp"
+    remote_src: true
+  when: archiver_appliance_installation.stat.exists == false
+
+- name: Unpack Archiver-Appliance
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
+    dest: "{{ archiver_appliance_home }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  when: archiver_appliance_installation.stat.exists == false
