@@ -56,11 +56,14 @@ needed for that training event at the right status (commit).
 ### Create the Virtual Machine
 
 You can create the VM in the traditional manual way.
-Instructions for the rocky flavor are in `doc`.
+The `doc` folder contains
+[instructions for manually creating a Rocky flavour VM](doc/creating-vm-from-scratch.md).
 
 A much faster way is using [Vagrant](https://www.vagrantup.com/),
 which allows for a scripted, automated way to create VirtualBox VMs.
-Instructions (for all four flavours) are also in `doc`.
+In the same folder you will find
+[instructions for creating VMs using Vagrant](doc/vagrant.md)
+(covering all four flavours).
 
 ### Bootstrap the Training-VM
 
