@@ -68,6 +68,10 @@ In the same folder you will find
 ### Bootstrap the Training-VM
 
 Once your VM is up, run the script `bootstrap.sh`.
+```bash
+# from inside the VM
+eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap.sh)"
+```
 
 This will ask for the slug of the training event
 you want to install the VM for
@@ -81,7 +85,7 @@ This script can be run at any time to pull and install
 the latest changes in the setup.
 
 It updates the collection's submodules
-and calls Ansible to run through the install.
+and calls Ansible to run the installation procedure.
 
 The Ansible scripts are optimized for execution time
 (skipping parts that are already installed and unchanged),
