@@ -7,14 +7,15 @@ for the EPICS Training from scratch.
 The recipe was set up using VirtualBox 7.0.14 on Windows 10,
 but it should work similarly on other versions and host systems.
 
-VirtualBox >=7.1 now supports Apple Silicon based Macs. 
-The following instructions work, but note issues #12 and #13. 
-For an alternative option, see
-[these instructions](/doc/creating-vm-from-scratch-apple-silicon.md).
+VirtualBox >=7.1 now supports Apple Silicon based Macs.
+The recipe below has also been tested with VirtualBox 7.1.6
+and an Apple Silicon M2 MacBook using Rocky Linux 9.5.
+The instructions generally work,
+but be aware of issues #12 and #13 for the actual EPICS training setup.
 
 ## Create the VM
 
-Create a new virtual machine, using an Rocky Linux 9.4 iso image.
+Create a new virtual machine, using an Rocky Linux (>= 9.4) iso image.
 (Both a local install from the 10GB DVD iso
 or a network install from the 900MB boot iso work.)
 Here are the settings we used.
@@ -31,7 +32,7 @@ and select "Make this user administrator" (which enables sudo).
 We did not set a password, which is fine for a personal VM
 that you run on your own computer/laptop.
 
-Consider saving the state in a snapshot, *"9.4 fresh"*.
+Consider saving the state in a snapshot, *"rocky fresh"*.
 
 ## Update the system
 
@@ -45,7 +46,7 @@ Enable EPEL and update the system.
 # dnf install -y epel-release && dnf update -y --refresh
 ```
 
-Reboot (important!).
+**Reboot (important!).**
 
 Note: If you're working with an older snapshot
 and this command produces unexpected weird errors
@@ -68,23 +69,39 @@ Install the prerequisites for building the VBox Guest Additions
 # dnf install -y dkms kernel-devel kernel-headers
 ```
 
-Reboot.
+**Reboot.**
 
-It is useful to make another snapshot at this point, *"9.4 updated"*.
+It is useful to make another snapshot at this point, *"rocky updated"*.
 
 ## Install the VBox Guest Additions
 
 "Insert Guest Additions CD" in the VBox GUI and authorize autostart.
 
-Reboot.
+**Reboot.**
+
+In the `Devices` menu of VBox GUI you can now switch on "Shared Clipboards",
+and setup "Shared Folders".
+
+If you encounter `Permission denied` issues with mounted folders,
+you can try running (might require relog or reboot):
+
+```
+sudo usermod -aG vboxsf $(whoami)
+```
 
 Note: If you're experiencing unexpected graphics issues
 (e.g., diagonal patterns that change with mouse actions),
 try enabling or disabling 3D acceleration in the VM settings.
 
-Create a snapshot *"9.4 with Guest Additions <VBox version>"*.
+Create a snapshot *"rocky with Guest Additions <VBox version>"*.
 
 ## Get and run the bootstrap script
+
+Install git:
+
+```
+sudo dnf install -y git
+```
 
 The remaining steps are done as the regular user.
 
@@ -110,6 +127,8 @@ of the sample file `vm-setup/ansible/group_vars/local.yml.sample`.
 Edit `local.yml` to configure your training VM.
 
 ## Run ansible to install the system
+
+*For Apple Silicon users: Be aware of issues #12 and #13 before running ansible*
 
 ```
 $ vm-setup/update.sh
