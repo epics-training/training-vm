@@ -184,8 +184,8 @@ epics_modules:
 
   opcua:
     name: "OPC UA Support (open62541)"
-    version: "0.10.0"
-    url: "https://github.com/epics-modules/opcua/archive/refs/tags/v0.10.0.tar.gz"
+    version: "0.11.0"
+    url: "https://github.com/epics-modules/opcua/archive/refs/tags/v0.11.0.tar.gz"
     release_var: "OPCUA"
     release_sortkey: "10"
     required_debs:
