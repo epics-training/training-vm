@@ -42,6 +42,21 @@ COLLECTION=${COLLECTION:-"training"}
 SLUGFILE=${SLUGFILE:-"/etc/epics-training"}
 COLLECTION_REPO=${COLLECTION_REPO:-"https://github.com/epics-training/training-collection"}
 
+# Install prerequisites: Git, Ansible
+if ! command -v git >/dev/null; then
+    packages="git"
+fi
+if ! command -v ansible >/dev/null; then
+    packages="${packages} ansible"
+fi
+if [ "${packages}" ]; then
+    echo "Installing prerequisites: ${packages}..."
+    sudo dnf update
+    sudo dnf install -y ${packages}
+else
+    echo "All prerequisites are installed."
+fi
+
 # if SLUG is not set, read it from SLUGFILE or ask for it
 if [ ! "${SLUG}" ]; then
     if [ ! -e "${SLUGFILE}" ]; then
@@ -63,21 +78,6 @@ if [ ! "${SLUG}" ]; then
     else
         SLUG=$(<${SLUGFILE})
     fi
-fi
-
-# Install prerequisites: Git, Ansible
-if ! command -v git >/dev/null; then
-    packages="git"
-fi
-if ! command -v ansible >/dev/null; then
-    packages="${packages} ansible"
-fi
-if [ "${packages}" ]; then
-    echo "Installing prerequisites: ${packages}..."
-    sudo dnf update
-    sudo dnf install -y ${packages}
-else
-    echo "All prerequisites are installed."
 fi
 
 # Clone the collection
