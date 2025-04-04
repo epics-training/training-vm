@@ -1,4 +1,4 @@
-# Vagrant VM Creation
+# Create the VM Using Vagrant
 
 Vagrant: making VMs as much fun as containers!
 
@@ -61,7 +61,7 @@ In case of kernel updates and a mismatch of VirtualBox versions
 between your host and the Vagrant base box image,
 the `vagrant vbguest` step fails with not being able
 to download the correct version of the kernel development package.
-The error messages contain e.g.: 
+The error messages contain e.g.:
 
 ```
 Package kernel-devel-5.14.0-427.42.1.el9_4.x86_64 is already installed.
@@ -86,64 +86,18 @@ and shrink the disk image (see below).
 
 ## Adding More Features
 
-The initial installation is a minimal VM. 
-You can add more features by running the Ansible playbook again
+The initial installation is a minimal VM.
+
+The next step in creating your Training-VM instance issue
+is to [bootstrap and update the VM](bootstrap-update-vm.md).
+
+Alternatively,
+you can add more features by running the Ansible playbook again
 after creating a custom local.yml.
 
 - copy the file `ansible/group_vars/everything.yml` to `ansible/group_vars/local.yml`
 - edit `ansible/group_vars/local.yml` to enable the features you want
 - run `vagrant provision rocky`
-
-Alternatively, you can do this from inside the VM:
-
-```bash
-# from inside the VM
-eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap.sh)"
-```
-
-The above step clones the training-vm repository
-and additional training material into the VM.
-
-Now change into the `training` directory.
-
-The file `local.yml` has been created as a copy
-of the sample file `vm-setup/ansible/group_vars/local.yml.sample`.
-
-Edit `local.yml` to configure your training VM,
-then re-run the Ansible playbook:
-
-```
-$ vm-setup/update.sh
-```
-
-## Extended Configuration Options
-
-To support development,
-the behaviour of the `bootstrap.sh` script can be adapted
-using a bootstrap setup file that is sourced by the script.
-
-Create a file using the default name `~/bootstrap_setup`
-that contains settings in bash syntax.
-
-- `COLLECTION`: name of the directory for clone the collection into
-  (default `training`)
-- `COLLECTION_REPO`: URL of the repo to clone for the collection
-  (default: `https://github.com/epics-training/training-collection`)
-- `SLUGFILE`: file to store the slug (branch) name
-  (default: `/etc/epics-training`)
-
-You can redirect any of the submodules
-to be directly cloned from a different location.
-E.g., to clone the `vm-setup` submodule
-from johndoe's fork of the `training-vm` repo (`test-feature` branch):
-```
-REPO[vm-setup]=https://github.com/johndoe/training-vm
-BRANCH[vm-setup]=test-feature
-```
-
-The `bootstrap.sh` script
-can take the name of a bootstrap setup file as parameter.
-This allows to have different setups in parallel collection directories.
 
 ## Troubleshooting
 
@@ -167,8 +121,3 @@ SSH into the rocky VM:
 ```
 vagrant ssh rocky
 ```
-
-## Shrinking the VM into a Small Appliance File
-
-TODO
-This will describe how to zero unused blocks and make a smaller appliance file.
