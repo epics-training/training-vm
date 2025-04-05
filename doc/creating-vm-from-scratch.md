@@ -95,45 +95,9 @@ try enabling or disabling 3D acceleration in the VM settings.
 
 Create a snapshot *"rocky with Guest Additions <VBox version>"*.
 
-## Get and run the bootstrap script
+## Add the Training Specific Content: Bootstrap and Update
 
-Install git:
+The initial installation is a minimal VM.
 
-```
-sudo dnf install -y git
-```
-
-The remaining steps are done as the regular user.
-
-Copy the script `bootstrap.sh` onto the VM and run it.
-(Preferably from your home directory.)
-
-E.g. (in one audacious step)
-```
-$ eval "$(curl -L https://raw.githubusercontent.com/epics-training/training-vm/main/bootstrap.sh)"
-```
-
-This will first make sure the required software is installed (git, ansible).
-Then it will clone this repository with the ansible configuration
-into a directory called `training`.
-
-## Create your local configuration
-
-Change into the `training` directory.
-
-The file `local.yml` has been created as a copy
-of the sample file `vm-setup/ansible/group_vars/local.yml.sample`.
-
-Edit `local.yml` to configure your training VM.
-
-## Run ansible to install the system
-
-*For Apple Silicon users: Be aware of issues #12 and #13 before running ansible*
-
-```
-$ vm-setup/update.sh
-```
-will install or update the training VM according to your configuration.
-
-The compiling jobs will take their time.
-Subsequent runs of the script will not recompile modules unless necessary.
+The next step in creating your Training-VM instance issue
+is to [bootstrap and update the VM](bootstrap-update-vm.md).

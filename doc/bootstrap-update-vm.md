@@ -37,6 +37,8 @@ to pull and install the latest changes in the setup.
 It updates the collection's submodules
 and calls Ansible to run the installation procedure.
 
+*Apple Silicon users: Be aware of issues #12 and #13 before running ansible*
+
 ```bash
 vm-setup/update.sh
 ```

@@ -84,7 +84,7 @@ Before publishing an OVA file,
 adjust CPUs to a more friendly value for the end user's host machine
 and shrink the disk image (see below).
 
-## Adding More Features
+## Add the Training Specific Content: Bootstrap and Update
 
 The initial installation is a minimal VM.
 
