@@ -2,7 +2,7 @@
 
 This step installs and updates all training event specific content
 on your Training-VM. This assumes you have set up your VM
-following the [instructions](instructions).
+following the [instructions](instructions.md).
 
 ## Bootstrap - Run Once on a New VM
 
