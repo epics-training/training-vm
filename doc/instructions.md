@@ -10,18 +10,20 @@ Not all modules are working on all flavours.
 
 Not all modules are working on Mac using Apple Silicon processors.
 
-## Create the Virtual Machine
+## 1. Create the Virtual Machine
 
 The first step is to create a VM in the desired flavour.
 
 There are two ways to do that:
 
-1. You can create the VM step-by-step from scratch
+-  You can create the VM step-by-step from scratch
    by following the
    [instructions for manually creating a Rocky VM](creating-vm-from-scratch.md).
    This is the traditional and slow option.
 
-2. Vagrant can create VirtualBox VMs in a scripted faster fashion,
+or
+
+-  Vagrant can create VirtualBox VMs in a scripted faster fashion,
    based on available base box images.
    Follow the
    [instructions for creating VMs using Vagrant](creating-vm-using-vagrant.md)
@@ -34,7 +36,7 @@ If you have a received a link to an "OVA" VM appliance for the empty VM,
 you can download and install that appliance
 instead of creating the VM in one of the ways described above.
 
-## Bootstrap and Update the Training-VM
+## 2. Bootstrap and Update the Training-VM
 
 Once your VM is up,
 you need to install the content
@@ -50,7 +52,7 @@ that corresponds to a branch in the collection repo.
 This setup keeps the versions/repositories for different events
 separate and available.
 It also allows to get last-minute updates for the event
-by updating the collection an re-running the Ansible scripts.
+by updating the collection and re-running the Ansible scripts.
 
 The details are shown in the
 [instructions for bootstrapping and updating](bootstrap-update-vm.md).

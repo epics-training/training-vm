@@ -39,11 +39,11 @@ There are two steps to create a Training-VM instance:
 1. Create the VirtualBox VM
    ([manually](doc/creating-vm-from-scratch.md) or
    [using Vagrant](doc/creating-vm-using-vagrant))
-2. [Bootstrap/Update](doc/bootstrap-update-vm.md) the Training-VM
+2. [Bootstrap and Update](doc/bootstrap-update-vm.md) the Training-VM
    to install the training-specific software and content
 
-Follow the [instructions](doc/instructions.md)
-to learn how to set up your VM instance.
+The [instructions](doc/instructions.md)
+show in more detail how to set up your VM instance.
 If you already have set up your VM,
 you can directly jump to the
 [bootstrap and update section](doc/bootstrap-update-vm).
