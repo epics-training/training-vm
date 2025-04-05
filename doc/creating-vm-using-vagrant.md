@@ -15,10 +15,8 @@ Advantages:
 ## Pre-Requisites
 
 Set up the required tools on your host machine:
-1. Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-   - WARNING: VirtualBox 7.1 is not compatible with Vagrant 2.4.1 or 2.4.2,
-     use VirtualBox 7.0 until Vagrant 2.4.3 is released.
-2. Install [Vagrant](https://www.vagrantup.com/downloads.html)
+1. Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (>= 7.1)
+2. Install [Vagrant](https://www.vagrantup.com/downloads.html) (>= 2.4.3)
 3. Install [git](https://git-scm.com/downloads)
 
 ## Initial Installation
