@@ -23,6 +23,22 @@ a "fully installed" VM can also be distributed,
 keeping the possibility to update the content at any time
 with last-minute changes.
 
+## Goals
+
+We hope to achieve two main goals:
+
+1. Provide a portable platform for hands-on training events
+   that is shared, modular, extensible
+   and adapted to the workflow of preparing a training event.
+
+2. Use the Training-VM to show a (scripted) good-practice way
+   of setting up an EPICS system: download released sources,
+   compile and set up from scratch, using standard methods and
+   structures.
+
+A Training-VM instance should not only be a fully functional minimal system,
+but also - in the setup scripts - contain the instructions how to get there.
+
 ## Technology
 
 We are using [VirtualBox](https://www.oracle.com/virtualization/virtualbox/)
