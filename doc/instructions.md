@@ -16,7 +16,7 @@ The first step is to create a VM in the desired flavour.
 
 There are two ways to do that:
 
-1. You can create the VM in the traditional manual way
+1. You can create the VM step-by-step from scratch
    by following the
    [instructions for manually creating a Rocky VM](creating-vm-from-scratch.md).
    This is the traditional and slow option.

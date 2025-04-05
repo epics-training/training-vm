@@ -1,7 +1,8 @@
 # Bootstrap and Update the Training-VM
 
 This step installs and updates all training event specific content
-on your Training-VM.
+on your Training-VM. This assumes you have set up your VM
+following the [instructions](instructions).
 
 ## Bootstrap - Run Once on a New VM
 
@@ -60,23 +61,35 @@ using a bootstrap setup file that is sourced by the script.
 Create a file using the default name `~/bootstrap_setup`
 that contains settings in bash syntax.
 
-- `COLLECTION`: name of the directory for clone the collection into
+- `COLLECTION`: name of the local directory
+   to clone the training collection into
   (default `training`)
-- `COLLECTION_REPO`: URL of the repo to clone for the collection
+- `COLLECTION_REPO`: URL of the repo to clone the collection from
   (default: `https://github.com/epics-training/training-collection`)
 - `SLUGFILE`: file to store the slug (branch) name
   (default: `/etc/epics-training`)
 
-You can redirect any of the submodules
-to be directly cloned from a different location.
-E.g., to clone the `vm-setup` submodule
-from johndoe's fork of the `training-vm` repo (`test-feature` branch):
+The `COLLECTION_REPO` setting can be used
+to point to a fork of the base setup.
+This may be useful for developing and testing changes
+to the `bootstrap.sh` or `update.sh` scripts.
+
+If you want to develop or test a different version
+of a specific training submodule,
+you can do that using the `REPO[<submodule>]=<url>` syntax.
+This example directly clones the `vm-setup` submodule
+from johndoe's fork of the `training-vm` repo (`test-feature` branch)
+instead of using the git submodule specified in the collection:
+ranch):
 ```
 REPO[vm-setup]=https://github.com/johndoe/training-vm
 BRANCH[vm-setup]=test-feature
 ```
+The list of available submodules shows up
+at the top level of the collection repo
+(on your event-specific branch defined by the slug).
 
 The `bootstrap.sh` script
 can take the name of a bootstrap setup file as parameter.
-This allows to actively maintain different setups
+This allows to actively maintain different independent setups
 in parallel collection directories.
