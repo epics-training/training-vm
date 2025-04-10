@@ -32,4 +32,8 @@
       tags: epics_tools
       when: epics_tools
 
+    - role: oac-tree
+      tags: oac_tree
+      when: oac_tree
+
   environment: "{{ proxy_env }}"

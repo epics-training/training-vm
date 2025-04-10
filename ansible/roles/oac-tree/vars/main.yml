@@ -1,0 +1,94 @@
+---
+# variables for oac-tree
+
+oactree_install_path: "/opt/oac-tree"
+
+oactree_modules_list:
+  - sup_dto
+  - sup_utils
+  - oac_tree
+  - oac_tree_control
+  - sup_di
+  - sup_protocol
+  - sup_epics
+  - sup_mathexpr
+  - oac_tree_epics
+  - oac_tree_mathexpr
+  - oac_tree_server
+# GUI
+  - sup_gui_extra
+  - sup_mvvm
+  - sup_gui_core
+  - oac_tree_gui
+
+required_debs:
+  - unzip
+  - cmake
+  - libgtest-dev
+  - libgmock-dev
+  - libxml2-dev
+  - qt6-base-dev
+  - qt6-svg-dev
+  - qt6-charts-dev
+  - qt6-tools-dev
+  - adwaita-qt6
+
+required_rpms:
+  - unzip
+  - cmake
+  - gtest-devel
+  - gmock-devel
+  - libxml2-devel
+  - qt6-qtbase-devel
+  - qt6-qtsvg-devel
+  - qt6-qtcharts-devel
+  - qt6-qttools-devel
+  - adwaita-qt6
+
+oactree_modules:
+  oac_tree:
+    name: "core library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree.zip"
+  sup_dto:
+    name: "sup-dto library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-dto.zip"
+  sup_utils:
+    name: "sup-utils library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-utils.zip"
+  oac_tree_control:
+    name: "control plugin"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree-control.zip"
+  sup_di:
+    name: "sup-di library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-di.zip"
+  sup_protocol:
+    name: "sup-protocol library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-protocol.zip"
+  sup_epics:
+    name: "sup-epics library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-epics.zip"
+  sup_mathexpr:
+    name: "sup-mathexpr library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-mathexpr.zip"
+  oac_tree_epics:
+    name: "EPICS plugin"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree-epics.zip"
+  oac_tree_mathexpr:
+    name: "Mathexpr plugin"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree-mathexpr.zip"
+  oac_tree_server:
+    name: "Server plugin"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree-server.zip"
+# GUI
+  sup_gui_extra:
+    name: "sup-gui-extra library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-gui-extra.zip"
+  sup_mvvm:
+    name: "sup-mvvm library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-mvvm.zip"
+  sup_gui_core:
+    name: "sup-gui-core library"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/sup-gui-core.zip"
+  oac_tree_gui:
+    name: "GUI application"
+    url: "https://github.com/epics-training/oac-tree-zips/raw/refs/heads/main/oac-tree-gui.zip"

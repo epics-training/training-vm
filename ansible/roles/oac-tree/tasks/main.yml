@@ -1,0 +1,59 @@
+---
+# oac-tree role
+
+- name: "Create directories"
+  ansible.builtin.file:
+    path: "{{ oactree_install_path }}/{{ item }}"
+    state: directory
+  loop:
+    - .flag
+    - oac-tree.sh.d
+    - lib/oac-tree/plugins
+    - src
+  become: true
+
+- name: "Install required DEB dependencies"
+  ansible.builtin.apt:
+    name: "{{ required_debs }}"
+    state: present
+  become: true
+  when: is_debian
+
+- name: "Configure Raven repository"
+  ansible.builtin.dnf:
+    name: "https://pkgs.sysadmins.ws/el9/base/x86_64/raven-release.el9.noarch.rpm"
+    disable_gpg_check: true
+    state: present
+  become: true
+  when: is_redhat
+
+- name: "Install required RPM dependencies"
+  ansible.builtin.dnf:
+    name: "{{ required_rpms }}"
+    enablerepo:
+      - epel
+    state: present
+  become: true
+  when: is_redhat
+
+- name: "Clear global rebuild flag"
+  ansible.builtin.file:
+    path: "{{ oactree_install_path }}/.flag/REBUILD"
+    state: absent
+  become: true
+
+- name: "Add plugin location to linker configuration"
+  ansible.builtin.lineinfile:
+    path: /etc/ld.so.conf.d/oac-tree.conf
+    create: true
+    line: "{{ item }}"
+  become: true
+  loop:
+    - "/usr/local/lib64"
+    - "{{ oactree_install_path }}/lib/oac-tree/plugins"
+    - "/opt/epics/base-7.0.9/lib/linux-{{ ansible_facts['architecture'] }}"
+    - "/opt/epics/pvxs-1.3.1/lib/linux-{{ ansible_facts['architecture'] }}"
+
+- name: "Build oac-tree modules and plugins"
+  include_tasks: build_module.yml
+  loop: "{{ oactree_modules_list }}"

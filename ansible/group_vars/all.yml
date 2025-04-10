@@ -7,6 +7,7 @@ docker: true # for rootful this needs to happen before first reboot
 epics_modules_build: false
 catrust: false
 epics_tools: false
+oac_tree: false
 bluesky: false
 
 # Default configuration for the EPICS modules to build
