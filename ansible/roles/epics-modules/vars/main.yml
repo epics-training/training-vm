@@ -19,6 +19,7 @@ epics_modules:
       - perl-devel
       - perl-Test-Simple
       - perl-Test-Harness
+      - perl-FindBin
     pre_hook: base_prep.yml
     args: -j {{ ansible_facts.processor_vcpus }}
 
