@@ -49,18 +49,41 @@
     state: directory
   become: true
 
+- name: Check for Vagrant-injected certificate
+  ansible.builtin.stat:
+    path: "{{ ca_temp_path }}"
+  register: temp_cert
+
 - name: Download ROOT CA Certificate
   ansible.builtin.get_url:
     url: "{{ root_ca_url }}"
-    dest: "{{ ca_trust_der_path }}"
+    dest: "{{ ca_temp_path }}"
     validate_certs: false
   become: true
   register: get_url_result
+  when: root_ca_url is defined
+
+- name: Check type of downloaded ROOT CA certificate
+  ansible.builtin.command: grep -q -- "-----BEGIN CERTIFICATE-----" "{{ ca_temp_path}}"
+  register: check_pem
+  failed_when: check_pem.rc != 0 and check_pem.rc != 1
+  check_mode: false
+  changed_when: false
+  when: temp_cert.stat.exists or get_url_result.changed
 
 - name: Convert DER certificate to PEM
-  command: openssl x509 -inform DER -in '{{ ca_trust_folder }}/corporate_root_ca.der.crt' -out '{{ ca_trust_pem_path }}' -outform PEM
+  ansible.builtin.shell: |
+    openssl x509 -inform DER -in {{ ca_temp_path }} -out {{ ca_trust_pem_path }} -outform PEM
+    cp -f {{ ca_temp_path }} {{ ca_trust_der_path }}
   become: true
-  when: get_url_result.changed
+  when: check_pem.rc == 1
+
+- name: Convert PEM certificate to DER
+  ansible.builtin.shell: |
+    openssl x509 -inform PEM -in {{ ca_temp_path }} -out {{ ca_trust_der_path }} -outform DER
+    cp -f {{ ca_temp_path }} {{ ca_trust_pem_path }}
+  become: true
+  when: check_pem.rc == 0
 
 - name: Copy PEM certificate to system ca trust directory
   ansible.builtin.copy:

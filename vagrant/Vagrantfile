@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
         vb.customize ["storageattach", :id, "--storagectl", "IDE Controller", "--device", "0", "--port", "0", "--medium", "emptydrive"]
       end
 
-      # Install corporate root CA certificate (PEM format)
+      # Install corporate root CA certificate (PEM or DER format)
       # if it exists here as 'corporate_root_ca.crt'
       if File.exist?("corporate_root_ca.crt")
         this.vm.provision "file", source: "corporate_root_ca.crt", destination: "corporate_root_ca.crt"

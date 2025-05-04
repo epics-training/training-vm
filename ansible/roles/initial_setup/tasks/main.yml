@@ -35,16 +35,18 @@
       - vim
       - curl
       - sudo
+      - openssl
       - "{{ distro.gnome_group }}"
   become: true
   when: is_debian
 
-- name: RPM Install Development Tools
+- name: RPM Install Dev Tools and Gnome
   dnf:
     name:
       - "@Development Tools"
       - vim
       - sudo
+      - openssl
       - "@{{ distro.gnome_group }}"
     allowerasing: true # fix version conflicts for curl and coreutils on Rocky
   become: true

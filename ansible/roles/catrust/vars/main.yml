@@ -1,0 +1,10 @@
+# [catrust] Use self-signed CA certificate to work through corporate firewall
+# with deep packet inspection (e.g., f5)
+
+# In local.yml, set the URL for the certificate (PEM or DER)
+#root_ca_url: "http://pki.iter.org/CertEnroll/io-ws-pkiroot_ITER%20Organization%20Root%20CA.crt"
+
+ca_trust_folder: "/var/lib/training-vm/ca_trust"
+ca_temp_path: "/tmp/corporate_root_ca.crt"
+ca_trust_der_path: "{{ ca_trust_folder }}/corporate_root_ca.der.crt"
+ca_trust_pem_path: "{{ ca_trust_folder }}/corporate_root_ca.pem.crt"
