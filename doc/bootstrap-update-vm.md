@@ -31,6 +31,12 @@ as a copy of the sample file
 Edit `local.yml` to configure your training VM,
 then update your Training-VM.
 
+### Adding a CA Certificate
+
+If your institute firewall requires an additional CA certificate,
+enable the `catrust` role
+and set the URL for downloading the certificate (in PEM or DER format).
+
 ## Update - Run When Necessary to Update the Setup
 
 The `update.sh` script can be run at any time

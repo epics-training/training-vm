@@ -81,6 +81,13 @@ You can login with username `epics-dev`, no password.
 Before publishing an OVA file,
 adjust CPUs to a more friendly value for the end user's host machine.
 
+### Adding a CA Certificate
+
+If your institute firewall requires an additional CA certificate,
+copy the required certificate (in PEM format)
+into the `vagrant` directory (next to the `Vagrantfile`)
+and enable the `catrust` role (in the bootstrap step).
+
 ## Add the Training Specific Content: Bootstrap and Update
 
 The initial installation is a minimal VM.
