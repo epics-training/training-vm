@@ -25,7 +25,7 @@ debian_defaults:
 
 distros:
   Rocky: "{{ redhat_defaults }}"
-  Fedora: "{{ redhat_defaults | ansible.builtin.combine({'gnome_group':'Fedora Workstation'}) }}"
+  Fedora: "{{ redhat_defaults | ansible.builtin.combine({'gnome_group':'gnome-desktop'}) }}"
   Debian: "{{ debian_defaults }}"
   Ubuntu: "{{ debian_defaults | ansible.builtin.combine({'gdm_config':'/etc/gdm3/custom.conf'}) }}"
 

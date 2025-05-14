@@ -7,7 +7,7 @@
 
 @distros = [
   {
-    box: "fedora/40-cloud-base",
+    box: "fedora/41-cloud-base",
     installer: "dnf",
     name: "fedora"
   },
