@@ -1,0 +1,30 @@
+---
+- name: "{{ epics_modules[item].name }} | CONFIG_SITE.local"
+  ansible.builtin.template:
+    src: stream_CONFIG_SITE.local.j2
+    dest: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/configure/CONFIG_SITE.local"
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Download PCRE sources"
+  ansible.builtin.unarchive:
+    src: "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2/download"
+    dest: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/"
+    owner: root
+    group: root
+    remote_src: true
+    extra_opts:
+      - --transform
+      - "s|^[^/]*|pcre|" # normalize source path
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Configure PCRE"
+  ansible.builtin.command:
+    cmd: ./configure
+    chdir: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/pcre"
+  become: true
+
+- name: "{{ epics_modules[item].name }} | Build PCRE (this may take a while)"
+  ansible.builtin.command:
+    cmd: make install
+    chdir: "{{ epics_install_path }}/{{ item }}-{{ epics_modules[item].version }}/pcre"
+  become: true

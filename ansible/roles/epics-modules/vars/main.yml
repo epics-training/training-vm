@@ -199,3 +199,12 @@ epics_modules:
       - libxml2-devel
     pre_hook: opcua_prep.yml
     args: -j {{ ansible_facts.processor_vcpus }}
+
+  stream:
+    name: "StreamDevice"
+    version: "2.8.26"
+    url: "https://github.com/paulscherrerinstitute/StreamDevice/archive/refs/tags/2.8.26.tar.gz"
+    release_var: "STREAM"
+    release_sortkey: "10"
+    pre_hook: stream_prep.yml
+    args: -j {{ ansible_facts.processor_vcpus }}

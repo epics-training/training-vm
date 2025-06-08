@@ -29,6 +29,8 @@ epics_modules_list:
 #  - adcore
 #  - adsimdetector
 #  - adpvadriver
+# StreamDevice (needs sscan, calc)
+#  - stream
 
 # Set proxies, if needed
 #proxy_env:
