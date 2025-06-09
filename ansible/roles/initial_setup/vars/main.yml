@@ -7,6 +7,7 @@ last_partition_no: "{{ ansible_devices[root_disk].partitions.keys() | list | len
 
 redhat_defaults:
   gnome_group: "Workstation"
+  devel_group: "Development Tools"
   gdm_config: "/etc/gdm/custom.conf"
   installer: "dnf"
   openssl_config: "/etc/crypto-policies/back-ends/opensslcnf.config"
@@ -25,7 +26,7 @@ debian_defaults:
 
 distros:
   Rocky: "{{ redhat_defaults }}"
-  Fedora: "{{ redhat_defaults | ansible.builtin.combine({'gnome_group':'Fedora Workstation'}) }}"
+  Fedora: "{{ redhat_defaults | ansible.builtin.combine({'gnome_group':'gnome-desktop', 'devel_group':'development-tools'}) }}"
   Debian: "{{ debian_defaults }}"
   Ubuntu: "{{ debian_defaults | ansible.builtin.combine({'gdm_config':'/etc/gdm3/custom.conf'}) }}"
 

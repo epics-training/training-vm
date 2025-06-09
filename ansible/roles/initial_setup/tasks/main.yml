@@ -70,7 +70,7 @@
     - name: Install Dev Tools and Gnome
       ansible.builtin.dnf:
         name:
-          - "@Development Tools"
+          - "@{{ distro.devel_group }}"
           - vim
           - sudo
           - openssl
