@@ -43,7 +43,7 @@
 - name: RPM Install Dev Tools and Gnome
   dnf:
     name:
-      - "@Development Tools"
+      - "@{{ distro.devel_group }}"
       - vim
       - sudo
       - openssl

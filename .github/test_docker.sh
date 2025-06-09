@@ -34,7 +34,7 @@ case "$1" in
     "debian")
         image="debian:bookworm"; installer=apt ;;
     "fedora")
-        image="fedora:40"; installer=dnf ;;
+        image="fedora:41"; installer=dnf ;;
 
     *) echo "Usage: $0 {ubuntu|rocky|debian|fedora}"; exit 1;;
 esac
