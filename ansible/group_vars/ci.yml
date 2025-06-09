@@ -35,6 +35,7 @@ epics_modules_list:
   - "{{ 'adsimdetector' if ansible_distribution in ['Ubuntu', 'Rocky'] else 'skip' }}"
   # only build if we built pvapy
   - "{{ 'adpvadriver' if ansible_distribution == 'Rocky' else 'skip' }}"
+  - stream
 
 # tell ansible that we are in a container instead of VM
 in_container: true
