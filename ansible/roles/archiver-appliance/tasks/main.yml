@@ -1,5 +1,10 @@
-# Download and install the archiver appliance
 ---
+# Download and install the archiver appliance
+
+- name: Install and configure MariaDB
+  ansible.builtin.include_tasks:
+    file: install_mariadb.yml
+
 - name: Ensure archiver_appliance_home directory exists
   become: true
   file:

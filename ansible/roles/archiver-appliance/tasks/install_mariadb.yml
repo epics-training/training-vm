@@ -1,0 +1,39 @@
+---
+# Install MariaDB; configure for Archiver Appliance
+- name: Install required DEB dependencies
+  become: true
+  ansible.builtin.apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+  when: is_debian
+
+- name: Install required RPM dependencies
+  become: true
+  ansible.builtin.dnf:
+    name: mariadb-server
+    state: present
+  when: is_redhat
+
+- name: Manage MariaDB service
+  become: true
+  ansible.builtin.systemd_service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: MariaDB - create Archiver-Appliance database
+  become: true
+  community.mysql.mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: archappl
+
+- name: MariaDB - create Archiver-Appliance user
+  become: true
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: archappl
+    password: archappl
+    priv: 'archappl.*:ALL'
+    state: present
