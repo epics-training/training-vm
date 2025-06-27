@@ -1,4 +1,17 @@
-# Defaults for archiver-appliance
 ---
-archiver_appliance_home: "/opt/epics-tools/lib/archiver-appliance"
+# Defaults for tomcat and archiver-appliance
+
+tomcat_home: "/opt/epics-tools/lib/tomcat"
+tomcat_version: "9.0.79"
+tomcat_user: tomcat
+tomcat_group: tomcat
+
 archiver_appliance_version: "2.0.7"
+
+archiver_appliance_id: "appliance0"
+archiver_appliance_storage: "{{ tomcat_home }}/storage"
+
+# JAVA options
+archiver_appliance_java_maxmetaspace: "256M"
+archiver_appliance_java_initial_heapsize: "512M"
+archiver_appliance_java_max_heapsize: "512M"

@@ -1,0 +1,100 @@
+# {{ ansible_managed }}
+# Environment variables loaded by CATALINA_HOME/bin/catalina.sh
+
+#   CATALINA_OUT    (Optional) Full path to a file where stdout and stderr
+#                   will be redirected.
+#                   Default is $CATALINA_BASE/logs/catalina.out
+#
+#   CATALINA_OPTS   (Optional) Java runtime options used when the "start",
+#                   "run" or "debug" command is executed.
+#                   Include here and not in JAVA_OPTS all options, that should
+#                   only be used by Tomcat itself, not by the stop process,
+#                   the version command etc.
+#                   Examples are heap size, GC logging, JMX ports etc.
+CATALINA_OPTS="-XX:MaxMetaspaceSize={{ archiver_appliance_java_maxmetaspace }} -XX:+UseG1GC -Xms{{ archiver_appliance_java_initial_heapsize }} -Xmx{{ archiver_appliance_java_max_heapsize }} -ea"
+
+#   CATALINA_TMPDIR (Optional) Directory path location of temporary directory
+#                   the JVM should use (java.io.tmpdir).  Defaults to
+#                   $CATALINA_BASE/temp.
+
+#   JAVA_HOME       Must point at your Java Development Kit installation.
+#                   Required to run the with the "debug" argument.
+JAVA_HOME="{{ java_home }}"
+
+#   JRE_HOME        Must point at your Java Runtime installation.
+#                   Defaults to JAVA_HOME if empty. If JRE_HOME and JAVA_HOME
+#                   are both set, JRE_HOME is used.
+#
+#   JAVA_OPTS       (Optional) Java runtime options used when any command
+#                   is executed.
+#                   Include here and not in CATALINA_OPTS all options, that
+#                   should be used by Tomcat and also by the stop process,
+#                   the version command etc.
+#                   Most options should go into CATALINA_OPTS.
+#
+#   JAVA_ENDORSED_DIRS (Optional) Lists of of colon separated directories
+#                   containing some jars in order to allow replacement of APIs
+#                   created outside of the JCP (i.e. DOM and SAX from W3C).
+#                   It can also be used to update the XML parser implementation.
+#                   Note that Java 9 no longer supports this feature.
+#                   Defaults to $CATALINA_HOME/endorsed.
+#
+#   JPDA_TRANSPORT  (Optional) JPDA transport used when the "jpda start"
+#                   command is executed. The default is "dt_socket".
+#
+#   JPDA_ADDRESS    (Optional) Java runtime options used when the "jpda start"
+#                   command is executed. The default is 8000.
+#
+#   JPDA_SUSPEND    (Optional) Java runtime options used when the "jpda start"
+#                   command is executed. Specifies whether JVM should suspend
+#                   execution immediately after startup. Default is "n".
+#
+#   JPDA_OPTS       (Optional) Java runtime options used when the "jpda start"
+#                   command is executed. If used, JPDA_TRANSPORT, JPDA_ADDRESS,
+#                   and JPDA_SUSPEND are ignored. Thus, all required jpda
+#                   options MUST be specified. The default is:
+#
+#                   -agentlib:jdwp=transport=$JPDA_TRANSPORT,
+#                       address=$JPDA_ADDRESS,server=y,suspend=$JPDA_SUSPEND
+#
+#   JSSE_OPTS       (Optional) Java runtime options used to control the TLS
+#                   implementation when JSSE is used. Default is:
+#                   "-Djdk.tls.ephemeralDHKeySize=2048"
+#
+#   CATALINA_PID    (Optional) Path of the file which should contains the pid
+#                   of the catalina startup java process, when start (fork) is
+#                   used
+CATALINA_PID=$CATALINA_BASE/temp/catalina.pid
+
+#   LOGGING_CONFIG  (Optional) Override Tomcat's logging config file
+#                   Example (all one line)
+#                   LOGGING_CONFIG="-Djava.util.logging.config.file=$CATALINA_BASE/conf/logging.properties"
+#
+#   LOGGING_MANAGER (Optional) Override Tomcat's logging manager
+#                   Example (all one line)
+#                   LOGGING_MANAGER="-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager"
+#
+#   USE_NOHUP       (Optional) If set to the string true the start command will
+#                   use nohup so that the Tomcat process will ignore any hangup
+#                   signals. Default is "false" unless running on HP-UX in which
+#                   case the default is "true"
+
+# Variables required by EPICS Archiver Appliance
+# WARNING! Variables have to be exported to be passed to the archiver appliance by the catalina.sh script!
+export TOMCAT_HOME="{{ tomcat_home }}"
+
+# appliance id and xml
+export ARCHAPPL_MYIDENTITY="{{ archiver_appliance_id }}"
+export ARCHAPPL_APPLIANCES="{{ tomcat_home }}/archappl_conf/appliances.xml"
+
+# appliance policies file
+export ARCHAPPL_POLICIES="{{ tomcat_home }}/archappl_conf/policies.py"
+
+# location of the short term, mid term and long term stores
+# this is necessary only if your policy demands it
+export ARCHAPPL_SHORT_TERM_FOLDER="{{ archiver_appliance_storage }}/sts"
+export ARCHAPPL_MEDIUM_TERM_FOLDER="{{ archiver_appliance_storage }}/mts"
+export ARCHAPPL_LONG_TERM_FOLDER="{{ archiver_appliance_storage }}/lts"
+
+# EPICS variables
+export EPICS_HOST_ARCH=linux-{{ ansible_architecture }}

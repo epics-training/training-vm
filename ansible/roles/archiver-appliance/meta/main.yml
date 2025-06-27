@@ -1,6 +1,4 @@
-# Dependencies for archiver-appliance
 ---
+# Dependencies for archiver-appliance
 dependencies:
   - role: java
-  - role: tomcat
-

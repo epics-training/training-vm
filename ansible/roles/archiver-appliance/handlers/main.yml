@@ -1,0 +1,8 @@
+---
+# Handlers for Archiver Appliance
+
+- name: Restart archiver-appliance
+  become: true
+  ansible.builtin.service:
+    name: archiver-appliance
+    state: restarted

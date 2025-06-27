@@ -1,38 +1,90 @@
 ---
 # Download and install the archiver appliance
-
 - name: Install and configure MariaDB
   ansible.builtin.include_tasks:
     file: install_mariadb.yml
 
-- name: Ensure archiver_appliance_home directory exists
+- name: Check if Tomcat installation exists
   become: true
-  file:
-    path: "{{ archiver_appliance_home }}"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
+  ansible.builtin.stat:
+    path: "{{ tomcat_home }}/bin"
+  register: tomcat_installation
+  changed_when: false
 
-- name: Check if Archiver-Appliance installation exists
+- name: Download and install Tomcat
+  ansible.builtin.include_tasks:
+    file: install_tomcat.yml
+  when: tomcat_installation.stat.exists == false
+
+- name: Check if Archiver Appliance installation exists
   become: true
-  stat:
-    path: "{{ archiver_appliance_home }}/engine.war"
+  ansible.builtin.stat:
+    path: "{{ tomcat_home }}/webapps/mgmt"
   register: archiver_appliance_installation
   changed_when: false
 
-- name: Download Archiver-Appliance
-  ansible.builtin.unarchive:
-    src: "https://github.com/archiver-appliance/epicsarchiverap/releases/download/{{ archiver_appliance_version }}/default-package.zip"
-    dest: "/tmp"
-    remote_src: true
+- name: Download and install the Archiver Appliance
+  ansible.builtin.include_tasks:
+    file: install_appliance.yml
   when: archiver_appliance_installation.stat.exists == false
 
-- name: Unpack Archiver-Appliance
+- name: Ensure storage and configuration directories exist
   become: true
-  ansible.builtin.unarchive:
-    src: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
-    dest: "{{ archiver_appliance_home }}"
-    remote_src: true
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-  when: archiver_appliance_installation.stat.exists == false
+  ansible.builtin.file:
+    path: "{{ tomcat_home }}/{{ item }}"
+    state: directory
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+  loop:
+    - storage/sts
+    - storage/mts
+    - storage/lts
+    - archappl_conf
+
+- name: Configure Archiver Appliance
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ tomcat_home }}/archappl_conf/{{ item }}"
+  loop:
+    - appliances.xml
+    - policies.py
+
+- name: Set the archappl.properties
+  become: true
+  ansible.builtin.template:
+    src: archappl.properties.j2
+    dest: "{{ tomcat_home }}/webapps/archappl.properties"
+    owner: root
+    group: "{{ tomcat_group }}"
+    mode: "0640"
+  notify:
+    - Restart archiver-appliance
+
+- name: Create Tomcat setenv.sh script
+  become: true
+  ansible.builtin.template:
+    src: setenv.sh.j2
+    dest: "{{ tomcat_home }}/bin/setenv.sh"
+    owner: root
+    group: "{{ tomcat_group }}"
+    mode: "0644"
+  notify:
+    - Restart archiver-appliance
+
+- name: Create Archiver Appliance systemd service
+  become: true
+  ansible.builtin.template:
+    src: archiver_appliance.service.j2
+    dest: /etc/systemd/system/archiver-appliance.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Manage Archiver Appliance service
+  become: true
+  ansible.builtin.systemd_service:
+    name: archiver-appliance
+    state: started
+    enabled: true
+    daemon_reload: true
