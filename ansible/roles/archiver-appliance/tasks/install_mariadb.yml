@@ -16,24 +16,25 @@
     state: present
   when: is_redhat
 
-- name: Manage MariaDB service
+- name: Manage MariaDB service; create AA user and database
   become: true
-  ansible.builtin.systemd_service:
-    name: mariadb
-    state: started
-    enabled: true
+  when: not in_container
+  block: 
+    - name: Manage MariaDB service
+      ansible.builtin.systemd_service:
+        name: mariadb
+        state: started
+        enabled: true
 
-- name: MariaDB - create Archiver-Appliance database
-  become: true
-  community.mysql.mysql_db:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-    name: archappl
+    - name: MariaDB - create Archiver-Appliance database
+      community.mysql.mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: archappl
 
-- name: MariaDB - create Archiver-Appliance user
-  become: true
-  community.mysql.mysql_user:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-    name: archappl
-    password: archappl
-    priv: 'archappl.*:ALL'
-    state: present
+    - name: MariaDB - create Archiver-Appliance user
+      community.mysql.mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: archappl
+        password: archappl
+        priv: 'archappl.*:ALL'
+        state: present

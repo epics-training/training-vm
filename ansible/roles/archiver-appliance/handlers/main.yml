@@ -3,6 +3,7 @@
 
 - name: Restart archiver-appliance
   become: true
+  when: not in_container
   ansible.builtin.service:
     name: archiver-appliance
     state: restarted

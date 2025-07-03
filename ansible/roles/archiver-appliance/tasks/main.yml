@@ -83,6 +83,7 @@
 
 - name: Manage Archiver Appliance service
   become: true
+  when: not in_container
   ansible.builtin.systemd_service:
     name: archiver-appliance
     state: started
@@ -90,5 +91,6 @@
     daemon_reload: true
 
 - name: Add Firefox bookmark
+  when: not in_container
   ansible.builtin.include_tasks:
     file: add_firefox_bookmark.yml
