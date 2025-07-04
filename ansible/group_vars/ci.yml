@@ -7,6 +7,7 @@ epics_modules_build: true
 catrust: false
 epics_tools: true
 oac_tree: true
+archiver_appliance: true
 docker: true
 # the attempt to make docker outside docker work is a failure because the
 # compose file tries to mount host folders it cannot see. For the moment

@@ -1,0 +1,29 @@
+[Unit]
+Description=Tomcat with Archiver Appliance
+After=syslog.target network.target
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=forking
+PIDFile={{ tomcat_home }}/temp/catalina.pid
+WorkingDirectory=/var/log/tomcat
+
+Environment="CATALINA_HOME={{ tomcat_home }}"
+Environment="CATALINA_BASE={{ tomcat_home }}"
+
+ExecStart={{ tomcat_home }}/bin/catalina.sh start
+ExecStop={{ tomcat_home }}/bin/catalina.sh stop
+TimeoutSec=180
+
+User={{ tomcat_user }}
+Group={{ tomcat_group }}
+
+Restart=on-failure
+RestartSec=5s
+
+Environment=JAVA_HOME="{{ java_home }}"
+
+[Install]
+WantedBy=multi-user.target

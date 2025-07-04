@@ -8,6 +8,7 @@ epics_modules_build: false
 catrust: false
 epics_tools: false
 oac_tree: false
+archiver_appliance: false
 bluesky: false
 
 # Default configuration for the EPICS modules to build

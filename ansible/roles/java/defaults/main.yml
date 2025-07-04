@@ -1,0 +1,4 @@
+# Java settings
+---
+java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+mvn_home: "/opt/epics-tools/lib/apache-maven"

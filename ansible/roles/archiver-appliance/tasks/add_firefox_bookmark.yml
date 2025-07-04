@@ -1,0 +1,66 @@
+---
+- name: Ensure sqlite3 is installed (DEB)
+  become: yes
+  when: is_debian
+  ansible.builtin.package:
+    name: sqlite3
+    state: present
+
+- name: Ensure sqlite is installed (RPM)
+  become: yes
+  when: is_redhat
+  ansible.builtin.package:
+    name: sqlite
+    state: present
+
+- name: Find the default Firefox profile directory
+  ansible.builtin.find:
+    paths:
+      - "/home/{{ firefox_user }}/.mozilla/firefox/"
+      - "/home/{{ firefox_user }}/snap/firefox/common/.mozilla/firefox/"
+    patterns: "*.default,*.default-release" # Common patterns for default profiles
+    file_type: directory
+  register: ff_profile_find
+
+- name: Fail if no Firefox profile was found
+  ansible.builtin.fail:
+    msg: "Could not find a default Firefox profile for user {{ firefox_user }}."
+  when: ff_profile_find.matched == 0
+
+- name: Set path facts for clarity
+  ansible.builtin.set_fact:
+    firefox_profile_path: "{{ ff_profile_find.files[0].path }}"
+    places_db_path: "{{ ff_profile_find.files[0].path }}/places.sqlite"
+
+- name: "Check if bookmark already exists in '{{ places_db_path }}'"
+  ansible.builtin.shell:
+    # This SQL joins the bookmarks and places tables to find an existing entry
+    # by URL and parent folder, then counts the results.
+    cmd: |
+      sqlite3 '{{ places_db_path }}' "SELECT count(*) FROM moz_bookmarks b JOIN moz_places p ON b.fk=p.id WHERE p.url='{{ bookmark_url }}' AND b.parent={{ bookmark_parent_folder_id }};"
+  register: check_bookmark
+  changed_when: false # This task only reads data, it never changes state
+  failed_when: check_bookmark.rc != 0
+
+- name: "Backup places.sqlite before making changes"
+  ansible.builtin.copy:
+    src: "{{ places_db_path }}"
+    dest: "{{ places_db_path }}.bak-{{ ansible_date_time.iso8601 }}"
+    remote_src: yes
+  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
+
+- name: "(Idempotent) Add URL to moz_places table"
+  ansible.builtin.shell:
+    # INSERT OR IGNORE will add the URL only if it doesn't already exist.
+    cmd: |
+      sqlite3 '{{ places_db_path }}' "INSERT OR IGNORE INTO moz_places (url, title, rev_host, frecency) VALUES ('{{ bookmark_url }}', '{{ bookmark_title }}', 'moc.elbisna.scod.', 100);"
+  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
+
+- name: "Add bookmark entry to moz_bookmarks table"
+  ansible.builtin.shell:
+    # This command inserts the actual bookmark, linking to the URL we just ensured exists.
+    # It uses a sub-SELECT to get the foreign key (fk) of the URL from the moz_places table.
+    # The dateAdded and lastModified use unix epoch time in microseconds, as Firefox expects.
+    cmd: |
+      sqlite3 '{{ places_db_path }}' "INSERT INTO moz_bookmarks (type, fk, parent, position, title, dateAdded, lastModified) VALUES (1, (SELECT id FROM moz_places WHERE url = '{{ bookmark_url }}'), {{ bookmark_parent_folder_id }}, 9999, '{{ bookmark_title }}', strftime('%s','now')*1000000, strftime('%s','now')*1000000);"
+  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
