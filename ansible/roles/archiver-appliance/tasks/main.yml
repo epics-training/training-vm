@@ -88,3 +88,7 @@
     state: started
     enabled: true
     daemon_reload: true
+
+- name: Add Firefox bookmark
+  ansible.builtin.include_tasks:
+    file: add_firefox_bookmark.yml

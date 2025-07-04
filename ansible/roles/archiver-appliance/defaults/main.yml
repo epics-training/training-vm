@@ -15,3 +15,16 @@ archiver_appliance_storage: "{{ tomcat_home }}/storage"
 archiver_appliance_java_maxmetaspace: "256M"
 archiver_appliance_java_initial_heapsize: "512M"
 archiver_appliance_java_max_heapsize: "512M"
+
+# --- The user whose Firefox profile we are modifying ---
+firefox_user: "{{ dev_user }}"
+
+# --- Bookmark Details ---
+bookmark_title: "Archiver"
+bookmark_url: "http://localhost:17665/mgmt/ui/index.html"
+
+# --- Parent Folder ID in Firefox ---
+# 2 = Bookmarks Menu
+# 3 = Bookmarks Toolbar
+# 5 = Other Bookmarks
+bookmark_parent_folder_id: 3
