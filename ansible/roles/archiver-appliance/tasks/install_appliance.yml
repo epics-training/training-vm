@@ -1,0 +1,41 @@
+--- 
+- name: Create temporary location for WAR unpacking
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/archappl"
+    state: directory
+
+- name: Download Archiver-Appliance
+  ansible.builtin.unarchive:
+    src: "https://github.com/archiver-appliance/epicsarchiverap/releases/download/{{ archiver_appliance_version }}/default-package.zip"
+    dest: "/tmp"
+    creates: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
+    remote_src: true
+
+- name: Unpack Archiver-Appliance
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
+    dest: "/tmp/archappl"
+    remote_src: true
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+
+- name: Unpack and move WARs into Tomcat instance
+  become: true
+  ansible.builtin.shell: |
+    PATH=$PATH:{{ java_home }}/bin
+    cd /tmp/archappl
+    # Unpack WARs and copy dependencies into lib
+    (mkdir mgmt && cd mgmt && jar -xvf ../mgmt.war && rm ../mgmt.war)
+    cp -r mgmt/WEB-INF/lib lib && rm -fr mgmt/WEB-INF/lib
+    (mkdir etl && cd etl && jar -xvf ../etl.war && rm ../etl.war && rm -rf WEB-INF/lib)
+    (mkdir engine && cd engine && jar -xvf ../engine.war && rm ../engine.war && rm -rf WEB-INF/lib)
+    (mkdir retrieval && cd retrieval && jar -xvf ../retrieval.war && rm ../retrieval.war && rm -rf WEB-INF/lib)
+    # Move everything into the Tomcat instance
+    rm -fr {{ tomcat_home }}/webapps/{mgmt,etl,engine,retrieval}
+    mv mgmt etl engine retrieval {{ tomcat_home }}/webapps/
+    cp lib/* {{ tomcat_home }}/lib/
+    chown -R {{ tomcat_user }}:{{ tomcat_group }} {{ tomcat_home }}/webapps
+  notify:
+    - Restart archiver-appliance
