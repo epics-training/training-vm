@@ -6,6 +6,7 @@
     name:
       - mariadb-server
       - python3-pymysql
+    update_cache: true
     state: present
   when: is_debian
 
@@ -13,6 +14,7 @@
   become: true
   ansible.builtin.dnf:
     name: mariadb-server
+    update_cache: true
     state: present
   when: is_redhat
 
