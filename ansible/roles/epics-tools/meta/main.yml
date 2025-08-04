@@ -1,0 +1,4 @@
+# Dependencies for epics-tools
+---
+dependencies:
+  - role: java

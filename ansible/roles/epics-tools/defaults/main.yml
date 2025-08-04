@@ -1,13 +1,9 @@
+# defaults for epics_tools
 ---
-# defaults file for epics_tools
-
-epics_services_account: root
-
-java_home: "/opt/epics-tools/lib/jvm/jdk-17"
-mvn_home: "/opt/epics-tools/lib/apache-maven"
-
 phoebus_version: 8728dbb
 
 phoebus_launcher: "/opt/epics-tools/lib/phoebus/phoebus-product/phoebus.sh"
 phoebus_owner: "root"
 force_gpu: false
+
+mvn_home: "/opt/epics-tools/lib/apache-maven"

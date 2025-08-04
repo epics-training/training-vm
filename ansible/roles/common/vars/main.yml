@@ -1,2 +1,6 @@
+# Global settings
+---
 epics_install_path: "/opt/epics"
 opi_install_path: "/opt/opi"
+
+epics_services_account: root

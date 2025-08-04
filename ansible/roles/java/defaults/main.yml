@@ -1,0 +1,3 @@
+# Java settings
+---
+java_home: "/opt/epics-tools/lib/jvm/jdk-17"

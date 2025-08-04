@@ -1,0 +1,45 @@
+# Install Maven
+---
+- name: Ensure mvn directory exists
+  become: true
+  file:
+    path: "{{ mvn_home }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Install apache-maven-3.6.3
+  become: true
+  ansible.builtin.unarchive:
+    src: https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+    dest: "{{ mvn_home }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    creates: "{{ mvn_home }}/bin/mvn"
+    extra_opts:
+      - --strip-components=1
+
+# Configure proxies for maven (if required)
+- name: Clear existing proxy configuration
+  become: true
+  community.general.xml:
+    path: "{{ mvn_home }}/conf/settings.xml"
+    namespaces:
+      mvn: http://maven.apache.org/SETTINGS/1.0.0
+    xpath: /mvn:settings/mvn:proxies
+    set_children: []
+  when: proxy_mvn is defined
+
+- name: Add proxy configuration
+  become: true
+  community.general.xml:
+    path: "{{ mvn_home }}/conf/settings.xml"
+    namespaces:
+      mvn: http://maven.apache.org/SETTINGS/1.0.0
+    xpath: /mvn:settings/mvn:proxies
+    add_children: "{{ item }}"
+    input_type: xml
+    pretty_print: true
+  loop: "{{ proxy_mvn }}"
+  when: proxy_mvn is defined
