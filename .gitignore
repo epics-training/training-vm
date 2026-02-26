@@ -5,3 +5,5 @@ ansible/group_vars/local.yml
 venv
 **/.vagrant
 /vagrant/corporate_root_ca.crt
+__pycache__
+*.pyc
