@@ -1,0 +1,3 @@
+---
+# This role should only be included by other roles, so this will be defined
+epics_module_parent_role_path: "{{ ansible_parent_role_paths[0] }}"

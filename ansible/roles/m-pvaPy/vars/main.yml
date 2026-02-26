@@ -25,5 +25,5 @@ m_pvapy_modules:
       - python3-sphinx_rtd_theme
     enable_repos:
       - crb
-    pre_hook: "{{ playbook_dir }}/roles/m-pvaPy/tasks/pvapy_prep.yml"
-    post_hook: "{{ playbook_dir }}/roles/m-pvaPy/tasks/pvapy_post.yml"
+    pre_hook: "pvapy_prep.yml"
+    post_hook: "pvapy_post.yml"

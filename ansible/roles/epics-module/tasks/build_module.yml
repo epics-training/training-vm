@@ -68,7 +68,7 @@
       become: true
 
     - name: "{{ module.name }} rebuild | Run pre-build hook"
-      include_tasks: "{{ module.pre_hook }}"
+      include_tasks: "{{ epics_module_parent_role_path }}/tasks/{{ module.pre_hook }}"
       when: module.pre_hook is defined
 
     - name: "{{ module.name }} rebuild | Compile from sources (this may take a while)"
@@ -84,7 +84,7 @@
       become: true
 
     - name: "{{ module.name }} rebuild | Run post-build hook"
-      include_tasks: "{{ module.post_hook }}"
+      include_tasks: "{{ epics_module_parent_role_path }}/tasks/{{ module.post_hook }}"
       when: module.post_hook is defined
 
     - name: "{{ module.name }} rebuild | Show build result"

@@ -25,7 +25,7 @@ m_base_modules:
       - perl-Test-Harness
       - perl-FindBin
       - perl-Sys-Hostname
-    pre_hook: "{{ playbook_dir }}/roles/m-base/tasks/base_prep.yml"
+    pre_hook: "base_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}
 
   - id: pvxs

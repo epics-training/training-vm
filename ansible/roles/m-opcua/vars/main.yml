@@ -16,5 +16,5 @@ m_opcua_modules:
       - cmake
       - openssl-devel
       - libxml2-devel
-    pre_hook: "{{ playbook_dir }}/roles/m-opcua/tasks/opcua_prep.yml"
+    pre_hook: "opcua_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}

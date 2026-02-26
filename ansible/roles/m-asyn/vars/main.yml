@@ -15,5 +15,5 @@ m_asyn_modules:
       - libtirpc-devel
     enable_repos:
       - crb
-    pre_hook: "{{ playbook_dir }}/roles/m-asyn/tasks/asyn_prep.yml"
+    pre_hook: "asyn_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}

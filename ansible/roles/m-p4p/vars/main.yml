@@ -22,5 +22,5 @@ m_p4p_modules:
       - python3-Cython
     enable_repos:
       - crb
-    pre_hook: "{{ playbook_dir }}/roles/m-p4p/tasks/p4p_prep.yml"
+    pre_hook: "p4p_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}
