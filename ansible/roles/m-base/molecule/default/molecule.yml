@@ -1,0 +1,32 @@
+---
+dependency:
+  name: galaxy
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../resources/converge.yml
+  inventory:
+    host_vars:
+      m-base-docker:
+        in_container: true
+        is_debian: true
+        docker: true
+        install_gnome: false
+    group_vars:
+      all:
+
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  directory: ../resources/tests/
+driver:
+  name: docker
+platforms:
+  - name: m-base-docker
+    image: ubuntu:22.04
