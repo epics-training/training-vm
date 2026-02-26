@@ -1,0 +1,6 @@
+---
+- name: Converge
+  hosts: all # dunno
+  become: true
+  roles:
+    - role: initial_setup
