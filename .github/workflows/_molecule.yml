@@ -1,0 +1,26 @@
+on:
+  workflow_call:
+
+jobs:
+  molecule:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        role: ["initial_setup", "m-base"]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11.x"
+      - name: Install dependencies
+        run: |
+          pip install "ansible>11,<12" molecule=="25.1.0" molecule-plugins=="23.7.0" molecule-docker pytest pytest-testinfra
+      - name: Run molecule tests
+        working-directory: "${{ github.repository }}/ansible/roles/${{ matrix.role }}"
+        run: |
+          molecule test
+        env:
+          PY_COLORS: 1

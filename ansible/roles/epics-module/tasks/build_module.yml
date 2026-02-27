@@ -124,7 +124,14 @@
     dest: "/etc/profile.d/epics-tools.sh"
   become: true
 
+- name: "{{ module.name }} | Determine .bob files to copy"
+  ansible.builtin.find:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}"
+    patterns: "*.bob"
+  register: bob_files
+
 - name: "{{ module.name }} | Copy .bob files to {{ opi_install_path }}"
-  ansible.builtin.shell:
-    cmd: "find {{ epics_install_path }}/{{ module.id }}-{{ module.version }} -name '*.bob' -exec cp {} {{ opi_install_path }}/ \\;"
-  become: true
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ opi_install_path }}"
+  loop: "{{ bob_files.files }}"

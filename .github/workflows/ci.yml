@@ -12,3 +12,6 @@ jobs:
     needs: check
     if: needs.check.outputs.branch-pr == ''
     uses: ./.github/workflows/_docker_build.yml
+
+  molecule:
+    uses: ./.github/workflows/_molecule.yml
