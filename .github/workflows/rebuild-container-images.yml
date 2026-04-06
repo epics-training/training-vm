@@ -68,6 +68,8 @@ jobs:
           file: ./.github/workflows/Containerfile.${{ matrix.distro }}
           build-args: |
             IMAGE=${{ matrix.image }}
+          cache-from: type=gha,scope=${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.distro }}
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ env.REPO_NAME }}/epics-training-base-${{ matrix.distro }}:latest
           outputs: ${{ (github.ref != 'refs/heads/main') && format('type=docker,dest=/tmp/image-{0}.tar', matrix.distro) || '' }}
