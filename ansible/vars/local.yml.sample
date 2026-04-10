@@ -15,7 +15,7 @@ m_asyn: true
 m_stream: true
 
 # Services
-# epics_tools: true
+# phoebus: true
 # archiver_appliance: true
 # docker: true
 # bluesky: true

@@ -5,7 +5,7 @@
 initial_setup: false
 docker: true # for rootful this needs to happen before first reboot
 catrust: false
-epics_tools: false
+phoebus: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

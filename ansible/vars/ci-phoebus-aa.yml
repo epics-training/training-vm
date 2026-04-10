@@ -4,7 +4,7 @@
 # Phoebus, Archiver Appliance and dependencies
 
 m_base: true
-epics_tools: true
+phoebus: true
 archiver_appliance: true
 
 in_container: true

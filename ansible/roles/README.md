@@ -27,7 +27,7 @@ StreamDevice Device Support.
 
 ## Phoebus and Services
 
-### epics-tools
+### phoebus
 Control System Studio / Phoebus.
 
 ### archiver-appliance

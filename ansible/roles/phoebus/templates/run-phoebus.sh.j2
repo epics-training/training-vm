@@ -3,7 +3,7 @@
 # Phoebus launcher for Linux or Mac OS X
 TOP=/opt/epics-tools
 
-export JAVA_HOME=/opt/epics-tools/lib/jvm/jdk-17
+export JAVA_HOME={{ java_home }}
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # Reduce VIRT memory
@@ -27,12 +27,12 @@ fi
 
 # figure out the path to the configuration settings
 if [[ -z "${PHOEBUS_CONFIG}" ]]; then
-  PHOEBUS_CONFIG=/opt/epics-tools/config/preferences.ini
+  PHOEBUS_CONFIG=${TOP}/config/preferences.ini
 fi
 
 # figure out the path to the configuration settings
 if [[ -z "${PHOEBUS_LOGGING}" ]]; then
-  PHOEBUS_LOGGING=/opt/epics-tools/config/logging.properties
+  PHOEBUS_LOGGING=${TOP}/config/logging.properties
 fi
 
 # To get one instance, use server mode

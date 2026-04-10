@@ -4,7 +4,7 @@
 # For use in fully testing VMs
 
 catrust: false
-epics_tools: true
+phoebus: true
 oac_tree: true
 archiver_appliance: true
 docker: true

@@ -1,4 +1,4 @@
-# Dependencies for epics-tools
+# Dependencies for phoebus
 ---
 allow_duplicates: true
 dependencies:

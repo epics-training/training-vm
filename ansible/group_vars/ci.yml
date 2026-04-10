@@ -4,7 +4,7 @@
 # For use by CI running in containers
 
 catrust: false
-epics_tools: true
+phoebus: true
 oac_tree: true
 archiver_appliance: true
 docker: true

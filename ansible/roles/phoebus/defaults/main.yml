@@ -1,4 +1,4 @@
-# defaults for epics_tools
+# defaults for phoebus
 ---
 phoebus_version: v5.0.2
 

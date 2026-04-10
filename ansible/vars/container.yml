@@ -14,7 +14,7 @@ m_stream: true
 m_areadetector: true
 
 #catrust: true
-epics_tools: true
+phoebus: true
 #oac_tree: true
 #archiver_appliance: true
 #docker: true

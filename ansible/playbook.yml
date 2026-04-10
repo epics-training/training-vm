@@ -121,11 +121,11 @@
           include_role:
             name: bluesky
 
-    - name: EPICS Tools
+    - name: Phoebus
       include_role:
-        name: epics-tools
-      when: epics_tools is defined and epics_tools | bool
-      tags: epics_tools
+        name: phoebus
+      when: phoebus is defined and phoebus | bool
+      tags: phoebus
 
     - name: OAC Tree
       include_role:

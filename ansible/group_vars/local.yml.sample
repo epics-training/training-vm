@@ -6,7 +6,7 @@
 #initial_setup: true # only used for Vagrant build
 #docker: false # for rootful this needs to happen before first reboot
 #catrust: true
-#epics_tools: true
+#phoebus: true
 #oac_tree: true
 #archiver_appliance: true
 #bluesky: true
