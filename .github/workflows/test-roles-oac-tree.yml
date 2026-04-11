@@ -25,6 +25,12 @@ jobs:
   check:
     uses: ./.github/workflows/_check.yml
 
+  wait:
+    uses: ./.github/workflows/_wait_for_workflow.yml
+    with:
+      workflow_name: "rebuild-container-images"
+      sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
   prep:
     runs-on: ubuntu-latest
     outputs:
@@ -34,10 +40,9 @@ jobs:
         run: echo "repo_name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
   test:
-    needs: [check, prep]
+    needs: [check, wait, prep]
     name: "${{ matrix.distro }}: ${{ matrix.conf.name }}"
     if: |
-      needs.check.outputs.branch-pr == '' &&
       (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     strategy:
       fail-fast: false
@@ -47,12 +52,29 @@ jobs:
           - name: "oac-tree"
             id: "ci-oac-tree"
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/${{ needs.prep.outputs.repo_name }}/epics-training-base-${{ matrix.distro }}:latest
+    permissions:
+      contents: read
+      actions: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Download image artifact
+        if: needs.wait.outputs.artifact_exists == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: epics-training-base-${{ matrix.distro }}-image
+          path: /tmp
+          run-id: ${{ needs.wait.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Load image
+        if: needs.wait.outputs.artifact_exists == 'true'
+        run: docker load -i /tmp/image-${{ matrix.distro }}.tar
+
       - name: Build ${{ matrix.conf.name }}
         run: |
-          cd ansible
-          ansible-playbook -v playbook.yml -e "@vars/${{ matrix.conf.id }}.yml"
+          IMAGE="ghcr.io/${{ needs.prep.outputs.repo_name }}/epics-training-base-${{ matrix.distro }}:latest"
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
+            ansible-playbook -v playbook.yml -e "@vars/${{ matrix.conf.id }}.yml"

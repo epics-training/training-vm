@@ -1,0 +1,83 @@
+name: "Wait for Workflow"
+
+on:
+  workflow_call:
+    inputs:
+      workflow_name:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+    outputs:
+      artifact_exists:
+        description: "Whether a new image artifact was created"
+        value: ${{ jobs.wait.outputs.artifact_exists }}
+      run_id:
+        description: "The ID of the workflow run that created the artifact"
+        value: ${{ jobs.wait.outputs.run_id }}
+
+jobs:
+  wait:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_exists: ${{ steps.check.outputs.artifact_exists }}
+      run_id: ${{ steps.check.outputs.run_id }}
+    steps:
+      - name: Wait for workflow
+        uses: actions/github-script@v9
+        id: check
+        with:
+          script: |
+            const workflow_name = "${{ inputs.workflow_name }}";
+            const sha = "${{ inputs.sha }}";
+
+            let artifact_exists = "false";
+            let retry_count = 0;
+            const max_retries = 10; // Wait up to 5 minutes for the run to appear
+
+            while (true) {
+              const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow_name + ".yml",
+                head_sha: sha
+              });
+
+              const run = runs.workflow_runs.find(r => r.head_sha === sha);
+
+              if (run) {
+                console.log(`Found run ${run.id} with status ${run.status}`);
+                core.setOutput("run_id", run.id.toString());
+              }
+
+              if (!run) {
+                if (retry_count < max_retries) {
+                  console.log(`No run found for this workflow and SHA. Retry ${retry_count + 1}/${max_retries}...`);
+                  retry_count++;
+                  await new Promise(resolve => setTimeout(resolve, 30000));
+                  continue;
+                } else {
+                  console.log("No run found after maximum retries. Proceeding without artifact.");
+                  break;
+                }
+              }
+
+              if (run.status === "completed") {
+                console.log(`Run completed with conclusion: ${run.conclusion}`);
+                core.setOutput("run_id", run.id.toString());
+                if (run.conclusion === "success") {
+                  if (context.ref !== 'refs/heads/main') {
+                    artifact_exists = "true";
+                  }
+                } else {
+                  core.setFailed(`Workflow ${workflow_name} failed with conclusion: ${run.conclusion}`);
+                }
+                break;
+              }
+
+              console.log(`Run is still ${run.status}. Waiting 30 seconds...`);
+              await new Promise(resolve => setTimeout(resolve, 30000));
+            }
+
+            core.setOutput("artifact_exists", artifact_exists);
