@@ -2,6 +2,7 @@
 - name: "{{ module.name }} | Install required DEB dependencies"
   ansible.builtin.apt:
     name: "{{ module.required_debs }}"
+    install_recommends: false
     state: present
     update_cache: true
   become: true
@@ -11,6 +12,7 @@
   dnf:
     name: "{{ module.required_rpms }}"
     enablerepo: "{{ module.enable_repos | default('[]') }}"
+    install_weak_deps: false
     state: present
   become: true
   when: is_redhat and module.required_rpms is defined

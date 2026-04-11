@@ -3,7 +3,8 @@ ARG IMAGE=rockylinux:latest
 FROM $IMAGE
 
 RUN dnf install -y epel-release || dnf update -y --refresh
-RUN dnf install -y git python3-pip python3-jmespath ansible
+RUN dnf install -y git python3-pip python3-jmespath ansible \
+ && dnf clean all && rm -rf /var/cache/{yum,dnf}
 RUN pip3 install ansible-lint
 
 COPY ansible /ansible
