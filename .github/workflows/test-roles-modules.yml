@@ -82,5 +82,6 @@ jobs:
           # but we need to be sure about the tag. The build-push-action uses the tags provided.
           # In rebuild-container-images.yml, we provided the ghcr.io tag even for local builds.
 
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
+          docker run --rm --init --memory=6g --shm-size=2g \
+            -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
             ansible-playbook -v playbook.yml -e "@vars/${{ matrix.conf.id }}.yml"

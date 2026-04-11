@@ -114,7 +114,7 @@
   when: oactree_bundle_flag.stat.exists == false
 
 - name: "Run make (build and install everything - this may take a while)"
-  command: make -j {{ ansible_facts.processor_vcpus }} -C {{ oactree_install_path }}/src/oac-tree-bundle/build
+  command: make -j 1 -C {{ oactree_install_path }}/src/oac-tree-bundle/build
   register: build_result
   environment:
     EPICS_BASE: "{{ epics_install_path }}/base-{{ epics_base_version }}"

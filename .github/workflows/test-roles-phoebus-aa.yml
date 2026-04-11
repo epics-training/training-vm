@@ -78,5 +78,6 @@ jobs:
       - name: Build ${{ matrix.conf.name }}
         run: |
           IMAGE="ghcr.io/${{ needs.prep.outputs.repo_name }}/epics-training-base-${{ matrix.distro }}:latest"
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
+          docker run --rm --init --memory=6g --shm-size=2g \
+            -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
             ansible-playbook -v playbook.yml -e "@vars/${{ matrix.conf.id }}.yml"
