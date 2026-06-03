@@ -1,0 +1,43 @@
+---
+- name: Install {{ item.name }} IOC
+  ansible.builtin.git:
+    repo: "{{ item.url }}"
+    dest: "{{ ioc_install_dir }}/{{ item.path }}"
+
+- name: Build {{ item.name }} IOC
+  ansible.builtin.command:
+    cmd: make
+    chdir: "{{ ioc_install_dir }}/{{ item.path }}"
+
+- name: Create log directory 
+  become: true
+  ansible.builtin.file:
+    path: /var/log/procServ
+    owner: epics-dev
+    group: epics-dev
+    mode: '0755'
+    state: directory
+
+- name: Create run directory
+  become: true
+  ansible.builtin.file:
+    path: /run/ioc@ioc{{ item.ioc_name }}
+    owner: epics-dev
+    group: epics-dev
+    mode: '0755'
+    state: directory
+
+- name: Create systemd unit file for {{ item.name }} IOC
+  become: true
+  ansible.builtin.template:
+    src: ioc@.service.j2
+    dest: /etc/systemd/system/ioc@ioc{{ item.ioc_name }}.service
+
+- name: Enable and start IOC process
+  become: true
+  ansible.builtin.systemd_service:
+    name: ioc@ioc{{ item.ioc_name}}.service
+    daemon_reload: true
+    state: restarted
+    enabled: true
+

@@ -40,14 +40,14 @@ fi
 # REPO[xyz] (and BRANCH[xyz]
 COLLECTION=${COLLECTION:-"training"}
 SLUGFILE=${SLUGFILE:-"/etc/epics-training"}
-COLLECTION_REPO=${COLLECTION_REPO:-"https://github.com/epics-training/training-collection"}
+COLLECTION_REPO=${COLLECTION_REPO:-"https://github.com/osprey-dcs/training-collection"}
 
 # Install prerequisites: Git, Ansible
 if ! command -v git >/dev/null; then
     packages="git"
 fi
 if ! command -v ansible >/dev/null; then
-    packages="${packages} ansible"
+    packages="${packages} ansible-core"
 fi
 if [ "${packages}" ]; then
     echo "Installing prerequisites: ${packages}..."

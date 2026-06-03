@@ -6,6 +6,8 @@ tomcat_version: "9.0.79"
 tomcat_user: tomcat
 tomcat_group: tomcat
 
+# TODO: Update AA version to avoid bug with incorrect timestamp
+# values in queries.
 archiver_appliance_version: "2.0.7"
 
 archiver_appliance_id: "appliance0"

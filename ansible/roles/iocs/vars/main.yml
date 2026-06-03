@@ -1,0 +1,26 @@
+---
+# TODO: Add an IOC with iocStats loaded to provide some meaningful PVs.
+# TODO: Add a vacuum IOC
+# TODO: Add a sequence IOC
+# TODO: Update the ramp IOC with PVs for sine, noise
+
+# Define local EPICS IOC installation path
+ioc_install_dir: /opt/iocs
+
+# List of IOCs to clone, build and set up as systemd service.
+# Replace lists with '[]' if no IOCs required.
+#
+# TODO: Create a different user for owning the IOCs to stop
+# people changing files and causing git pulls to fail.
+ioc_list:
+  - name: ramp
+    url: https://github.com/osprey-dcs/training-ioc-ramp.git
+    path: ramp
+    ioc_name: training-ramp
+    iocBoot_dir: ramp
+
+# List of IOCs to fetch but not build
+ioc_fetch_list:
+  - name: epics-train-2026
+    url: https://github.com/kasemir/epics-train-2026.git
+    path: epics-train-2026-kk

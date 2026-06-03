@@ -1,0 +1,6 @@
+---
+- name: Install {{ item.name }} IOC
+  ansible.builtin.git:
+    repo: "{{ item.url }}"
+    dest: "{{ ioc_install_dir }}/{{ item.path }}"
+

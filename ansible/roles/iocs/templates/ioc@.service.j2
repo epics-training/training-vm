@@ -1,0 +1,25 @@
+[Unit]
+Description=procServ for ioc{{ item.ioc_name }}
+After=network.target remote-fs.target autofs.service
+ConditionPathIsDirectory={{ ioc_install_dir }}/{{ item.path }}
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/procServ \
+                    --foreground \
+                    --logfile=/var/log/procServ/out-ioc{{ item.ioc_name }}.log \
+                    --info-file=/run/ioc@ioc{{ item.ioc_name }}/info \
+                    --ignore=^C^D \
+                    --chdir={{ ioc_install_dir }}/{{ item.path }}/iocBoot/ioc{{ item.iocBoot_dir }} \
+                    --name=ioc{{ item.ioc_name }} \
+                    --port=unix:/run/ioc@ioc{{ item.ioc_name }}/control \
+                    {{ ioc_install_dir }}/{{ item.path }}/iocBoot/ioc{{ item.iocBoot_dir }}/st.cmd
+SyslogIdentifier=ioc@ioc{{ item.ioc_name }}
+RuntimeDirectory=ioc@ioc{{ item.ioc_name }}
+RuntimeDirectoryMode=0755
+
+User=epics-dev
+Group=epics-dev
+
+[Install]
+WantedBy=multi-user.target

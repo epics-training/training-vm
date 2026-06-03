@@ -5,3 +5,4 @@ ansible/group_vars/local.yml
 venv
 **/.vagrant
 /vagrant/corporate_root_ca.crt
+ansible/vars/local.yml.bak

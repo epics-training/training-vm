@@ -12,6 +12,6 @@ elif [[ "$installer" == "dnf" ]]; then
     dnf install -y ansible python3-jmespath
 fi
 
-cd /ansible
+cd ansible
 ansible-galaxy install -r requirements.yml || true
 ansible-playbook $ansible_args playbook.yml -e @vars/local.yml -e initial_setup=true

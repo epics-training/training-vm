@@ -13,7 +13,9 @@
 - name: Install required RPM dependencies
   become: true
   ansible.builtin.dnf:
-    name: mariadb-server
+    name:
+      - mariadb-server
+      - python3-PyMySQL
     update_cache: true
     state: present
   when: is_redhat
@@ -21,22 +23,32 @@
 - name: Manage MariaDB service; create AA user and database
   become: true
   when: not in_container
-  block: 
+  block:
     - name: Manage MariaDB service
       ansible.builtin.systemd_service:
         name: mariadb
         state: started
         enabled: true
 
+    - name: Set MariaDB socket path
+      ansible.builtin.set_fact:
+        mariadb_socket: "{{ '/var/run/mysqld/mysqld.sock' if is_debian else '/var/lib/mysql/mysql.sock' }}"
+
     - name: MariaDB - create Archiver-Appliance database
       community.mysql.mysql_db:
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_unix_socket: "{{ mariadb_socket }}"
         name: archappl
 
     - name: MariaDB - create Archiver-Appliance user
       community.mysql.mysql_user:
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_unix_socket: "{{ mariadb_socket }}"
         name: archappl
         password: archappl
         priv: 'archappl.*:ALL'
         state: present
+
+    # Brute force the privilege setting as the priv: directive in the above 
+    # task does not appear to work.
+    - name: ensure mariadb privileges are set
+      ansible.builtin.shell:
+        cmd: "mariadb --execute \"GRANT ALL ON archappl.* TO 'archappl' identified by 'archappl';\""

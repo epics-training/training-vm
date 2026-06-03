@@ -1,0 +1,43 @@
+---
+
+# Create host elasticsearch directory
+- name: Create elasticsearch directory
+  become_method: containers.podman.podman_unshare
+  become: true
+  ansible.builtin.file:
+    path: "{{ elasticsearch_directory }}"
+    owner: epics-dev
+    group: epics-dev
+    mode: '0777'
+    state: directory
+
+# Create elasticsearch container
+- name: Create elasticsearch container
+  containers.podman.podman_container:
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:{{ elasticsearch_version }}
+    state: quadlet
+    env:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+      network.host: "127.0.0.1"
+      bootstrap.memory_lock: "true"
+    volume: "{{ elasticsearch_directory }}:/usr/share/elasticsearch/data:Z"
+    network: host
+    auto_remove: true
+    health_cmd: "curl http://localhost:9200/"
+    healthcheck_start_period: "10m"
+    quadlet_options:
+      - |
+        [Install]
+        WantedBy=default.target
+
+
+- name: Enable elasticsearch container
+  ansible.builtin.systemd:
+    name: elasticsearch
+    daemon-reload: true
+    state: started
+    enabled: true
+    scope: user

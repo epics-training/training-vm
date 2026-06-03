@@ -12,6 +12,8 @@ org.phoebus.ui/ui_monitor_period=0
 # Channel Access
 org.phoebus.pv.ca/addr_list=10.39.59.255
 org.phoebus.pv.ca/auto_addr_list=true
+org.phoebus.pv.ca/dbe_property_supported=true
+org.phoebus.pv.ca/variable_length_array=true
 
 # PVAccess
 org.epics.pva/epics_pva_addr_list=10.39.59.255
@@ -49,12 +51,16 @@ org.phoebus.logbook/logbook_factory=inmemory
 
 # Archived Data
 
-org.csstudio.trends.databrowser3/urls=pbraw\://epics-services-tst:13168/retrieval|tst
-org.csstudio.trends.databrowser3/archives=pbraw\://epics-services-tst:13168/retrieval
+org.csstudio.trends.databrowser3/urls=pbraw\://localhost:17665/retrieval|tst
+org.csstudio.trends.databrowser3/archives=pbraw\://localhost:17665/retrieval
 org.csstudio.trends.databrowser3/use_default_archives=false
 # Include to get a prompt for newly started instance
 org.csstudio.trends.databrowser3/prompt_for_raw_data_request = true
 org.csstudio.trends.databrowser3/prompt_for_visibility = true
+org.csstudio.trends.databrowser3/use_default_archives = true
+org.csstudio.trends.databrowser3/drop_failed_archives = false
+org.csstudio.trends.databrowser3/use_auto_scale = false
+
 
 # Save Restore
 org.phoebus.applications.saveandrestore.client/jmasar.service.url=http://epics-services-tst:23181

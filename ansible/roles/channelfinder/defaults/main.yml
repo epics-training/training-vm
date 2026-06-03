@@ -1,0 +1,5 @@
+---
+# Defaults for elasticsearch and channelfinder
+elasticsearch_version: "8.11.2"
+elasticsearch_directory: "/opt/channelfinder/esdata"
+

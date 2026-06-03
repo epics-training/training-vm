@@ -1,0 +1,22 @@
+---
+# Create IOC top-level directory
+- name: Create IOC top-level directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ ioc_install_dir }}"
+    state: directory
+    owner: epics-dev
+    group: epics-dev
+    mode: 0755
+
+# Install and build IOCs
+- name: Install and build IOCs
+  include_tasks: install_iocs.yml
+  when: iocs is defined and iocs | bool
+  loop: "{{ ioc_list }}"
+
+# Fetch IOCs that do not need building
+- name: Fetch IOCs
+  include_tasks: fetch_iocs.yml
+  when: iocs is defined and iocs | bool
+  loop: "{{ ioc_fetch_list }}"

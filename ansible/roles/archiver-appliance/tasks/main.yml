@@ -72,6 +72,11 @@
   notify:
     - Restart archiver-appliance
 
+- name: "Run the Archiver-Appliance's MariaDB install script"
+  become: true
+  ansible.builtin.shell:
+    cmd: "mariadb --user=archappl --password=archappl --database=archappl < {{ tomcat_home }}/webapps/mgmt/install/archappl_mysql.sql || true"
+
 - name: Create Archiver Appliance systemd service
   become: true
   ansible.builtin.template:

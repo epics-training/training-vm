@@ -1,12 +1,1 @@
-# User specific configuration
-# In this case, a small default that works fast and on all flavours
-
-# Replace this file with a copy of the local.yml.sample then change it!
-
-# OR
-
-# Create your own setup file, e.g., myVM.yml
-# and specify it on the ansible-playbook command line:
-# ansible-playbook ... playbook.yml -e @vars/myVM.yml
-
-m_base: true
+../../../local.yml

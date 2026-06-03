@@ -36,6 +36,8 @@ else
     slug=""
 fi
 
+# TODO: Add a test here to fail with better diagnostics if any of the
+# git commands fail (e.g., due to modified files that cannot be overwritten).
 ( cd ${collection_dir}; git checkout --recurse-submodules ${slug}; git pull --recurse-submodules )
 
 if [ ! -e "${collection_dir}/vm-setup/ansible/vars/local.yml" ]; then
@@ -45,3 +47,6 @@ fi
 cd ${bootstrap_dir}/ansible
 ansible-galaxy install -r requirements.yml || true
 ansible-playbook playbook.yml "$@" -e "@vars/local.yml"
+
+# TODO: Add some sort of version number printout here to allow confirmation
+# that the update has worked as expected. A commit hash may be sufficient.

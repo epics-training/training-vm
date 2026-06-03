@@ -6,7 +6,7 @@
 
 - name: expand the root disk
   include_tasks: grow_disk.yml
-  when: not in_container
+  when: false
 
 - name: Replace mirrorlist with specific mirrors for Rocky
   when: ansible_facts['distribution'] == 'Rocky'
@@ -72,6 +72,8 @@
           - vim
           - sudo
           - openssl
+          - procServ
+          - socat
           - "@{{ distro.gnome_group }}"
         allowerasing: true # fix version conflicts for curl and coreutils on Rocky
 
@@ -109,6 +111,7 @@
   become: true
 
 - name: Hide user vagrant from the GDM greeter (login user select)
+  ignore_errors: true
   ansible.builtin.template:
     src: user.conf_nogreeter
     dest: /var/lib/AccountsService/users/vagrant
@@ -119,3 +122,19 @@
     dest: /usr/bin/python
     state: link
   become: true
+
+- name: Disable selinux on Redhat variants
+  when: ansible_facts['os_family'] == 'RedHat'
+  become: true
+  ansible.posix.selinux:
+    state: disabled
+    update_kernel_param: true
+  
+- name: Disable firewall service (at least for RedHat variants)
+  when: ansible_facts['os_family'] == 'RedHat'
+  become: true
+  ansible.builtin.systemd_service:
+    name: firewalld.service
+    state: stopped
+    enabled: false
+

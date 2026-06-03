@@ -18,7 +18,7 @@
     paths:
       - "/home/{{ firefox_user }}/.mozilla/firefox/"
       - "/home/{{ firefox_user }}/snap/firefox/common/.mozilla/firefox/"
-    patterns: "*.default,*.default-release" # Common patterns for default profiles
+    patterns: "*.default,*.default-release,*.default-default" # Common patterns for default profiles
     file_type: directory
   register: ff_profile_find
 
@@ -40,21 +40,22 @@
       sqlite3 '{{ places_db_path }}' "SELECT count(*) FROM moz_bookmarks b JOIN moz_places p ON b.fk=p.id WHERE p.url='{{ bookmark_url }}' AND b.parent={{ bookmark_parent_folder_id }};"
   register: check_bookmark
   changed_when: false # This task only reads data, it never changes state
-  failed_when: check_bookmark.rc != 0
+  # rc = 5 - database locked due to Firefox being open
+  failed_when: check_bookmark.rc != 0 and check_bookmark.rc != 5
 
 - name: "Backup places.sqlite before making changes"
   ansible.builtin.copy:
     src: "{{ places_db_path }}"
     dest: "{{ places_db_path }}.bak-{{ ansible_facts['date_time'].iso8601 }}"
     remote_src: yes
-  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
+  when: check_bookmark.stdout == "0" and check_bookmark.rc == 0 # Only run if the bookmark doesn't exist
 
 - name: "(Idempotent) Add URL to moz_places table"
   ansible.builtin.shell:
     # INSERT OR IGNORE will add the URL only if it doesn't already exist.
     cmd: |
       sqlite3 '{{ places_db_path }}' "INSERT OR IGNORE INTO moz_places (url, title, rev_host, frecency) VALUES ('{{ bookmark_url }}', '{{ bookmark_title }}', 'moc.elbisna.scod.', 100);"
-  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
+  when: check_bookmark.stdout == "0" and check_bookmark.rc == 0 # Only run if the bookmark doesn't exist
 
 - name: "Add bookmark entry to moz_bookmarks table"
   ansible.builtin.shell:
@@ -63,4 +64,4 @@
     # The dateAdded and lastModified use unix epoch time in microseconds, as Firefox expects.
     cmd: |
       sqlite3 '{{ places_db_path }}' "INSERT INTO moz_bookmarks (type, fk, parent, position, title, dateAdded, lastModified) VALUES (1, (SELECT id FROM moz_places WHERE url = '{{ bookmark_url }}'), {{ bookmark_parent_folder_id }}, 9999, '{{ bookmark_title }}', strftime('%s','now')*1000000, strftime('%s','now')*1000000);"
-  when: check_bookmark.stdout == "0" # Only run if the bookmark doesn't exist
+  when: check_bookmark.stdout == "0" and check_bookmark.rc == 0 # Only run if the bookmark doesn't exist
