@@ -7,7 +7,6 @@
     msg: |
       rootdisk:{{ root_disk }}, root_part:{{ root_partition }} fs_type:{{ root_fs_type }}, all_partitions:{{ partitions }}, no:{{ last_partition_no }}
       DISTRO:{{ ansible_facts['distribution'] }} (family: {{ ansible_facts['os_family'] }})
-      is_redhat:{{ is_redhat }}, is_debian:{{ is_debian }}
 
 - name: APT Install growpart
   ansible.builtin.apt:
@@ -15,13 +14,13 @@
     state: latest
     update_cache: true
   become: true
-  when: is_debian
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: DNF Install growpart
   dnf:
     name: cloud-utils-growpart
   become: true
-  when: is_redhat
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: growpart the root partition to fill all available space
   ansible.builtin.shell:

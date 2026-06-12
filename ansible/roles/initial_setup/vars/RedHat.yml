@@ -1,0 +1,4 @@
+---
+initial_setup_gnome_group: "Workstation"
+initial_setup_devel_group: "Development Tools"
+initial_setup_gdm_config: "/etc/gdm/custom.conf"

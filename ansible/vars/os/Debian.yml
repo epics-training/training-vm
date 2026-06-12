@@ -1,7 +1,5 @@
 ---
 distro:
-  gnome_group: "gnome-core"
-  gdm_config: "/etc/gdm3/daemon.conf"
   installer: "apt"
   openssl_config: "/etc/ssl/openssl.cnf"
   system_ca_trust_dir: "/usr/local/share/ca-certificates"

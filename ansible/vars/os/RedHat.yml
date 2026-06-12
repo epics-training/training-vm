@@ -1,8 +1,5 @@
 ---
 distro:
-  gnome_group: "Workstation"
-  devel_group: "Development Tools"
-  gdm_config: "/etc/gdm/custom.conf"
   installer: "dnf"
   openssl_config: "/etc/crypto-policies/back-ends/opensslcnf.config"
   system_ca_trust_dir: "/etc/pki/ca-trust/source/anchors"

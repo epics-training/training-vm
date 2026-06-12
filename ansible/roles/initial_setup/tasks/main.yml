@@ -1,4 +1,11 @@
 ---
+- name: Load distribution variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts['distribution'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}.yml"
+
 - name: Print all available facts for debugging
   # 'cd ansible; ansible localhost -m ansible.builtin.setup' will show this info
   ansible.builtin.debug:
@@ -35,7 +42,7 @@
         - rocky-addons.repo
 
 - name: APT Upgrade all packages; install Dev Tools and Gnome
-  when: is_debian
+  when: ansible_facts['os_family'] == 'Debian'
   become: true
   block:
     - name: Upgrade all packages
@@ -53,10 +60,10 @@
           - curl
           - sudo
           - openssl
-          - "{{ distro.gnome_group }}"
+          - "{{ initial_setup_gnome_group }}"
 
 - name: RPM Upgrade all packages; install Dev Tools and Gnome
-  when: is_redhat
+  when: ansible_facts['os_family'] == 'RedHat'
   become: true
   block:
     - name: Upgrade all packages
@@ -67,12 +74,12 @@
     - name: Install Dev Tools and Gnome
       ansible.builtin.dnf:
         name:
-          - "@{{ distro.devel_group }}"
+          - "@{{ initial_setup_devel_group }}"
           - gcc-c++
           - vim
           - sudo
           - openssl
-          - "@{{ distro.gnome_group }}"
+          - "@{{ initial_setup_gnome_group }}"
         allowerasing: true # fix version conflicts for curl and coreutils on Rocky
 
 - name: Change default target to graphical.target
@@ -85,7 +92,7 @@
 
 - name: Make XOrg the default display manager
   ansible.builtin.lineinfile:
-    path: "{{ distro.gdm_config }}"
+    path: "{{ initial_setup_gdm_config }}"
     search_string: "WaylandEnable"
     line: "WaylandEnable=false"
   become: true

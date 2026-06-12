@@ -1,0 +1,3 @@
+---
+initial_setup_gnome_group: "gnome-core"
+initial_setup_gdm_config: "/etc/gdm3/daemon.conf"
