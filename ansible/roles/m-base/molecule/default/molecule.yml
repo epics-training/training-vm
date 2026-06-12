@@ -14,7 +14,6 @@ provisioner:
     host_vars:
       m-base-docker:
         in_container: true
-        is_debian: true
         docker: true
         install_gnome: false
     group_vars:

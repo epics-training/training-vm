@@ -6,7 +6,7 @@
     state: present
     update_cache: true
   become: true
-  when: is_debian and module.required_debs is defined
+  when: ansible_facts['os_family'] == 'Debian' and module.required_debs is defined
 
 - name: "{{ module.name }} | Install required RPM dependencies"
   dnf:
@@ -15,7 +15,7 @@
     install_weak_deps: false
     state: present
   become: true
-  when: is_redhat and module.required_rpms is defined
+  when: ansible_facts['os_family'] == 'RedHat' and module.required_rpms is defined
 
 - name: "{{ module.name }} | Check target directory"
   ansible.builtin.stat:
