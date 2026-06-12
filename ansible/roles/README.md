@@ -2,27 +2,27 @@
 
 ## EPICS Modules
 
-### m-areadetector
+### m_areadetector
 The AreaDetector image processing framework
 (modules Core, SimDetector and PVADriver)
 and their dependency Busy.
 
-### m-base
+### m_base
 EPICS Base C++ and PVXS.
 
-### m-opcua
+### m_opcua
 OPC UA Device Support and the open62541 low-level driver.
 
-### m-p4p
+### m_p4p
 Python wrapper for PVAccess (PVXS-based) and PVA Gateway.
 
-### m-pvaPy
+### m_pvaPy
 Python wrapper for PVAccess (based on the classical PVA stack).
 
-### m-seq
+### m_seq
 State Notation language compiler and Sequencer.
 
-### m-stream
+### m_stream
 StreamDevice Device Support.
 
 ## Phoebus and Services
@@ -30,12 +30,12 @@ StreamDevice Device Support.
 ### phoebus
 Control System Studio / Phoebus.
 
-### archiver-appliance
+### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
 ## Other Clients
 
-### oac-tree
+### oac_tree
 High-level sequencer for automation, operation and control.
 
 ## Bluesky Modules
@@ -52,16 +52,16 @@ Enterprise CA certificate install
 ## Internal Modules
 Low-level stuff and dependencies of the above.
 
-### m-asyn
+### m_asyn
 The ASYN Driver framework.
 
-### m-autosave
+### m_autosave
 The AutoSaveRestore (EPICS Process Database persistence) module.
 
-### m-calc
+### m_calc
 The CALC (array and string calculation) module.
 
-### m-sscan
+### m_sscan
 The SSCAN (multi-dimensional scan record) module.
 
 ### docker
@@ -75,7 +75,7 @@ Java SDK needed for Phoebus and Services.
 
 # Adding EPICS modules
 
-m-base provides a task file to install one or more EPICS modules.
+m_base provides a task file to install one or more EPICS modules.
 
 ## Parameters
 
@@ -102,7 +102,7 @@ Each dictionary in `epics_modules_to_build` should have the following keys:
 
 ## Usage Example
 
-In a high-level role `m-example`:
+In a high-level role `m_example`:
 
 `vars/main.yml`:
 ```yaml
@@ -114,7 +114,7 @@ m_example_modules:
     url: "https://example.com/example-{{ example_version }}.tar.gz"
     release_var: "EXAMPLE"
     release_sortkey: "10"
-    pre_hook: "{{ playbook_dir }}/roles/m-example/tasks/example_prep.yml"
+    pre_hook: "{{ playbook_dir }}/roles/m_example/tasks/example_prep.yml"
 ```
 
 `tasks/main.yml`:

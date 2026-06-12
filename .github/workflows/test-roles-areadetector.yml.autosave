@@ -14,7 +14,7 @@ on:
       - '!ansible/roles/initial_setup/**'
       - '!ansible/roles/catrust/**'
       - '!ansible/roles/common/**'
-      - '!ansible/roles/m-base/**'
+      - '!ansible/roles/m_base/**'
       - '!ansible/roles/epics-module/**'
   pull_request:
     paths:
@@ -26,7 +26,7 @@ on:
       - '!ansible/roles/initial_setup/**'
       - '!ansible/roles/catrust/**'
       - '!ansible/roles/common/**'
-      - '!ansible/roles/m-base/**'
+      - '!ansible/roles/m_base/**'
       - '!ansible/roles/epics-module/**'
   workflow_run:
     workflows: ["Rebuild Container Images"]
@@ -59,7 +59,7 @@ jobs:
         conf:
           - name: "areaDetector"
             id: "ci-areadetector"
-          - name: "oac-tree"
+          - name: "oac_tree"
             id: "ci-oac-tree"
           - name: "Phoebus & Archiver"
             id: "ci-phoebus-aa"

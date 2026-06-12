@@ -1,6 +1,0 @@
----
-dependencies:
-  - role: m-base
-  - role: m-asyn
-  - role: m-autosave
-  - role: m-pvaPy

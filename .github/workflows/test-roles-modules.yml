@@ -7,16 +7,16 @@ on:
       - 'ansible/vars/ci-*.yml'
       - 'ansible/playbook.yml'
       - 'ansible/requirements.yml'
-      - 'ansible/roles/m-*/**'
-      - '!ansible/roles/m-base/**'
+      - 'ansible/roles/m_*/**'
+      - '!ansible/roles/m_base/**'
   pull_request:
     paths:
     - '.github/workflows/test-roles-modules.yml'
     - 'ansible/vars/ci-*.yml'
     - 'ansible/playbook.yml'
     - 'ansible/requirements.yml'
-    - 'ansible/roles/m-*/**'
-    - '!ansible/roles/m-base/**'
+    - 'ansible/roles/m_*/**'
+    - '!ansible/roles/m_base/**'
   workflow_run:
     workflows: ["Rebuild Container Images"]
     types:

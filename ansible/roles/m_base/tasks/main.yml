@@ -1,0 +1,23 @@
+---
+- name: Ensure installation directories exist
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: "0755"
+  become: true
+  loop:
+    - "{{ epics_install_path }}"
+    - "{{ epics_install_path }}/RELEASE.local.d"
+    - "{{ epics_install_path }}/epics-tools.sh.d"
+    - "{{ epics_install_path }}/.flag"
+    - "{{ opi_install_path }}"
+
+- name: Install EPICS Base and PVXS
+  include_tasks: "{{ epics_build_module_task }}"
+  vars:
+    epics_modules_to_build: "{{ m_base_modules }}"
+  when: not (m_base_installed | default(false))
+
+- name: Mark m_base as installed
+  set_fact:
+    m_base_installed: true

@@ -1,0 +1,10 @@
+---
+- name: Install ASYN
+  include_tasks: "{{ epics_build_module_task }}"
+  vars:
+    epics_modules_to_build: "{{ m_asyn_modules }}"
+  when: not (m_asyn_installed | default(false))
+
+- name: Mark m_asyn as installed
+  set_fact:
+    m_asyn_installed: true

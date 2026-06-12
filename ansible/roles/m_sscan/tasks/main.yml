@@ -1,0 +1,10 @@
+---
+- name: Install SSCAN
+  include_tasks: "{{ epics_build_module_task }}"
+  vars:
+    epics_modules_to_build: "{{ m_sscan_modules }}"
+  when: not (m_sscan_installed | default(false))
+
+- name: Mark m_sscan as installed
+  set_fact:
+    m_sscan_installed: true

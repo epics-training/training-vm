@@ -1,0 +1,9 @@
+---
+allow_duplicates: true
+galaxy_info:
+  role_name: m_epics
+  namespace: epics
+  author: Ralph Lange
+  description: Ansible role to install EPICS base in a training VM
+  license: EPICS open license
+  min_ansible_version: "2.7"

@@ -1,0 +1,10 @@
+---
+- name: Install autosave
+  include_tasks: "{{ epics_build_module_task }}"
+  vars:
+    epics_modules_to_build: "{{ m_autosave_modules }}"
+  when: not (m_autosave_installed | default(false))
+
+- name: Mark m_autosave as installed
+  set_fact:
+    m_autosave_installed: true

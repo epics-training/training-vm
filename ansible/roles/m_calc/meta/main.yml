@@ -1,0 +1,4 @@
+---
+dependencies:
+  - role: m_base
+  - role: m_sscan

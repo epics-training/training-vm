@@ -1,0 +1,10 @@
+---
+- name: Install P4P
+  include_tasks: "{{ epics_build_module_task }}"
+  vars:
+    epics_modules_to_build: "{{ m_p4p_modules }}"
+  when: not (m_p4p_installed | default(false))
+
+- name: Mark m_p4p as installed
+  set_fact:
+    m_p4p_installed: true

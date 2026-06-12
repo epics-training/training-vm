@@ -7,14 +7,14 @@ on:
       - 'ansible/vars/ci-*.yml'
       - 'ansible/playbook.yml'
       - 'ansible/requirements.yml'
-      - 'ansible/roles/oac-tree/**'
+      - 'ansible/roles/oac_tree/**'
   pull_request:
     paths:
     - '.github/workflows/test-roles-oac-tree.yml'
     - 'ansible/vars/ci-*.yml'
     - 'ansible/playbook.yml'
     - 'ansible/requirements.yml'
-    - 'ansible/roles/oac-tree/**'
+    - 'ansible/roles/oac_tree/**'
   workflow_run:
     workflows: ["Rebuild Container Images"]
     types:

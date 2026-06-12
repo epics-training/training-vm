@@ -35,75 +35,75 @@
 
     - name: EPICS Base
       include_role:
-        name: m-base
+        name: m_base
       when: m_base is defined and m_base | bool
-      tags: m-base
+      tags: m_base
 
     - name: ASYN
       include_role:
-        name: m-asyn
+        name: m_asyn
       when: m_asyn is defined and m_asyn | bool
-      tags: m-asyn
+      tags: m_asyn
 
     - name: Autosave
       include_role:
-        name: m-autosave
+        name: m_autosave
       when: m_autosave is defined and m_autosave | bool
-      tags: m-autosave
+      tags: m_autosave
 
     - name: SScan
       include_role:
-        name: m-sscan
+        name: m_sscan
       when: m_sscan is defined and m_sscan | bool
-      tags: m-sscan
+      tags: m_sscan
 
     - name: Calc
       include_role:
-        name: m-calc
+        name: m_calc
       when: m_calc is defined and m_calc | bool
-      tags: m-calc
+      tags: m_calc
 
     - name: Busy
       include_role:
-        name: m-busy
+        name: m_busy
       when: m_busy is defined and m_busy | bool
-      tags: m-busy
+      tags: m_busy
 
     - name: AreaDetector
       include_role:
-        name: m-areadetector
+        name: m_areadetector
       when: m_areadetector is defined and m_areadetector | bool
-      tags: m-areadetector
+      tags: m_areadetector
 
     - name: OPC UA
       include_role:
-        name: m-opcua
+        name: m_opcua
       when: m_opcua is defined and m_opcua | bool
-      tags: m-opcua
+      tags: m_opcua
 
     - name: P4P
       include_role:
-        name: m-p4p
+        name: m_p4p
       when: m_p4p is defined and m_p4p | bool
-      tags: m-p4p
+      tags: m_p4p
 
     - name: pvaPy
       include_role:
-        name: m-pvaPy
+        name: m_pvaPy
       when: m_pvaPy is defined and m_pvaPy | bool
-      tags: m-pvaPy
+      tags: m_pvaPy
 
     - name: Sequencer
       include_role:
-        name: m-seq
+        name: m_seq
       when: m_seq is defined and m_seq | bool
-      tags: m-seq
+      tags: m_seq
 
     - name: StreamDevice
       include_role:
-        name: m-stream
+        name: m_stream
       when: m_stream is defined and m_stream | bool
-      tags: m-stream
+      tags: m_stream
 
     - name: Docker
       include_role:
@@ -129,13 +129,13 @@
 
     - name: OAC Tree
       include_role:
-        name: oac-tree
+        name: oac_tree
       when: oac_tree is defined and oac_tree | bool
       tags: oac_tree
 
     - name: Archiver Appliance
       include_role:
-        name: archiver-appliance
+        name: archiver_appliance
       when: archiver_appliance is defined and archiver_appliance | bool
       tags: archiver_appliance
 

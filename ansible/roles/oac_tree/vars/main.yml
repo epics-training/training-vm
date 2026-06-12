@@ -1,0 +1,31 @@
+---
+# variables for oac_tree
+
+oactree_install_path: "/opt/oac-tree"
+
+oactree_bundle_repo: "https://github.com/oac-tree/oac-tree-bundle.git"
+oactree_bundle_version: "v1.4"
+
+required_debs:
+  - cmake
+  - git
+  - libgtest-dev
+  - libgmock-dev
+  - libxml2-dev
+  - qt6-base-dev
+  - qt6-svg-dev
+  - qt6-charts-dev
+  - qt6-tools-dev
+  - adwaita-qt6
+
+required_rpms:
+  - cmake
+  - git
+  - gtest-devel
+  - gmock-devel
+  - libxml2-devel
+  - qt6-qtbase-devel
+  - qt6-qtsvg-devel
+  - qt6-qtcharts-devel
+  - qt6-qttools-devel
+  - adwaita-qt6

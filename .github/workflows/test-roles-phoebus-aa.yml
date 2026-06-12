@@ -9,7 +9,7 @@ on:
       - 'ansible/requirements.yml'
       - 'ansible/roles/phoebus/**'
       - 'ansible/roles/java/**'
-      - 'ansible/roles/archiver-appliance/**'
+      - 'ansible/roles/archiver_appliance/**'
   pull_request:
     paths:
     - '.github/workflows/test-roles-phoebus-aa.yml'
@@ -18,7 +18,7 @@ on:
     - 'ansible/requirements.yml'
     - 'ansible/roles/phoebus/**'
     - 'ansible/roles/java/**'
-    - 'ansible/roles/archiver-appliance/**'
+    - 'ansible/roles/archiver_appliance/**'
   workflow_run:
     workflows: ["Rebuild Container Images"]
     types:
