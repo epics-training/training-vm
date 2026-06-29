@@ -51,20 +51,20 @@ mkdir -p "cache"
 
 case $FLAVOR in
     fedora)
-        BASE_IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-41-1.4.x86_64.qcow2"
-        BASE_IMAGE="cache/fedora-41.qcow2"
+        BASE_IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/44/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-44-1.7.x86_64.qcow2"
+        BASE_IMAGE="cache/fedora-44.qcow2"
         ;;
     rocky)
         BASE_IMAGE_URL="https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
         BASE_IMAGE="cache/rocky-9.qcow2"
         ;;
     debian)
-        BASE_IMAGE_URL="https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2"
-        BASE_IMAGE="cache/debian-12.qcow2"
+        BASE_IMAGE_URL="https://cloud.debian.org/images/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
+        BASE_IMAGE="cache/debian-13.qcow2"
         ;;
     ubuntu)
-        BASE_IMAGE_URL="https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
-        BASE_IMAGE="cache/ubuntu-24.04.qcow2"
+        BASE_IMAGE_URL="https://cloud-images.ubuntu.com/resolute/current/resolute-server-cloudimg-amd64.img"
+        BASE_IMAGE="cache/ubuntu-26.04.qcow2"
         ;;
     *)
         echo "Unknown flavor: $FLAVOR"
