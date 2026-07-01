@@ -11,43 +11,18 @@
   ansible.builtin.debug:
     var: ansible_facts
 
-- name: Replace mirrorlist with specific mirrors for Rocky
-  when: ansible_facts['distribution'] == 'Rocky'
-  become: true
-  block:
-    - name: Comment out mirrorlist for Rocky
-      ansible.builtin.replace:
-        path: "/etc/yum.repos.d/{{ item }}"
-        regexp: "^(mirrorlist=.*)$"
-        replace: "#\\1"
-      with_items:
-        - rocky.repo
-        - rocky-extras.repo
-        - rocky-devel.repo
-        - rocky-addons.repo
-
-    - name: Uncomment baseurl for Rocky
-      ansible.builtin.replace:
-        path: "/etc/yum.repos.d/{{ item }}"
-        regexp: "^#(baseurl=.*)$"
-        replace: "\\1"
-      with_items:
-        - rocky.repo
-        - rocky-extras.repo
-        - rocky-devel.repo
-        - rocky-addons.repo
-
 - name: APT Upgrade all packages; install Dev Tools and Gnome
   when: ansible_facts['os_family'] == 'Debian'
   become: true
   block:
-    - name: Upgrade all packages
+    - name: APT Update and upgrade all packages
       ansible.builtin.apt:
-        name: "*"
-        state: latest
+        upgrade: dist
         update_cache: true
+        autoclean: true
+        autoremove: true
 
-    - name: Install Dev Tools
+    - name: APT Install Dev Tools
       ansible.builtin.apt:
         name:
           - build-essential
@@ -57,7 +32,7 @@
           - sudo
           - openssl
 
-    - name: Install Gnome
+    - name: APT Install Gnome
       ansible.builtin.apt:
         name:
           - "{{ initial_setup_gnome_group }}"
@@ -67,12 +42,13 @@
   when: ansible_facts['os_family'] == 'RedHat'
   become: true
   block:
-    - name: Upgrade all packages
+    - name: RPM Upgrade all packages
       ansible.builtin.dnf:
         name: "*"
         state: latest
+        update_cache: true
 
-    - name: Install Dev Tools
+    - name: RPM Install Dev Tools
       ansible.builtin.dnf:
         name:
           - "@{{ initial_setup_devel_group }}"
@@ -81,29 +57,35 @@
           - sudo
           - openssl
         allowerasing: true # fix version conflicts for curl and coreutils on Rocky
+        install_weak_deps: false
 
-    - name: Install Gnome
+    - name: RPM Install Gnome
       ansible.builtin.dnf:
         name:
           - "@{{ initial_setup_gnome_group }}"
         allowerasing: true
+        install_weak_deps: false
       when: install_graphics | bool
 
-- name: Change default target to graphical.target
-  file:
-    src: /usr/lib/systemd/system/graphical.target
-    dest: /etc/systemd/system/default.target
-    state: link
-  become: true
-  when: not in_container and install_graphics | bool
+    - name: RPM clean cache
+      ansible.builtin.command: dnf clean all
 
-- name: Make XOrg the default display manager
-  ansible.builtin.lineinfile:
-    path: "{{ initial_setup_gdm_config }}"
-    search_string: "WaylandEnable"
-    line: "WaylandEnable=false"
-  become: true
+- name: Set default to graphical target
   when: not in_container and install_graphics | bool
+  become: true
+  block:
+# Source - https://stackoverflow.com/a/72196011
+# Posted by TRW, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-07-01, License - CC BY-SA 4.0
+    - name: "Get current systemd default" # noqa: command-instead-of-module
+      ansible.builtin.command: "systemctl get-default"
+      changed_when: false
+      register: systemdefault
+
+    - name: "Set default to graphical target"
+      ansible.builtin.command: "systemctl set-default graphical.target"
+      when: "'graphical' not in systemdefault.stdout"
+      changed_when: true
 
 - name: Create development user
   ansible.builtin.user:
