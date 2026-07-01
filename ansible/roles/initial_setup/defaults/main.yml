@@ -1,2 +1,3 @@
 ---
 dev_user: "epics-dev"
+install_graphics: false

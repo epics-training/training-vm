@@ -21,6 +21,11 @@
         msg: "Unsupported distro {{ ansible_facts['distribution'] }}."
       when: is_debian == false and is_redhat == false
 
+    - name: Decide if graphics should be installed
+      ansible.builtin.set_fact:
+        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or oac_tree | default(false) | bool }}"
+      tags: always
+
     - name: Initial setup
       include_role:
         name: initial_setup

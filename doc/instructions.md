@@ -23,10 +23,11 @@ There are two ways to do that:
 
 or
 
--  Vagrant can create VirtualBox VMs in a scripted faster fashion,
-   based on available base box images.
-   Follow the
-   [instructions for creating VMs using Vagrant](creating-vm-using-vagrant.md)
+-  cloud-init and QEMU can create a pre-provisioned VM in a scripted, faster
+   fashion, based on official cloud images. The resulting image works
+   directly with QEMU/KVM, and is also converted to a VirtualBox-compatible
+   VDI. Follow the
+   [instructions for creating VMs using cloud-init](creating-vm-using-cloud-init.md)
    (covering all four flavours).
 
 At this point, you have an "empty" VM

@@ -1,0 +1,7 @@
+# additional ignored files for cloud-init
+/cache
+/VMs
+/meta-data
+/user-data
+/seed.iso
+/provisioning.sh.tmp
