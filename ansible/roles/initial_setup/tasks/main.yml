@@ -11,10 +11,6 @@
   ansible.builtin.debug:
     var: ansible_facts
 
-- name: expand the root disk
-  include_tasks: grow_disk.yml
-  when: not in_container
-
 - name: Replace mirrorlist with specific mirrors for Rocky
   when: ansible_facts['distribution'] == 'Rocky'
   become: true
@@ -51,7 +47,7 @@
         state: latest
         update_cache: true
 
-    - name: Install Dev Tools and Gnome
+    - name: Install Dev Tools
       ansible.builtin.apt:
         name:
           - build-essential
@@ -60,7 +56,12 @@
           - curl
           - sudo
           - openssl
+
+    - name: Install Gnome
+      ansible.builtin.apt:
+        name:
           - "{{ initial_setup_gnome_group }}"
+      when: install_graphics | bool
 
 - name: RPM Upgrade all packages; install Dev Tools and Gnome
   when: ansible_facts['os_family'] == 'RedHat'
@@ -71,7 +72,7 @@
         name: "*"
         state: latest
 
-    - name: Install Dev Tools and Gnome
+    - name: Install Dev Tools
       ansible.builtin.dnf:
         name:
           - "@{{ initial_setup_devel_group }}"
@@ -79,8 +80,14 @@
           - vim
           - sudo
           - openssl
-          - "@{{ initial_setup_gnome_group }}"
         allowerasing: true # fix version conflicts for curl and coreutils on Rocky
+
+    - name: Install Gnome
+      ansible.builtin.dnf:
+        name:
+          - "@{{ initial_setup_gnome_group }}"
+        allowerasing: true
+      when: install_graphics | bool
 
 - name: Change default target to graphical.target
   file:
@@ -88,7 +95,7 @@
     dest: /etc/systemd/system/default.target
     state: link
   become: true
-  when: not in_container
+  when: not in_container and install_graphics | bool
 
 - name: Make XOrg the default display manager
   ansible.builtin.lineinfile:
@@ -96,7 +103,7 @@
     search_string: "WaylandEnable"
     line: "WaylandEnable=false"
   become: true
-  when: not in_container
+  when: not in_container and install_graphics | bool
 
 - name: Create development user
   ansible.builtin.user:
@@ -107,18 +114,13 @@
     comment: "EPICS Developer"
   become: true
 
-- name: Make users passwordless for sudo in group wheel
+- name: Make development user passwordless for sudo in group wheel
   ansible.builtin.lineinfile:
     path: /etc/sudoers
     regexp: "^%{{ dev_user }}"
     line: "%{{ dev_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
   become: true
-
-- name: Hide user vagrant from the GDM greeter (login user select)
-  ansible.builtin.template:
-    src: user.conf_nogreeter
-    dest: /var/lib/AccountsService/users/vagrant
 
 - name: Ensure that python refers to python3 (fixes issue with Rocky container)
   ansible.builtin.file:

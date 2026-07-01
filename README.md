@@ -41,9 +41,9 @@ but also - in the setup scripts - contain the instructions how to get there.
 
 ## Technology
 
-We are using [VirtualBox](https://www.oracle.com/virtualization/virtualbox/)
-to create the virtual machine,
-which can be run on Linux, Windows and Mac hosts.
+We are using [QEMU](https://www.qemu.org/) and [cloud-init](https://cloud-init.io/)
+to create and provision the virtual machine.
+The resulting images are compatible with QEMU and [VirtualBox](https://www.oracle.com/virtualization/virtualbox/).
 
 We are using [Ansible](https://docs.ansible.com/)
 to install and configure the software on the Training-VM.
@@ -52,9 +52,9 @@ to install and configure the software on the Training-VM.
 
 There are two steps to create a Training-VM instance:
 
-1. Create the VirtualBox VM
+1. Create the VM
    ([manually](doc/creating-vm-from-scratch.md) or
-   [using Vagrant](doc/creating-vm-using-vagrant.md))
+   [using cloud-init](doc/creating-vm-using-cloud-init.md))
 2. [Bootstrap and Update](doc/bootstrap-update-vm.md) the Training-VM
    to install the training-specific software and content
 
