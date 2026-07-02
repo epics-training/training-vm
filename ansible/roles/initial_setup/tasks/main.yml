@@ -104,9 +104,27 @@
     validate: "visudo -cf %s"
   become: true
 
-- name: Ensure that python refers to python3 (fixes issue with Rocky container)
+- name: Ensure that python refers to python3
   ansible.builtin.file:
     src: /usr/bin/python3
     dest: /usr/bin/python
     state: link
   become: true
+
+- name: Disable SELinux and firewall (on RedHat)
+  when: ansible_facts['os_family'] == 'RedHat'
+  become: true
+  block:
+    - name: Disable SELinux (on RedHat)
+      ansible.posix.selinux:
+        state: disabled
+        update_kernel_param: true
+
+    - name: Disable firewall
+      ansible.builtin.systemd_service:
+        name: firewalld.service
+        state: stopped
+        enabled: false
+      register: firewalld_service_disable
+      failed_when: "firewalld_service_disable|failed and ('Could not find the requested service' not in firewalld_service_disable.msg)"
+      ignore_errors: true
