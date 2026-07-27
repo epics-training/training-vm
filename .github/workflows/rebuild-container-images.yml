@@ -70,12 +70,11 @@ jobs:
             IMAGE=${{ matrix.image }}
           cache-from: type=gha,scope=${{ matrix.distro }}
           cache-to: type=gha,mode=max,scope=${{ matrix.distro }}
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/main' && vars.UPLOAD_GHCR != '' }}
           tags: ghcr.io/${{ env.REPO_NAME }}/epics-training-base-${{ matrix.distro }}:latest
-          outputs: ${{ (github.ref != 'refs/heads/main') && format('type=docker,dest=/tmp/image-{0}.tar', matrix.distro) || '' }}
+          outputs: type=docker,dest=/tmp/image-${{ matrix.distro }}.tar
 
       - name: Upload image artifact
-        if: github.ref != 'refs/heads/main'
         uses: actions/upload-artifact@v7
         with:
           name: epics-training-base-${{ matrix.distro }}-image

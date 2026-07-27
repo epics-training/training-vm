@@ -67,9 +67,7 @@ jobs:
                 console.log(`Run completed with conclusion: ${run.conclusion}`);
                 core.setOutput("run_id", run.id.toString());
                 if (run.conclusion === "success") {
-                  if (context.ref !== 'refs/heads/main') {
-                    artifact_exists = "true";
-                  }
+                  artifact_exists = "true";
                 } else {
                   core.setFailed(`Workflow ${workflow_name} failed with conclusion: ${run.conclusion}`);
                 }
