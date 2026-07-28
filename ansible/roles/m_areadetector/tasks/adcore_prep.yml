@@ -6,6 +6,17 @@
     line: "-include $(TOP)/../RELEASE.local"
   become: true
 
+# xmlGetGlobalState() was libxml2's old per-thread global-state accessor,
+# used here only to reach its xmlFree member; it has been removed from
+# current libxml2 (e.g. on Fedora 44 and Ubuntu 26.04). Plain xmlFree() is
+# the same function and the documented modern replacement.
+- name: "{{ module.name }} pre-build hook | Replace deprecated xmlGetGlobalState()->xmlFree() calls"
+  ansible.builtin.replace:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/ADApp/pluginSrc/NDFileHDF5LayoutXML.cpp"
+    regexp: 'xmlGetGlobalState\(\)->xmlFree\('
+    replace: 'xmlFree('
+  become: true
+
 - name: "{{ module.name }} pre-build hook | Add configuration to configure/CONFIG_SITE"
   ansible.builtin.blockinfile:
     path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/CONFIG_SITE"
