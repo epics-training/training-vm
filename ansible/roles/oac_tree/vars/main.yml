@@ -28,4 +28,3 @@ required_rpms:
   - qt6-qtsvg-devel
   - qt6-qtcharts-devel
   - qt6-qttools-devel
-  - adwaita-qt6
