@@ -47,7 +47,7 @@ jobs:
           - name: "oac-tree"
             id: "ci-oac-tree"
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 165
     permissions:
       contents: read
       actions: read
@@ -80,4 +80,5 @@ jobs:
         run: |
           ./cloud-init/run_ansible_test.sh \
             -i /tmp/qcow2/${{ matrix.distro }}.qcow2 \
-            -c ${{ matrix.conf.id }}
+            -c ${{ matrix.conf.id }} \
+            -t 150

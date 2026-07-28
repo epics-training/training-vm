@@ -36,6 +36,20 @@
   become: true
   when: is_redhat
 
+# adwaita-qt6 is a cosmetic Qt6 style plugin (GNOME/Adwaita look for Qt apps),
+# not something oac-tree-bundle links against, so it's not worth failing the
+# whole build over. Rocky gets it from the Raven repo above; Fedora 44's own
+# repos no longer ship adwaita-qt5/adwaita-qt6 at all (retired upstream), so
+# skip it there and accept the default Qt6 style instead.
+- name: "Install adwaita-qt6 (cosmetic, unavailable on Fedora)"
+  ansible.builtin.dnf:
+    name: adwaita-qt6
+    enablerepo:
+      - epel
+    state: present
+  become: true
+  when: is_redhat and ansible_facts['distribution'] != 'Fedora'
+
 - name: "Check global rebuild flag"
   stat:
     path: "{{ oactree_install_path }}/.flag/REBUILD"
