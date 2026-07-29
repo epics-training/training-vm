@@ -8,3 +8,4 @@ m_calc_modules:
     url: "https://github.com/epics-modules/calc/archive/refs/tags/R{{ calc_version | replace('.', '-') }}.tar.gz"
     release_var: "CALC"
     release_sortkey: "10"
+    pre_hook: "calc_prep.yml"

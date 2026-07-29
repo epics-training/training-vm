@@ -1,3 +1,11 @@
 # Path to the PCRE installation
 PCRE_INCLUDE=/usr/local/include/
 PCRE_LIB=/usr/local/lib
+
+# stream-2.8.26's devXxStream.c device support files initialize their DSET
+# structs with properly-typed function pointers (e.g. long (*)(dbCommon*))
+# against generic DEVSUPFUN (long (*)(void)) struct fields. That was legal
+# pre-C23, but C23 redefined empty parens to mean "takes no arguments" (like
+# C++), so GCC 15's C23-by-default (Fedora 44, Ubuntu 26.04) now makes this a
+# hard type error - same root cause as the busy/seq/sscan/calc fixes.
+USR_CFLAGS_Linux += -std=gnu17

@@ -1,0 +1,19 @@
+---
+# calc-3.7.5's transformRecord.c (and likely other record types in this
+# module) declares its RSET function pointers (init_record, process,
+# special, get_precision, ...) the old K&R way (e.g. "static long
+# init_record();", meaning "unspecified arguments") and then defines/uses
+# them with real parameters. That was legal pre-C23, but C23 redefined empty
+# parens to mean "takes no arguments" (like C++), so GCC 15's C23-by-default
+# (Fedora 44, Ubuntu 26.04) now makes this a hard type error (both directly,
+# as "conflicting types", and indirectly via -Wincompatible-pointer-types
+# when the RSET struct is initialized) - same root cause as the busy/seq/
+# sscan fixes (see m_areadetector/tasks/busy_prep.yml, m_seq/tasks/seq_prep.yml,
+# m_sscan/tasks/sscan_prep.yml).
+- name: "{{ module.name }} pre-build hook | Allow legacy K&R-style declarations"
+  ansible.builtin.blockinfile:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/CONFIG_SITE"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      USR_CFLAGS_Linux += -std=gnu17
+  become: true

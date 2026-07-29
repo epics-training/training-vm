@@ -1,0 +1,15 @@
+---
+# seq-2.2.9's bundled lemon parser generator (src/lemon/lemon.c) declares
+# several functions the old K&R way (e.g. "void FindStates();", meaning
+# "unspecified arguments") and then defines them taking real parameters.
+# That was legal pre-C23, but C23 redefined empty parens to mean "takes no
+# arguments" (like C++), so GCC 15's C23-by-default (e.g. Ubuntu 26.04) now
+# makes this a hard type error ("conflicting types"), not a warning - same
+# root cause as the busy module fix (see m_areadetector/tasks/busy_prep.yml).
+- name: "{{ module.name }} pre-build hook | Allow legacy K&R-style declarations in lemon.c"
+  ansible.builtin.blockinfile:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/CONFIG_SITE"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      USR_CFLAGS_Linux += -std=gnu17
+  become: true

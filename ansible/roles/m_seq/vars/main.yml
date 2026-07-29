@@ -13,4 +13,5 @@ m_seq_modules:
       - re2c
     required_rpms:
       - re2c
+    pre_hook: "seq_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}
