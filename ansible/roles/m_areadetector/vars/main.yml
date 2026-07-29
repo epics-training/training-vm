@@ -11,6 +11,7 @@ m_areadetector_modules:
     url: "https://github.com/epics-modules/busy/archive/refs/tags/R{{ busy_version | replace('.', '-') }}.tar.gz"
     release_var: "BUSY"
     release_sortkey: "10"
+    pre_hook: "busy_prep.yml"
 
   - id: adcore
     name: "AreaDetector - Core"
