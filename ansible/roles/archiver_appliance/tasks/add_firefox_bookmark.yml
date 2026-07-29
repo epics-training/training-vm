@@ -13,11 +13,44 @@
     name: sqlite
     state: present
 
+- name: Ensure Firefox is installed (Debian)
+  become: true
+  when: ansible_facts['distribution'] == 'Debian'
+  ansible.builtin.apt:
+    name: firefox-esr
+    state: present
+
+- name: Ensure Firefox is installed (Ubuntu)
+  become: true
+  when: ansible_facts['distribution'] == 'Ubuntu'
+  ansible.builtin.apt:
+    name: firefox
+    state: present
+
+- name: Ensure Firefox is installed (RPM)
+  become: true
+  when: is_redhat
+  ansible.builtin.dnf:
+    name: firefox
+    state: present
+
 - name: Ensure Firefox profile exists
   become: true
   become_user: "{{ firefox_user }}"
   ansible.builtin.shell:
     cmd: "firefox -headless -CreateProfile {{ firefox_profile_name }} || true"
+  environment:
+    DISPLAY: ":0"
+  changed_when: false
+
+# -CreateProfile only creates the profile directory and prefs.js; places.sqlite
+# (and its moz_bookmarks/moz_places tables) is only populated by an actual
+# startup, so run one headlessly and kill it once initialization is done.
+- name: Initialize the Firefox profile database (creates places.sqlite tables)
+  become: true
+  become_user: "{{ firefox_user }}"
+  ansible.builtin.shell:
+    cmd: "timeout 15 firefox -headless -P {{ firefox_profile_name }} -no-remote about:blank || true"
   environment:
     DISPLAY: ":0"
   changed_when: false

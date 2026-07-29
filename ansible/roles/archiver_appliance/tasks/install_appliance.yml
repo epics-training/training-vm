@@ -1,4 +1,10 @@
 ---
+- name: Ensure unzip is installed (needed to unpack default-package.zip)
+  become: true
+  ansible.builtin.package:
+    name: unzip
+    state: present
+
 - name: Create temporary location for WAR unpacking
   become: true
   ansible.builtin.file:
