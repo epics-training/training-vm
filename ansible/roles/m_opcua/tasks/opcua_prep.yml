@@ -30,10 +30,14 @@
     mode: '0755'
   become: true
 
+# open62541 defaults UA_FORCE_WERROR to ON.
+# Its openssl crypto plugin trips GCC's -Wjump-misses-init
+# (a goto jumping over a variable's scope) on newer GCC (e.g. Fedora 44);
+# harmless, so disable the blanket -Werror rather than chase individual warnings.
 - name: "{{ module.name }} pre-build hook | Build open62541 (cmake)"
   ansible.builtin.command:
     chdir: "/opt/opcua/open62541/build"
-    cmd: cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_ENABLE_ENCRYPTION=OPENSSL
+    cmd: cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_ENABLE_ENCRYPTION=OPENSSL -DUA_FORCE_WERROR=OFF
   become: true
 
 - name: "{{ module.name }} pre-build hook | Build open62541 (make)"
@@ -65,6 +69,36 @@
     url: "https://github.com/epics-training/opcua-support/releases/download/v1.0/ua_expert.AppImage"
     dest: "/opt/opcua/uaexpert.AppImage"
     mode: "555"
+  become: true
+
+# Cherry-pick of upstream commit 485922c1e9b5bcce34d87be7bc5a6545209f8986
+# ("fix gcc-15 problem"), not yet in the v0.11.2 tag.
+- name: "{{ module.name }} pre-build hook | Fix extern \"C\" export nested in namespace (gcc-15, iocshIntegration.cpp)"
+  ansible.builtin.replace:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/devOpcuaSup/iocshIntegration.cpp"
+    regexp: |-
+      extern "C" \{
+      epicsExportRegistrar\(opcuaIocshRegister\);
+      \}
+
+      \} // namespace
+    replace: |-
+      } // namespace
+
+      extern "C" { epicsExportRegistrar(opcuaIocshRegister); }
+  become: true
+
+- name: "{{ module.name }} pre-build hook | Fix extern \"C\" export nested in namespace (gcc-15, opcuaItemRecord.cpp)"
+  ansible.builtin.replace:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/devOpcuaSup/opcuaItemRecord.cpp"
+    regexp: |-
+      extern "C" \{ epicsExportAddress\(rset, opcuaItemRSET\); \}
+
+      \} // namespace
+    replace: |-
+      } // namespace
+
+      extern "C" { epicsExportAddress(rset, opcuaItemRSET); }
   become: true
 
 - name: "{{ module.name }} pre-build hook| Ensure configure directory exists"
