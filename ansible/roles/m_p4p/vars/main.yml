@@ -22,5 +22,6 @@ m_p4p_modules:
       - python3-Cython
     enable_repos:
       - crb
+      - epel
     pre_hook: "p4p_prep.yml"
     args: -j {{ ansible_facts.processor_vcpus }}

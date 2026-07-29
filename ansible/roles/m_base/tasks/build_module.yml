@@ -8,6 +8,16 @@
   become: true
   when: ansible_facts['os_family'] == 'Debian' and module.required_debs is defined
 
+- name: "{{ module.name }} | Ensure EPEL is available"
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  become: true
+  when: >-
+    ansible_facts['os_family'] == 'RedHat' and
+    ansible_facts['distribution'] != 'Fedora' and
+    'epel' in (module.enable_repos | default([]))
+
 - name: "{{ module.name }} | Install required RPM dependencies"
   dnf:
     name: "{{ module.required_rpms }}"
