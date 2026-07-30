@@ -1,5 +1,5 @@
 ---
-p4p_version: "4.2.0"
+p4p_version: "4.2.2"
 
 m_p4p_modules:
   - id: p4p

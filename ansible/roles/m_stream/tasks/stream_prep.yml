@@ -12,6 +12,35 @@
     dest: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/CONFIG_SITE.local"
   become: true
 
+# Cherry-pick of upstream StreamDevice commit e87e093c846ca19383462036d2f85ca5369b17b3
+# Recent ASYN makes vxi11 support conditional, so streamApp's old asynRegistrars.dbd fails to link
+- name: "{{ module.name }} pre-build hook | Make vxi11 support optional (StreamDevice#e87e093)"
+  ansible.builtin.replace:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/streamApp/Makefile"
+    regexp: |-
+      ifdef ASYN
+      # edit asynRegistrars\.dbd if necessary
+      streamApp_DBD \+= asynRegistrars\.dbd
+      # add asynRecord\.dbd if you like
+      streamApp_DBD \+= asynRecord\.dbd
+      PROD_LIBS \+= asyn
+    replace: |-
+      ifdef ASYN
+      streamApp_DBD += asyn.dbd
+      streamApp_DBD += drvAsynIPPort.dbd
+      streamApp_DBD += drvAsynSerialPort.dbd
+      # vxi11 support is optional in recent asyn versions
+      #streamApp_DBD += drvVxi11.dbd
+
+      PROD_LIBS += asyn
+  become: true
+
+- name: "{{ module.name }} pre-build hook | Remove obsolete asynRegistrars.dbd"
+  ansible.builtin.file:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/streamApp/asynRegistrars.dbd"
+    state: absent
+  become: true
+
 - name: "{{ module.name }} pre-build hook | Download PCRE sources"
   ansible.builtin.unarchive:
     src: "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2/download"

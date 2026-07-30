@@ -1,5 +1,5 @@
 ---
-asyn_version: "4.45"
+asyn_version: "4.46"
 
 m_asyn_modules:
   - id: asyn

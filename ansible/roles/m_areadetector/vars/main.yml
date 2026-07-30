@@ -34,10 +34,8 @@ m_areadetector_modules:
       - hdf5-devel
     enable_repos:
       - crb
+      - epel
     pre_hook: "adcore_prep.yml"
-    # Fedora/Rocky 9 libxml2 is too new for Core 3.13 (missing XmlGetGlobal)
-    # Also skip on Ubuntu 24.04 (Noble) as seen in CI failures
-    skip: "{{ ansible_facts['distribution'] == 'Fedora' or (ansible_facts['distribution'] == 'Rocky' and ansible_facts.distribution_major_version == '9') or (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts.distribution_release == 'noble') }}"
 
   - id: adsimdetector
     name: "AreaDetector - SimDetector"
@@ -46,7 +44,6 @@ m_areadetector_modules:
     release_var: "ADSIMDETECTOR"
     release_sortkey: "10"
     pre_hook: "adsimdetector_prep.yml"
-    skip: "{{ ansible_facts['distribution'] == 'Fedora' or (ansible_facts['distribution'] == 'Rocky' and ansible_facts.distribution_major_version == '9') or (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts.distribution_release == 'noble') }}"
 
   - id: adpvadriver
     name: "AreaDetector - pvaDriver"
@@ -55,5 +52,3 @@ m_areadetector_modules:
     release_var: "PVADRIVER"
     release_sortkey: "10"
     pre_hook: "adpvadriver_prep.yml"
-    # only build on Rocky < 9 and non-Noble Ubuntu (though it was only Rocky originally)
-    skip: "{{ ansible_facts['distribution'] != 'Rocky' or ansible_facts.distribution_major_version == '9' }}"
