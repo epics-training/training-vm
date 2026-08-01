@@ -7,3 +7,4 @@ venv
 /vagrant/corporate_root_ca.crt
 __pycache__
 *.pyc
+/CLAUDE.md

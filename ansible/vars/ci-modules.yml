@@ -10,4 +10,4 @@ m_opcua: true
 m_stream: true
 m_p4p: true
 
-in_container: true
+in_container: false

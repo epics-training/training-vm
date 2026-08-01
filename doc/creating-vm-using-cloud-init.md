@@ -48,6 +48,11 @@ If you want the VM to clone a specific fork or branch of the `training-vm` repos
 ./create_vm.sh -f rocky -r https://github.com/myuser/training-vm.git -b my-feature-branch
 ```
 
+To pin provisioning to an exact commit (checked out after cloning the branch), add `-s`:
+```bash
+./create_vm.sh -f rocky -r https://github.com/myuser/training-vm.git -b my-feature-branch -s <commit-sha>
+```
+
 ## Output
 
 The resulting images are placed in the `VMs/` directory:

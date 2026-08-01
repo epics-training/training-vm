@@ -8,24 +8,29 @@ FLAVOR=""
 INSTALL_GRAPHICS="false"
 REPO_URL="https://github.com/epics-training/training-vm.git"
 REPO_BRANCH="main"
+REPO_SHA=""
 DISK_SIZE="150G"
 VM_DIR="VMs"
 CPUS="4"
 CA_CERT=""
 SET_CATRUST="false"
+INSTALL_TEST_HOOK="false"
 
 usage() {
-    echo "Usage: $0 -f <flavor> [-j <cpus>] [-c <ca_cert>] [-g] [-r <repo_url>] [-b <branch>]"
+    echo "Usage: $0 -f <flavor> [-j <cpus>] [-c <ca_cert>] [-g] [-r <repo_url>] [-b <branch>] [-T]"
     echo "  -f: flavor (fedora, rocky, debian, ubuntu)"
     echo "  -j: number of cpus to use (default: $CPUS)"
     echo "  -c: CA certificate to add (in PEM format)"
     echo "  -g: install graphics (default: false)"
     echo "  -r: repository URL (default: $REPO_URL)"
     echo "  -b: repository branch (default: $REPO_BRANCH)"
+    echo "  -s: repository commit sha to check out after cloning (default: branch tip)"
+    echo "  -T: authorize the CI test SSH key for epics-dev (used by run_ansible_test.sh;"
+    echo "      do not use for images meant for distribution)"
     exit 1
 }
 
-while getopts "f:j:c:gr:b:" opt; do
+while getopts "f:j:c:gr:b:s:T" opt; do
     case $opt in
         f) FLAVOR=$OPTARG ;;
         j) if [[ $OPTARG =~ ^[1-9][0-9]*$ ]]; then
@@ -38,6 +43,8 @@ while getopts "f:j:c:gr:b:" opt; do
         g) INSTALL_GRAPHICS="true" ;;
         r) REPO_URL=$OPTARG ;;
         b) REPO_BRANCH=$OPTARG ;;
+        s) REPO_SHA=$OPTARG ;;
+        T) INSTALL_TEST_HOOK="true" ;;
         *) usage ;;
     esac
 done
@@ -91,8 +98,10 @@ echo "Generating cloud-init seed..."
 # Create user-data from template
 sed -e "s|TRAINING_VM_REPO=.*|TRAINING_VM_REPO=\"$REPO_URL\"|" \
     -e "s|TRAINING_VM_BRANCH=.*|TRAINING_VM_BRANCH=\"$REPO_BRANCH\"|" \
+    -e "s|TRAINING_VM_SHA=.*|TRAINING_VM_SHA=\"$REPO_SHA\"|" \
     -e "s|INSTALL_GRAPHICS=.*|INSTALL_GRAPHICS=\"$INSTALL_GRAPHICS\"|" \
     -e "s|SET_CATRUST=.*|SET_CATRUST=\"$SET_CATRUST\"|" \
+    -e "s|INSTALL_TEST_HOOK=.*|INSTALL_TEST_HOOK=\"$INSTALL_TEST_HOOK\"|" \
     provisioning.sh > provisioning.sh.tmp
 
 # We need to embed the script into user-data

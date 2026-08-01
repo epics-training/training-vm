@@ -1,0 +1,105 @@
+name: "Build Cloud-Init VM Images"
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-cloud-init-images.yml'
+      - 'cloud-init/**'
+      - 'ansible/roles/initial_setup/**'
+      - 'ansible/roles/m_base/**'
+      - 'ansible/playbook.yml'
+      - 'ansible/requirements.yml'
+      - 'ansible/vars/local.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/build-cloud-init-images.yml'
+      - 'cloud-init/**'
+      - 'ansible/roles/initial_setup/**'
+      - 'ansible/roles/m_base/**'
+      - 'ansible/playbook.yml'
+      - 'ansible/requirements.yml'
+      - 'ansible/vars/local.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/_check.yml
+
+  build:
+    needs: check
+    name: "Build ${{ matrix.distro }} image"
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [fedora, rocky, debian, ubuntu]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Install QEMU and cloud-init tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils cloud-image-utils curl
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cache base cloud image
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: cloud-init/cache
+          key: cloud-init-base-image-${{ matrix.distro }}-${{ hashFiles('cloud-init/create_vm.sh') }}
+
+      - name: Determine repo/branch/commit under test
+        id: repo
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_URL: ${{ github.event.pull_request.head.repo.clone_url }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          PUSH_REF: ${{ github.ref_name }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "url=$PR_HEAD_URL" >> "$GITHUB_OUTPUT"
+            echo "branch=$PR_HEAD_REF" >> "$GITHUB_OUTPUT"
+            echo "sha=$PR_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=$PUSH_URL" >> "$GITHUB_OUTPUT"
+            echo "branch=$PUSH_REF" >> "$GITHUB_OUTPUT"
+            echo "sha=$PUSH_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build ${{ matrix.distro }} image
+        working-directory: cloud-init
+        env:
+          REPO_URL: ${{ steps.repo.outputs.url }}
+          REPO_BRANCH: ${{ steps.repo.outputs.branch }}
+          REPO_SHA: ${{ steps.repo.outputs.sha }}
+        run: |
+          ./create_vm.sh -f ${{ matrix.distro }} -g -T \
+            -r "$REPO_URL" \
+            -b "$REPO_BRANCH" \
+            -s "$REPO_SHA"
+
+      - name: Upload qcow2 artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: training-vm-${{ matrix.distro }}-qcow2
+          path: cloud-init/VMs/${{ matrix.distro }}.qcow2
+          retention-days: ${{ github.ref == 'refs/heads/main' && 14 || 3 }}
