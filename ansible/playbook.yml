@@ -144,4 +144,18 @@
       when: archiver_appliance is defined and archiver_appliance | bool
       tags: archiver_appliance
 
+  # Defined at the play level (not inside a role's handlers/main.yml) so it's
+  # always registered and notifiable regardless of which per-feature roles
+  # are enabled for a given run - training_vm_homepage_dir is living in
+  # group_vars/all.yml for the same reason.
+  handlers:
+    - name: Reassemble Training-VM homepage
+      become: true
+      ansible.builtin.assemble:
+        src: "{{ training_vm_homepage_dir }}/links.d"
+        dest: "{{ training_vm_homepage_dir }}/index.html"
+        owner: "{{ dev_user }}"
+        group: "{{ dev_user }}"
+        mode: "0644"
+
   environment: "{{ proxy_env }}"
