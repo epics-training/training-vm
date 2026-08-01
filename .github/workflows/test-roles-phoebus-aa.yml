@@ -19,35 +19,30 @@ on:
     - 'ansible/roles/phoebus/**'
     - 'ansible/roles/java/**'
     - 'ansible/roles/archiver_appliance/**'
-  workflow_run:
-    workflows: ["Rebuild Container Images"]
-    types:
-      - completed
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   check:
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/_check.yml
 
-  wait:
-    uses: ./.github/workflows/_wait_for_workflow.yml
+  resolve:
+    needs: check
+    permissions:
+      actions: read
+    uses: ./.github/workflows/_resolve_build_run.yml
     with:
-      workflow_name: "rebuild-container-images"
+      workflow_file: "build-cloud-init-images.yml"
       sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-
-  prep:
-    runs-on: ubuntu-latest
-    outputs:
-      repo_name: ${{ steps.lowercase.outputs.repo_name }}
-    steps:
-      - id: lowercase
-        run: echo "repo_name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+      branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
 
   test:
-    needs: [check, wait, prep]
+    needs: [check, resolve]
     name: "${{ matrix.distro }}: ${{ matrix.conf.name }}"
-    if: |
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     strategy:
       fail-fast: false
       matrix:
@@ -56,30 +51,37 @@ jobs:
           - name: "Phoebus & Archiver"
             id: "ci-phoebus-aa"
     runs-on: ubuntu-latest
+    timeout-minutes: 75
     permissions:
       contents: read
       actions: read
-      packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Download image artifact
-        if: needs.wait.outputs.artifact_exists == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          name: epics-training-base-${{ matrix.distro }}-image
-          path: /tmp
-          run-id: ${{ needs.wait.outputs.run_id }}
+          persist-credentials: false
+
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Download qcow2 artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: training-vm-${{ matrix.distro }}-qcow2
+          path: /tmp/qcow2
+          run-id: ${{ needs.resolve.outputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Load image
-        if: needs.wait.outputs.artifact_exists == 'true'
-        run: docker load -i /tmp/image-${{ matrix.distro }}.tar
-
-      - name: Build ${{ matrix.conf.name }}
+      - name: Run Ansible in QEMU (${{ matrix.conf.name }}, source=${{ needs.resolve.outputs.source }})
         run: |
-          IMAGE="ghcr.io/${{ needs.prep.outputs.repo_name }}/epics-training-base-${{ matrix.distro }}:latest"
-          docker run --rm --init --memory=6g --shm-size=2g \
-            -v ${{ github.workspace }}:/workspace -w /workspace/ansible $IMAGE \
-            ansible-playbook -v playbook.yml -e "@vars/${{ matrix.conf.id }}.yml"
+          ./cloud-init/run_ansible_test.sh \
+            -i /tmp/qcow2/${{ matrix.distro }}.qcow2 \
+            -c ${{ matrix.conf.id }}

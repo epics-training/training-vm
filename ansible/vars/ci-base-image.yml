@@ -1,7 +1,0 @@
----
-# Overrides for the GitHub CI base container image build
-
-initial_setup: true
-m_base: true
-
-in_container: true

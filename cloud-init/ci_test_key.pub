@@ -1,0 +1,1 @@
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAjDiVvK2Ia3MhFRk3p11N3FWWsFAaPBNZtjdjsKfyE/ training-vm CI ephemeral test key for epics-dev - grants access only inside a --snapshot, localhost-only, throwaway QEMU VM destroyed at job end; do not reuse elsewhere

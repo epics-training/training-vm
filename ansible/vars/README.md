@@ -2,19 +2,13 @@
 
 This folder contains collections of configurations and user setups.
 
-*File: `vars/ci-base-image.yml`*
-
-Setup used to create the container image
-that runs container-based CI on GitHub Actions.
-This saves time by
-starting from a common container image with the initial setup
-and running independent VM installs in parallel.
-
 *File: `vars/ci-*.yml`*
 
-Setups for the different container-based CI runs
-that are used on GitHub Actions.
-This saves time by running independent builds in parallel.
+Setups for the different role-testing CI runs used on GitHub Actions.
+Each is applied against a pre-built qcow2 VM image (from
+`.github/workflows/build-cloud-init-images.yml`) that already has EPICS
+Base installed, so these overrides only need to add the roles/modules
+specific to that test group.
 
 *File: `vars/container.yml`*
 
