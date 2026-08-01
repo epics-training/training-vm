@@ -103,7 +103,7 @@
     enabled: true
     daemon_reload: true
 
-- name: Add Firefox bookmark
-  when: not in_container
+- name: Add Archiver Appliance link to the Training-VM homepage
+  when: not in_container and install_graphics | bool
   ansible.builtin.include_tasks:
-    file: add_firefox_bookmark.yml
+    file: add_homepage_link.yml

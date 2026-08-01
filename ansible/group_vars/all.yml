@@ -17,6 +17,10 @@ is_debian: "{{ ansible_facts['os_family'] == 'Debian' }}"
 is_redhat: "{{ ansible_facts['os_family'] == 'RedHat' }}"
 dev_user: "epics-dev"
 
+# Shared by any role that wants to add a link to the desktop homepage set up
+# by initial_setup (roles/initial_setup/tasks/homepage.yml)
+training_vm_homepage_dir: "/home/{{ dev_user }}/.local/share/training-vm-homepage"
+
 # Default: false proxy
 proxy_env: {}
 

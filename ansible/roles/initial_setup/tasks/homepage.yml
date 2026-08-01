@@ -1,0 +1,114 @@
+---
+# A local, static "homepage" (opened via a Desktop icon) that other roles can
+# add links to - see roles/archiver_appliance/tasks/add_homepage_link.yml for
+# an example consumer. A role that wants to add a link just drops its own
+# "NN-name" fragment into {{ training_vm_homepage_dir }}/links.d and notifies
+# the "Reassemble Training-VM homepage" handler (defined at the playbook
+# level in playbook.yml, so it's always registered regardless of which
+# per-feature roles are enabled) - it runs once at the end of the play no
+# matter how many roles notify it, same fragment pattern already used for
+# RELEASE.local.d and epics-tools.sh.d in roles/m_base/tasks/build_module.yml.
+- name: Ensure the Training-VM homepage link fragments directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ training_vm_homepage_dir }}/links.d"
+    state: directory
+    owner: "{{ dev_user }}"
+    group: "{{ dev_user }}"
+    mode: "0755"
+
+- name: Add the Training-VM homepage header/footer fragments
+  become: true
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: "{{ training_vm_homepage_dir }}/links.d/{{ item.name }}"
+    owner: "{{ dev_user }}"
+    group: "{{ dev_user }}"
+    mode: "0644"
+  loop:
+    - name: "00-header"
+      content: |
+        <!DOCTYPE html>
+        <html>
+        <head><title>Training-VM Homepage</title></head>
+        <body>
+        <h1>Training-VM Homepage</h1>
+        <ul>
+    - name: "99-footer"
+      content: |
+        </ul>
+        </body>
+        </html>
+  loop_control:
+    label: "{{ item.name }}"
+  notify: Reassemble Training-VM homepage
+
+- name: Ensure the user's Desktop directory exists
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ dev_user }}/Desktop"
+    state: directory
+    owner: "{{ dev_user }}"
+    group: "{{ dev_user }}"
+    mode: "0755"
+
+- name: Add a Training-VM homepage icon to the Desktop
+  become: true
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Version=1.0
+      Type=Application
+      Name=Training-VM Homepage
+      Comment=Open the Training-VM homepage
+      Exec=firefox file://{{ training_vm_homepage_dir }}/index.html
+      Icon=firefox
+      Terminal=false
+      Categories=Network;
+    dest: "/home/{{ dev_user }}/Desktop/training-vm-homepage.desktop"
+    owner: "{{ dev_user }}"
+    group: "{{ dev_user }}"
+    mode: "0755"
+
+# GNOME Shell has shown no desktop icons at all since 3.28 without this
+# extension. Fedora/Ubuntu enable it by default; Rocky/Debian's GNOME task
+# groups may not include or enable it, so do both explicitly here too -
+# harmless if already present. Best-effort: if the package isn't available,
+# the icon just won't be visible, which is a cosmetic gap, not a broken
+# install.
+- name: Ensure the dconf CLI is installed
+  become: true
+  ansible.builtin.package:
+    name: "{{ 'dconf-cli' if is_debian else 'dconf' }}"
+    state: present
+
+- name: Install the GNOME desktop-icons extension (best-effort)
+  become: true
+  ansible.builtin.package:
+    name: gnome-shell-extension-desktop-icons-ng
+    state: present
+  register: ding_install
+  ignore_errors: true
+
+- name: Enable the GNOME desktop-icons extension by default
+  when: ding_install is succeeded
+  become: true
+  block:
+    - name: Ensure the dconf local.d directory exists
+      # Fedora/Rocky's dconf package pre-creates this; Debian/Ubuntu's doesn't
+      ansible.builtin.file:
+        path: /etc/dconf/db/local.d
+        state: directory
+        mode: "0755"
+
+    - name: Write the desktop-icons dconf default
+      ansible.builtin.copy:
+        content: |
+          [org/gnome/shell]
+          enabled-extensions=['ding@rastersoft.com']
+        dest: /etc/dconf/db/local.d/00-training-vm-desktop-icons
+        mode: "0644"
+
+    - name: Compile the dconf database
+      ansible.builtin.command: dconf update
+      changed_when: true

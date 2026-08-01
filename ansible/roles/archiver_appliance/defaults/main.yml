@@ -17,16 +17,6 @@ archiver_appliance_java_initial_heapsize: "512M"
 archiver_appliance_java_max_heapsize: "512M"
 archiver_appliance_java_heap_tuning_opts: "-XX:MaxHeapFreeRatio=10 -XX:MinHeapFreeRatio=5 -XX:-ShrinkHeapInSteps"
 
-# --- The user whose Firefox profile we are modifying ---
-firefox_user: "{{ dev_user }}"
-firefox_profile_name: "default"
-
-# --- Bookmark Details ---
-bookmark_title: "Archiver"
-bookmark_url: "http://localhost:17665/mgmt/ui/index.html"
-
-# --- Parent Folder ID in Firefox ---
-# 2 = Bookmarks Menu
-# 3 = Bookmarks Toolbar
-# 5 = Other Bookmarks
-bookmark_parent_folder_id: 3
+# --- Training-VM homepage link ---
+archiver_homepage_link_title: "Archiver"
+archiver_homepage_link_url: "http://localhost:17665/mgmt/ui/index.html"

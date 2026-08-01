@@ -96,6 +96,11 @@
     comment: "EPICS Developer"
   become: true
 
+- name: Set up the Training-VM homepage and desktop icon
+  when: not in_container and install_graphics | bool
+  ansible.builtin.include_tasks:
+    file: homepage.yml
+
 - name: Make development user passwordless for sudo in group wheel
   ansible.builtin.lineinfile:
     path: /etc/sudoers
