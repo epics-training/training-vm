@@ -1,0 +1,6 @@
+---
+# Fallback for architectures we do not (yet) support.
+# Deliberately does not define `arch` - playbook.yml fails fast on that.
+
+is_x86_64: false
+is_aarch64: false

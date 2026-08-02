@@ -6,9 +6,16 @@ The Training-VM is available in four flavours in their stable/current versions:
 - debian: the "stable" release of [Debian Linux](https://www.debian.org/)
 - ubuntu: [Ubuntu Linux](https://ubuntu.com/)
 
+Each flavour is available for two architectures:
+- `x86_64` (also called `amd64`): Intel/AMD processors
+- `aarch64` (also called `arm64`): ARM processors,
+  including Macs with Apple Silicon
+
 Not all modules are working on all flavours.
 
-Not all modules are working on Mac using Apple Silicon processors.
+Not all modules are working on `aarch64`
+(for example, the OPC UA training exercise needs the UaExpert client,
+which its vendor only publishes for `x86_64` Linux).
 
 ## 1. Create the Virtual Machine
 

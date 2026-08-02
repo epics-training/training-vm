@@ -2,5 +2,19 @@
 - name: Converge
   hosts: all # dunno
   become: true
+
+  # Molecule runs the role directly, bypassing playbook.yml, so the
+  # architecture variables the roles rely on have to be loaded here too.
+  # Same first-found logic as playbook.yml's pre_tasks, one source of truth.
+  pre_tasks:
+    - name: Load architecture-specific variables with fallback
+      ansible.builtin.include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_facts['architecture'] }}.yml"
+            - "default.yml"
+          paths:
+            - "{{ playbook_dir }}/../../../../vars/arch"
+
   roles:
     - role: initial_setup

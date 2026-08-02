@@ -20,6 +20,15 @@ on:
       - 'ansible/requirements.yml'
       - 'ansible/vars/local.yml'
   workflow_dispatch:
+    inputs:
+      architectures:
+        description: "Architectures to run (aarch64 needs a runner with /dev/kvm)"
+        type: choice
+        default: x86_64
+        options:
+          - x86_64
+          - aarch64
+          - x86_64,aarch64
 
 permissions: {}
 
@@ -30,14 +39,23 @@ jobs:
       pull-requests: read
     uses: ./.github/workflows/_check.yml
 
-  build:
+  arch:
     needs: check
-    name: "Build ${{ matrix.distro }} image"
+    uses: ./.github/workflows/_arch_matrix.yml
+    with:
+      architectures: ${{ inputs.architectures || '' }}
+
+  build:
+    needs: [check, arch]
+    name: "Build ${{ matrix.distro }} image (${{ matrix.arch.name }})"
     strategy:
       fail-fast: false
       matrix:
         distro: [fedora, rocky, debian, ubuntu]
-    runs-on: ubuntu-latest
+        # Resolved by _arch_matrix.yml: x86_64 always, aarch64 only when
+        # explicitly dispatched (GitHub's arm64 runners have no /dev/kvm).
+        arch: ${{ fromJSON(needs.arch.outputs.matrix) }}
+    runs-on: ${{ matrix.arch.runner }}
     timeout-minutes: 60
     permissions:
       contents: read
@@ -50,19 +68,27 @@ jobs:
       - name: Install QEMU and cloud-init tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-utils cloud-image-utils curl
+          sudo apt-get install -y ${{ matrix.arch.qemu }} qemu-utils cloud-image-utils curl
 
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          # On a runner without /dev/kvm at all, --name-match=kvm fails with an
+          # opaque "Failed to open the device 'kvm'". Report the real problem
+          # instead: QEMU would silently fall back to TCG emulation and grind
+          # past the job timeout, so stop here with an actionable message.
+          sudo udevadm trigger --name-match=kvm || true
+          if [ ! -e /dev/kvm ]; then
+            echo "::error ::No /dev/kvm on this $(uname -m) runner. These jobs need hardware virtualization - GitHub's arm64 hosted runners do not provide it. Use a KVM-capable (self-hosted or larger) runner."
+            exit 1
+          fi
 
       - name: Cache base cloud image
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: cloud-init/cache
-          key: cloud-init-base-image-${{ matrix.distro }}-${{ hashFiles('cloud-init/create_vm.sh') }}
+          key: cloud-init-base-image-${{ matrix.distro }}-${{ matrix.arch.name }}-${{ hashFiles('cloud-init/create_vm.sh') }}
 
       - name: Determine repo/branch/commit under test
         id: repo
@@ -85,14 +111,14 @@ jobs:
             echo "sha=$PUSH_SHA" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build ${{ matrix.distro }} image
+      - name: Build ${{ matrix.distro }} image (${{ matrix.arch.name }})
         working-directory: cloud-init
         env:
           REPO_URL: ${{ steps.repo.outputs.url }}
           REPO_BRANCH: ${{ steps.repo.outputs.branch }}
           REPO_SHA: ${{ steps.repo.outputs.sha }}
         run: |
-          ./create_vm.sh -f ${{ matrix.distro }} -g -T \
+          ./create_vm.sh -f ${{ matrix.distro }} -a ${{ matrix.arch.name }} -g -T \
             -r "$REPO_URL" \
             -b "$REPO_BRANCH" \
             -s "$REPO_SHA"
@@ -100,6 +126,6 @@ jobs:
       - name: Upload qcow2 artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: training-vm-${{ matrix.distro }}-qcow2
-          path: cloud-init/VMs/${{ matrix.distro }}.qcow2
+          name: training-vm-${{ matrix.distro }}-${{ matrix.arch.name }}-qcow2
+          path: cloud-init/VMs/${{ matrix.distro }}-${{ matrix.arch.name }}.qcow2
           retention-days: ${{ github.ref == 'refs/heads/main' && 14 || 3 }}

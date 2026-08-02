@@ -1,0 +1,71 @@
+name: "Resolve Architecture Matrix"
+
+# Turns a requested architecture list into the `arch` matrix dimension used by
+# the QEMU-based build/test workflows, so the arch -> runner/package mapping
+# lives in exactly one place.
+#
+# x86_64 is the default because it is the only architecture GitHub-hosted
+# runners can do here: the QEMU jobs need /dev/kvm, and GitHub's arm64 hosted
+# runners provide no nested virtualization. Without KVM, QEMU falls back to TCG
+# emulation, which is far too slow for these jobs (hours, past GitHub's 6 h job
+# cap). aarch64 is therefore opt-in via workflow_dispatch, ready for a
+# KVM-capable (self-hosted or larger) arm64 runner.
+
+on:
+  workflow_call:
+    inputs:
+      architectures:
+        description: "Comma-separated architectures (x86_64, aarch64). Empty means x86_64 only."
+        required: false
+        type: string
+        default: ""
+    outputs:
+      matrix:
+        description: "JSON array of {name, runner, qemu} objects for the arch matrix dimension"
+        value: ${{ jobs.resolve.outputs.matrix }}
+
+permissions: {}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - name: Build arch matrix
+        id: set
+        # Passed via env (not interpolated into the script) because this is a
+        # workflow_dispatch input, i.e. user-controlled. Values are matched
+        # against a fixed whitelist below.
+        env:
+          REQUESTED: ${{ inputs.architectures }}
+        run: |
+          set -euo pipefail
+
+          requested="${REQUESTED:-}"
+          if [ -z "$requested" ]; then
+            requested="x86_64"
+          fi
+
+          entries=""
+          for arch in $(echo "$requested" | tr ',' ' '); do
+            case "$arch" in
+              x86_64|amd64)
+                entry='{"name":"x86_64","runner":"ubuntu-latest","qemu":"qemu-system-x86"}'
+                ;;
+              aarch64|arm64)
+                # qemu-system-arm provides qemu-system-aarch64; aarch64 guests
+                # are UEFI-only, hence the firmware package
+                entry='{"name":"aarch64","runner":"ubuntu-24.04-arm","qemu":"qemu-system-arm qemu-efi-aarch64"}'
+                ;;
+              *)
+                echo "::error ::Unknown architecture '$arch' (supported: x86_64, aarch64)"
+                exit 1
+                ;;
+            esac
+            entries="${entries:+$entries,}$entry"
+          done
+
+          echo "matrix=[$entries]" >> "$GITHUB_OUTPUT"
+          echo "Architecture matrix: [$entries]"

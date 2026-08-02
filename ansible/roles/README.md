@@ -73,6 +73,32 @@ One-off role called at the first run in a freshly provisioned VM.
 ### java
 Java SDK needed for Phoebus and Services.
 
+# Writing architecture-independent roles
+
+The playbook supports both `x86_64` and `aarch64` (ARM64) targets.
+Never hard-code an architecture name in a role.
+`playbook.yml` loads `vars/arch/{{ ansible_facts['architecture'] }}.yml`
+(falling back to `vars/arch/default.yml`, which makes the run fail fast on an
+unsupported architecture) and thereby provides:
+
+- `arch.epics_host_arch`: `EPICS_HOST_ARCH` / the `linux-<arch>` subdirectory
+  EPICS builds into, e.g. `linux-x86_64`, `linux-aarch64`.
+- `arch.deb`: dpkg architecture name for apt sources lines (`amd64`, `arm64`).
+- `arch.rpm`: rpm architecture name for dnf repository paths (`x86_64`, `aarch64`).
+- `arch.multiarch_tuple`: Debian multiarch library directory under `/usr/lib`
+  (`x86_64-linux-gnu`, `aarch64-linux-gnu`).
+- `arch.java`: architecture token used by the Adoptium/Temurin release assets
+  (`x64`, `aarch64`).
+- `is_x86_64` / `is_aarch64`: booleans, for gating a task that genuinely only
+  applies to one architecture.
+
+Adding another architecture means adding one `vars/arch/<name>.yml` file.
+
+Some upstream artifacts are only published for x86_64. Where that happens the
+task is gated on `is_x86_64` with a comment explaining the consequence — see
+`m_opcua` (the UaExpert binary) and `oac_tree` (the Raven repo, which serves
+only the cosmetic `adwaita-qt6`).
+
 # Adding EPICS modules
 
 m_base provides a task file to install one or more EPICS modules.

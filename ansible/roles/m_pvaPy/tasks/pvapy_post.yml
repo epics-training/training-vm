@@ -1,6 +1,6 @@
 ---
 - name: "{{ module.name }} post-build hook | Build the documentation"
   ansible.builtin.shell: |
-    PYTHONPATH=../../lib/python/{{ ansible_facts['python_version'] }}/linux-x86_64
+    PYTHONPATH=../../lib/python/{{ ansible_facts['python_version'] }}/{{ arch.epics_host_arch }}
     make -C "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}" doc
   become: true

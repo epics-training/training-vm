@@ -19,13 +19,16 @@
   become: true
   when: is_debian
 
+# The Raven repo is only used for the cosmetic adwaita-qt6 below, and it only
+# publishes an x86_64 tree (.../el9/base/aarch64/ does not exist), so skip it
+# entirely on other architectures.
 - name: "Configure Raven repository"
   ansible.builtin.dnf:
-    name: "https://pkgs.sysadmins.ws/el9/base/x86_64/raven-release.el9.noarch.rpm"
+    name: "https://pkgs.sysadmins.ws/el9/base/{{ arch.rpm }}/raven-release.el9.noarch.rpm"
     disable_gpg_check: true
     state: present
   become: true
-  when: is_redhat
+  when: is_redhat and is_x86_64
 
 - name: "Install required RPM dependencies"
   ansible.builtin.dnf:
@@ -38,17 +41,17 @@
 
 # adwaita-qt6 is a cosmetic Qt6 style plugin (GNOME/Adwaita look for Qt apps),
 # not something oac-tree-bundle links against, so it's not worth failing the
-# whole build over. Rocky gets it from the Raven repo above; Fedora 44's own
-# repos no longer ship adwaita-qt5/adwaita-qt6 at all (retired upstream), so
-# skip it there and accept the default Qt6 style instead.
-- name: "Install adwaita-qt6 (cosmetic, unavailable on Fedora)"
+# whole build over. Rocky gets it from the Raven repo above (x86_64 only);
+# Fedora 44's own repos no longer ship adwaita-qt5/adwaita-qt6 at all (retired
+# upstream), so skip it there and accept the default Qt6 style instead.
+- name: "Install adwaita-qt6 (cosmetic, unavailable on Fedora and on non-x86_64)"
   ansible.builtin.dnf:
     name: adwaita-qt6
     enablerepo:
       - epel
     state: present
   become: true
-  when: is_redhat and ansible_facts['distribution'] != 'Fedora'
+  when: is_redhat and is_x86_64 and ansible_facts['distribution'] != 'Fedora'
 
 - name: "Check global rebuild flag"
   stat:
@@ -70,8 +73,8 @@
   loop:
     - "{{ oactree_install_path }}/{{ distro.lib_dirname }}"
     - "{{ oactree_install_path }}/{{ distro.lib_dirname }}/oac-tree/plugins"
-    - "{{ epics_install_path }}/base-{{ epics_base_version }}/lib/linux-{{ ansible_facts['architecture'] }}"
-    - "{{ epics_install_path }}/pvxs-{{ pvxs_version }}/lib/linux-{{ ansible_facts['architecture'] }}"
+    - "{{ epics_install_path }}/base-{{ epics_base_version }}/lib/{{ arch.epics_host_arch }}"
+    - "{{ epics_install_path }}/pvxs-{{ pvxs_version }}/lib/{{ arch.epics_host_arch }}"
 
 - name: "Check bundle source directory"
   stat:
@@ -121,7 +124,7 @@
     cmd: "cmake -DCMAKE_INSTALL_PREFIX={{ oactree_install_path }} -DCMAKE_PREFIX_PATH={{ oactree_install_path }} .."
   environment:
     EPICS_BASE: "{{ epics_install_path }}/base-{{ epics_base_version }}"
-    EPICS_HOST_ARCH: "linux-{{ ansible_facts['architecture'] }}"
+    EPICS_HOST_ARCH: "{{ arch.epics_host_arch }}"
     PVXS_DIR: "{{ epics_install_path }}/pvxs-{{ pvxs_version }}"
     CMAKE_PREFIX_PATH: "{{ oactree_install_path }}"
   become: true
@@ -132,7 +135,7 @@
   register: build_result
   environment:
     EPICS_BASE: "{{ epics_install_path }}/base-{{ epics_base_version }}"
-    EPICS_HOST_ARCH: "linux-{{ ansible_facts['architecture'] }}"
+    EPICS_HOST_ARCH: "{{ arch.epics_host_arch }}"
     PVXS_DIR: "{{ epics_install_path }}/pvxs-{{ pvxs_version }}"
     CMAKE_PREFIX_PATH: "{{ oactree_install_path }}"
   become: true

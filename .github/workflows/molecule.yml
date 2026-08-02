@@ -10,12 +10,22 @@ on:
 
 jobs:
   molecule:
-    runs-on: ubuntu-latest
+    name: "${{ matrix.role }} (${{ matrix.arch.name }})"
+    runs-on: ${{ matrix.arch.runner }}
     permissions:
       contents: read
     strategy:
+      # Don't let a failure on one architecture hide the result on the other
+      fail-fast: false
       matrix:
         role: ["initial_setup", "m_base"]
+        # The molecule platform image (ubuntu:22.04) is multi-arch, so each
+        # runner exercises the role natively on its own architecture
+        arch:
+          - name: x86_64
+            runner: ubuntu-latest
+          - name: aarch64
+            runner: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

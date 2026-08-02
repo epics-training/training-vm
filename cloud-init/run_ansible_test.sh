@@ -12,12 +12,20 @@ TIMEOUT_MINUTES="60"
 SSH_PORT="10022"
 IMAGE=""
 CONF=""
+ARCH=""
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source=qemu_arch.sh
+source "$SCRIPT_DIR/qemu_arch.sh"
 
 usage() {
-    echo "Usage: $0 -i <qcow2 image> -c <conf id> [-j <cpus>] [-m <mem>] [-t <timeout minutes>] [-p <ssh port>]"
+    echo "Usage: $0 -i <qcow2 image> -c <conf id> [-a <arch>] [-j <cpus>] [-m <mem>] [-t <timeout minutes>] [-p <ssh port>]"
     echo "  -i: path to the qcow2 image to boot (must be built with create_vm.sh -T;"
     echo "      opened with -snapshot, never modified)"
     echo "  -c: config id, maps to ansible/vars/<id>.yml"
+    echo "  -a: architecture of the image: x86_64 (amd64) or aarch64 (arm64)"
+    echo "      (default: inferred from the image's -<arch> filename suffix,"
+    echo "      else this host's architecture, currently $(host_arch))"
     echo "  -j: number of vCPUs (default: $CPUS)"
     echo "  -m: guest memory (default: $MEM)"
     echo "  -t: timeout in minutes for the ansible-playbook run (default: $TIMEOUT_MINUTES)"
@@ -25,10 +33,11 @@ usage() {
     exit 1
 }
 
-while getopts "i:c:j:m:t:p:" opt; do
+while getopts "i:c:a:j:m:t:p:" opt; do
     case $opt in
         i) IMAGE=$OPTARG ;;
         c) CONF=$OPTARG ;;
+        a) ARCH=$OPTARG ;;
         j) CPUS=$OPTARG ;;
         m) MEM=$OPTARG ;;
         t) TIMEOUT_MINUTES=$OPTARG ;;
@@ -41,7 +50,17 @@ done
 [ -z "$CONF" ] && usage
 [ -f "$IMAGE" ] || { echo "Image not found: $IMAGE" >&2; exit 1; }
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+# An explicit -a wins; otherwise trust the <flavor>-<arch>.qcow2 name that
+# create_vm.sh produces, and fall back to the host architecture.
+if [ -z "$ARCH" ]; then
+    case "$(basename "$IMAGE")" in
+        *-x86_64.*|*-amd64.*)  ARCH="x86_64" ;;
+        *-aarch64.*|*-arm64.*) ARCH="aarch64" ;;
+        *) ARCH=$(uname -m) ;;
+    esac
+fi
+ARCH=$(normalize_arch "$ARCH") || exit 1
+
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 ANSIBLE_DIR="$REPO_ROOT/ansible"
 [ -f "$ANSIBLE_DIR/vars/${CONF}.yml" ] || { echo "No such config: ansible/vars/${CONF}.yml" >&2; exit 1; }
@@ -63,10 +82,13 @@ SSH_KEY_OPTS=(-i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/d
               -o LogLevel=ERROR -o BatchMode=yes -o ConnectTimeout=5)
 SSH_OPTS=(-p "$SSH_PORT" "${SSH_KEY_OPTS[@]}")
 
-echo "Booting QEMU (snapshot mode, no cloud-init) with image=$IMAGE conf=$CONF ..."
-qemu-system-x86_64 \
-    -cpu host \
-    -M q35,accel=kvm:tcg \
+# Pick the emulator, machine type, CPU model and (on aarch64) UEFI firmware
+# that match the image's architecture.
+qemu_setup "$ARCH" "$WORK_DIR"
+
+echo "Booting QEMU (snapshot mode, no cloud-init) with image=$IMAGE arch=$ARCH conf=$CONF ..."
+"$QEMU_BIN" \
+    "${QEMU_ARCH_ARGS[@]}" \
     -m "$MEM" \
     -smp "$CPUS" \
     -no-reboot \

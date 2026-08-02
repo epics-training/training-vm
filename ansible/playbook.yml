@@ -15,11 +15,28 @@
             - vars/os
       tags: always
 
+    - name: Load architecture-specific variables with fallback
+      ansible.builtin.include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_facts['architecture'] }}.yml"
+            - "default.yml"
+          paths:
+            - vars/arch
+      tags: always
+
   tasks:
     - name: Check that distro has been identified
       ansible.builtin.fail:
         msg: "Unsupported distro {{ ansible_facts['distribution'] }}."
       when: is_debian == false and is_redhat == false
+
+    - name: Check that architecture has been identified
+      ansible.builtin.fail:
+        msg: >-
+          Unsupported architecture {{ ansible_facts['architecture'] }}.
+          Add ansible/vars/arch/{{ ansible_facts['architecture'] }}.yml to support it.
+      when: arch is not defined
 
     - name: Decide if graphics should be installed
       ansible.builtin.set_fact:

@@ -6,7 +6,7 @@
 
 - name: Add Docker APT repository
   apt_repository:
-    repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_facts['distribution'] | lower }} {{ ansible_facts.distribution_release }} stable
+    repo: deb [arch={{ arch.deb }}] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_facts['distribution'] | lower }} {{ ansible_facts.distribution_release }} stable
   become: true
 
 - name: Install Docker
