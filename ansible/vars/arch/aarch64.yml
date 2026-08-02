@@ -1,0 +1,17 @@
+---
+# Architecture-specific names for 64-bit ARM (ansible architecture fact: aarch64)
+
+arch:
+  # EPICS_HOST_ARCH / the linux-<arch> subdirectory EPICS builds into
+  epics_host_arch: "linux-aarch64"
+  # dpkg architecture name (apt repositories, [arch=...] in sources lines)
+  deb: "arm64"
+  # rpm architecture name (dnf repository path components)
+  rpm: "aarch64"
+  # Debian/Ubuntu multiarch library directory name (/usr/lib/<tuple>)
+  multiarch_tuple: "aarch64-linux-gnu"
+  # Architecture token used by the Adoptium/Temurin release assets
+  java: "aarch64"
+
+is_x86_64: false
+is_aarch64: true

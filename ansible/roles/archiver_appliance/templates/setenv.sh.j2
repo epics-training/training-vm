@@ -97,4 +97,4 @@ export ARCHAPPL_MEDIUM_TERM_FOLDER="{{ archiver_appliance_storage }}/mts"
 export ARCHAPPL_LONG_TERM_FOLDER="{{ archiver_appliance_storage }}/lts"
 
 # EPICS variables
-export EPICS_HOST_ARCH=linux-{{ ansible_facts['architecture'] }}
+export EPICS_HOST_ARCH={{ arch.epics_host_arch }}

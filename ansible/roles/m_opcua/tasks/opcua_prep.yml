@@ -64,12 +64,17 @@
     dest: "/opt/opcua/server_demo.tar.gz"
   become: true
 
-- name: "{{ module.name }} pre-build hook | Download the UaExpert client"
+# UaExpert is a closed-source binary from Unified Automation and is only
+# published for x86_64 Linux, so there is nothing to fetch on other
+# architectures. The opcua module itself builds fine without it - only the
+# interactive OPC UA browsing exercise is unavailable.
+- name: "{{ module.name }} pre-build hook | Download the UaExpert client (x86_64 only)"
   get_url:
     url: "https://github.com/epics-training/opcua-support/releases/download/v1.0/ua_expert.AppImage"
     dest: "/opt/opcua/uaexpert.AppImage"
     mode: "555"
   become: true
+  when: is_x86_64
 
 # Cherry-pick of upstream commit 485922c1e9b5bcce34d87be7bc5a6545209f8986
 # ("fix gcc-15 problem"), not yet in the v0.11.2 tag.

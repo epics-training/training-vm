@@ -9,7 +9,7 @@
 - name: Install open jdk 21
   become: true
   ansible.builtin.unarchive:
-    src: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_{{ (ansible_facts['architecture'] == 'x86_64') | ternary('x64', ansible_facts['architecture']) }}_linux_hotspot_21.0.9_10.tar.gz"
+    src: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_{{ arch.java }}_linux_hotspot_21.0.9_10.tar.gz"
     dest: "{{ java_home }}"
     remote_src: true
     creates: "{{ java_home }}/bin/java"

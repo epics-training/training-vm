@@ -1,4 +1,4 @@
-name: "Test Roles: oac-tree"
+name: "Roles: oac-tree"
 
 on:
   push:
@@ -16,6 +16,15 @@ on:
     - 'ansible/requirements.yml'
     - 'ansible/roles/oac_tree/**'
   workflow_dispatch:
+    inputs:
+      architectures:
+        description: "Architectures to run (aarch64 needs a runner with /dev/kvm)"
+        type: choice
+        default: x86_64
+        options:
+          - x86_64
+          - aarch64
+          - x86_64,aarch64
 
 permissions: {}
 
@@ -25,6 +34,12 @@ jobs:
       contents: read
       pull-requests: read
     uses: ./.github/workflows/_check.yml
+
+  arch:
+    needs: check
+    uses: ./.github/workflows/_arch_matrix.yml
+    with:
+      architectures: ${{ inputs.architectures || '' }}
 
   resolve:
     needs: check
@@ -37,16 +52,19 @@ jobs:
       branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
 
   test:
-    needs: [check, resolve]
-    name: "${{ matrix.distro }}: ${{ matrix.conf.name }}"
+    needs: [check, resolve, arch]
+    name: "${{ matrix.distro }}/${{ matrix.arch.name }}: ${{ matrix.conf.name }}"
     strategy:
       fail-fast: false
       matrix:
         distro: [ubuntu, rocky, debian, fedora]
+        # Resolved by _arch_matrix.yml: x86_64 always, aarch64 only when
+        # explicitly dispatched (GitHub's arm64 runners have no /dev/kvm).
+        arch: ${{ fromJSON(needs.arch.outputs.matrix) }}
         conf:
           - name: "oac-tree"
             id: "ci-oac-tree"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch.runner }}
     timeout-minutes: 165
     permissions:
       contents: read
@@ -60,18 +78,26 @@ jobs:
       - name: Install QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86
+          sudo apt-get install -y ${{ matrix.arch.qemu }}
 
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          # On a runner without /dev/kvm at all, --name-match=kvm fails with an
+          # opaque "Failed to open the device 'kvm'". Report the real problem
+          # instead: QEMU would silently fall back to TCG emulation and grind
+          # past the job timeout, so stop here with an actionable message.
+          sudo udevadm trigger --name-match=kvm || true
+          if [ ! -e /dev/kvm ]; then
+            echo "::error ::No /dev/kvm on this $(uname -m) runner. These jobs need hardware virtualization - GitHub's arm64 hosted runners do not provide it. Use a KVM-capable (self-hosted or larger) runner."
+            exit 1
+          fi
 
       - name: Download qcow2 artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          name: training-vm-${{ matrix.distro }}-qcow2
+          name: training-vm-${{ matrix.distro }}-${{ matrix.arch.name }}-qcow2
           path: /tmp/qcow2
           run-id: ${{ needs.resolve.outputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -79,6 +105,7 @@ jobs:
       - name: Run Ansible in QEMU (${{ matrix.conf.name }}, source=${{ needs.resolve.outputs.source }})
         run: |
           ./cloud-init/run_ansible_test.sh \
-            -i /tmp/qcow2/${{ matrix.distro }}.qcow2 \
+            -i /tmp/qcow2/${{ matrix.distro }}-${{ matrix.arch.name }}.qcow2 \
+            -a ${{ matrix.arch.name }} \
             -c ${{ matrix.conf.id }} \
             -t 150

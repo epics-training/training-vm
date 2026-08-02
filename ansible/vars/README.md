@@ -31,6 +31,22 @@ and change the content as required.
 
 ---
 
+## Differences Between Architectures
+
+Both `x86_64` and `aarch64` are supported, as build host and as target.
+Roles get their architecture-dependent names from the `arch` variable
+(see [`roles/README.md`](../roles/README.md)); the differences that are not
+just naming are:
+
+- `m_opcua`: the UaExpert client is a closed-source binary that Unified
+  Automation only ships for x86_64 Linux, so it is not installed on `aarch64`.
+  The module itself builds; only the interactive OPC UA browsing exercise is
+  unavailable.
+- `oac_tree`: on RedHat-family distros the Raven repository (which exists
+  solely to provide the cosmetic `adwaita-qt6` Qt style) has no `aarch64` tree,
+  so both are skipped there. oac-tree builds and runs, using the default Qt6
+  style.
+
 ## Differences Between Flavors
 
 Rocky is the only flavor that builds everything.
