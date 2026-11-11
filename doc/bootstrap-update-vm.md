@@ -28,7 +28,7 @@ The file `local.yml` contains the configuration
 for your specific training event.
 Originally, it has been created
 as a copy of the sample file
-`vm-setup/ansible/group_vars/local.yml.sample`.
+`vm-setup/ansible/vars/local.yml.sample`.
 
 Edit `local.yml` to configure your training VM,
 then update your Training-VM.
