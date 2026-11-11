@@ -1,0 +1,21 @@
+#!/bin/sh
+# {{ ansible_managed }}
+#
+# Phoebus alarm server launcher
+#
+# Run 'alarm-server -help' for options. Useful for trainees:
+#   alarm-server -config {{ alarm_config_name }} -export my_config.xml
+#   alarm-server -config {{ alarm_config_name }} -import my_config.xml
+
+export JAVA_HOME={{ java_home }}
+export PATH="$JAVA_HOME/bin:$PATH"
+
+TARGET={{ alarm_server_target_dir }}
+JAR=$(ls "$TARGET"/service-alarm-server-*.jar 2>/dev/null | grep -v -e '-sources' -e '-javadoc' | head -n 1)
+
+if [ -z "$JAR" ]; then
+  echo "alarm-server: no service-alarm-server-*.jar found in $TARGET" >&2
+  exit 1
+fi
+
+exec java ${ALARM_SERVER_JAVA_OPTS} -jar "$JAR" "$@"

@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Phoebus Alarm Server ({{ alarm_config_name }})
+After=network.target kafka.service
+Requires=kafka.service
+
+[Service]
+Type=simple
+User={{ alarm_server_user }}
+Group={{ alarm_server_group }}
+WorkingDirectory={{ alarm_server_home }}
+
+Environment="ALARM_SERVER_JAVA_OPTS={{ alarm_server_java_heap_opts }}"
+
+# -create_topics creates any missing Kafka topics for the configuration
+# (with the compaction/retention settings the alarm system needs)
+ExecStart=/usr/local/bin/alarm-server -noshell -create_topics -server {{ alarm_kafka_server }} -config {{ alarm_config_name }} -settings {{ alarm_server_settings }}
+SuccessExitStatus=143
+
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

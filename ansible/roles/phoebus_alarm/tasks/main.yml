@@ -1,0 +1,63 @@
+---
+# Run the Phoebus alarm server (built by the phoebus role) as a service
+
+- name: Check that the alarm server has been built
+  ansible.builtin.find:
+    paths: "{{ alarm_server_target_dir }}"
+    patterns: "service-alarm-server-*.jar"
+  register: alarm_server_jars
+
+- name: Fail if the alarm server jar is missing
+  ansible.builtin.fail:
+    msg: >-
+      No service-alarm-server-*.jar found in {{ alarm_server_target_dir }}.
+      The alarm server is built by the phoebus role - make sure it ran successfully.
+  when: alarm_server_jars.matched == 0
+
+- name: Ensure alarm-server group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ alarm_server_group }}"
+    system: true
+    state: present
+
+# Needs a home directory: Phoebus keeps user settings/state under ~/.phoebus
+- name: Ensure alarm-server user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ alarm_server_user }}"
+    group: "{{ alarm_server_group }}"
+    system: true
+    home: "{{ alarm_server_home }}"
+    createhome: true
+    shell: /sbin/nologin
+    state: present
+
+- name: Create alarm-server wrapper
+  become: true
+  ansible.builtin.template:
+    src: alarm-server.sh.j2
+    dest: /usr/local/bin/alarm-server
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart alarm-server
+
+- name: Create alarm-server systemd service
+  become: true
+  ansible.builtin.template:
+    src: alarm-server.service.j2
+    dest: /etc/systemd/system/alarm-server.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart alarm-server
+
+- name: Manage alarm-server service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: alarm-server
+    state: started
+    enabled: true
+    daemon_reload: true

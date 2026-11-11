@@ -16,6 +16,7 @@ m_stream: true
 
 # Services
 # phoebus: true
+# phoebus_alarm: true
 # archiver_appliance: true
 # docker: true
 # bluesky: true

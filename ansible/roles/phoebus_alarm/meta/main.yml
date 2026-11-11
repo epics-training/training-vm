@@ -1,0 +1,7 @@
+---
+# Dependencies for the Phoebus alarm server
+# (the alarm server binaries come from the phoebus role,
+#  which playbook.yml runs whenever phoebus_alarm is enabled)
+dependencies:
+  - role: java
+  - role: kafka

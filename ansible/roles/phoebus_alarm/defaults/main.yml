@@ -1,0 +1,15 @@
+---
+# Defaults for the Phoebus alarm server
+#
+# The alarm server itself is built by the phoebus role (Phoebus' top-level
+# Maven build includes services/), so this role only runs the already-built
+# alarm server. Kafka comes from the kafka role (a dependency).
+# alarm_config_name and alarm_kafka_server live in group_vars/all.yml,
+# because the phoebus role needs them too (client preferences).
+
+alarm_server_user: alarm-server
+alarm_server_group: alarm-server
+alarm_server_home: "/var/lib/alarm-server"
+alarm_server_target_dir: "/opt/epics-tools/lib/phoebus/services/alarm-server/target"
+alarm_server_settings: "/opt/epics-tools/config/preferences.ini"
+alarm_server_java_heap_opts: "-Xms128M -Xmx512M"
