@@ -13,6 +13,10 @@ archiver_appliance_version: "2.5.0"
 archiver_appliance_version_flag: "{{ tomcat_home }}/.installed-\
   tomcat-{{ tomcat_version }}-archappl-{{ archiver_appliance_version }}"
 
+# MariaDB schema script shipped with the installed appliance
+archiver_appliance_schema: "{{ tomcat_home }}/webapps/mgmt/install/\
+  archappl_mysql.sql"
+
 archiver_appliance_id: "appliance0"
 archiver_appliance_storage: "{{ tomcat_home }}/storage"
 
