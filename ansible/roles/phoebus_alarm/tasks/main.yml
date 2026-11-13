@@ -61,3 +61,57 @@
     state: started
     enabled: true
     daemon_reload: true
+
+# --- Verify that the alarm system is actually up and running ---
+
+- name: Apply pending service restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that the alarm system is running
+  when: not in_container
+  block:
+    - name: Wait for Kafka to accept connections
+      ansible.builtin.wait_for:
+        host: "{{ kafka_listen_host }}"
+        port: "{{ kafka_port }}"
+        timeout: 120
+
+    # The alarm server creates its topics at startup (-create_topics)
+    - name: Wait for the alarm server to create the {{ alarm_config_name }} topic
+      ansible.builtin.command:
+        cmd: "{{ kafka_home }}/bin/kafka-topics.sh --bootstrap-server {{ alarm_kafka_server }} --list"
+      environment:
+        JAVA_HOME: "{{ java_home }}"
+      register: alarm_kafka_topics
+      until: alarm_config_name in alarm_kafka_topics.stdout_lines
+      retries: 24
+      delay: 5
+      changed_when: false
+
+    # Give a crashing alarm server time to fail before checking
+    - name: Let the services settle
+      ansible.builtin.pause:
+        seconds: 15
+
+    - name: Get Kafka and alarm-server service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+      loop:
+        - kafka
+        - alarm-server
+      register: alarm_services
+
+    - name: Check that Kafka and alarm-server are active
+      ansible.builtin.assert:
+        that:
+          - item.status.ActiveState == 'active'
+          - item.status.SubState == 'running'
+        fail_msg: >-
+          Service {{ item.item }} is {{ item.status.ActiveState }}/{{ item.status.SubState }}
+          - see 'journalctl -u {{ item.item }}'
+        success_msg: "Service {{ item.item }} is running"
+        quiet: true
+      loop: "{{ alarm_services.results }}"
+      loop_control:
+        label: "{{ item.item }}"
