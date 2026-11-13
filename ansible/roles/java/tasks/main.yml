@@ -6,15 +6,33 @@
     path: "{{ java_home }}"
     state: directory
 
-- name: Install open jdk 21
+- name: Install open jdk {{ java_major }}
   become: true
   ansible.builtin.unarchive:
-    src: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_{{ arch.java }}_linux_hotspot_21.0.9_10.tar.gz"
+    src: "{{ java_url }}"
     dest: "{{ java_home }}"
     remote_src: true
     creates: "{{ java_home }}/bin/java"
     extra_opts:
       - --strip-components=1
+
+- name: Check that the new JDK is working
+  ansible.builtin.command: "{{ java_home }}/bin/java -version"
+  register: java_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Remove older JDK installations
+  become: true
+  ansible.builtin.file:
+    path: "{{ java_home | dirname }}/{{ item }}"
+    state: absent
+  loop:
+    - jdk-17
+    - jdk-21
+  when:
+    - java_version_check.rc == 0
+    - (java_home | dirname) + '/' + item != java_home
 
 - name: Check if CA certificate (DER format) exists
   ansible.builtin.stat:

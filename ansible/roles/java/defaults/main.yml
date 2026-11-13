@@ -1,3 +1,12 @@
 # Java settings
 ---
-java_home: "/opt/epics-tools/lib/jvm/jdk-21"
+java_home: "/opt/epics-tools/lib/jvm/jdk-{{ java_major }}"
+
+# Temurin release to install (from https://adoptium.net/temurin/releases/)
+java_major: "25"
+java_release: "25.0.5+8"
+java_tag: "jdk-{{ java_release | urlencode }}"
+java_file: "OpenJDK{{ java_major }}U-jdk_{{ arch.java }}_linux_hotspot_\
+  {{ java_release | replace('+', '_') }}.tar.gz"
+java_url: "https://github.com/adoptium/temurin{{ java_major }}-binaries/\
+  releases/download/{{ java_tag }}/{{ java_file }}"
