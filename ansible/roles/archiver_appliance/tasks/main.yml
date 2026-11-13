@@ -86,10 +86,21 @@
     query: show tables
   register: tables
 
+# become: the SQL script lives below webapps/, which is only readable by tomcat
 - name: Run the Archiver-Appliance's MariaDB install script
+  become: true
   ansible.builtin.shell:
     cmd: "mariadb -u archappl --password=archappl archappl < {{ tomcat_home }}/webapps/mgmt/install/archappl_mysql.sql"
-  when: "tables.rowcount == 0"
+  when: tables.rowcount[0] == 0
+
+- name: Check that the archiver tables exist
+  community.mysql.mysql_query:
+    login_db: archappl
+    login_user: archappl
+    login_password: archappl
+    query: show tables
+  register: tables
+  failed_when: tables.rowcount[0] == 0
 
 - name: Create Archiver Appliance systemd service
   become: true
@@ -108,6 +119,23 @@
     state: started
     enabled: true
     daemon_reload: true
+
+- name: Apply pending Archiver Appliance restarts before checking it
+  ansible.builtin.meta: flush_handlers
+
+- name: Check that the Archiver Appliance is up and answering
+  when: not in_container
+  ansible.builtin.uri:
+    url: "http://localhost:17665/mgmt/bpl/getApplianceInfo\
+      ?id={{ archiver_appliance_id }}"
+    return_content: true
+  register: archiver_appliance_info
+  until: >-
+    archiver_appliance_info.status == 200 and
+    (archiver_appliance_info.json | default({})).identity | default('')
+    == archiver_appliance_id
+  retries: 36
+  delay: 5
 
 - name: Add Archiver Appliance link to the Training-VM homepage
   when: not in_container and install_graphics | bool
