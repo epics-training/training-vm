@@ -49,9 +49,14 @@ org.phoebus.logbook/logbook_factory=inmemory
 
 # Archived Data
 
-org.csstudio.trends.databrowser3/urls=pbraw\://epics-services-tst:13168/retrieval|tst
-org.csstudio.trends.databrowser3/archives=pbraw\://epics-services-tst:13168/retrieval
+{% if archiver_appliance | default(false) | bool %}
+org.csstudio.trends.databrowser3/urls=pbraw\://{{ archiver_host }}:{{ archiver_retrieval_port }}/retrieval|Archiver Appliance
+org.csstudio.trends.databrowser3/archives=pbraw\://{{ archiver_host }}:{{ archiver_retrieval_port }}/retrieval
+org.csstudio.trends.databrowser3/use_default_archives=true
+org.csstudio.trends.databrowser3/drop_failed_archives=false
+{% else %}
 org.csstudio.trends.databrowser3/use_default_archives=false
+{% endif %}
 # Include to get a prompt for newly started instance
 org.csstudio.trends.databrowser3/prompt_for_raw_data_request = true
 org.csstudio.trends.databrowser3/prompt_for_visibility = true
