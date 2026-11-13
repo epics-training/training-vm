@@ -56,5 +56,10 @@ org.csstudio.trends.databrowser3/use_default_archives=false
 org.csstudio.trends.databrowser3/prompt_for_raw_data_request = true
 org.csstudio.trends.databrowser3/prompt_for_visibility = true
 
+# Alarm System
+org.phoebus.applications.alarm/server={{ alarm_kafka_server }}
+org.phoebus.applications.alarm/config_name={{ alarm_config_name }}
+org.phoebus.applications.alarm/config_names={{ alarm_config_name }}
+
 # Save Restore
 org.phoebus.applications.saveandrestore.client/jmasar.service.url=http://epics-services-tst:23181

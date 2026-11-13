@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Apache Kafka (single node, KRaft) for the Phoebus alarm system
+After=network.target
+
+[Service]
+Type=simple
+User={{ kafka_user }}
+Group={{ kafka_group }}
+
+Environment="JAVA_HOME={{ java_home }}"
+Environment="LOG_DIR={{ kafka_log_dir }}"
+Environment="KAFKA_HEAP_OPTS={{ kafka_heap_opts }}"
+
+ExecStart={{ kafka_home }}/bin/kafka-server-start.sh {{ kafka_config_dir }}/server.properties
+ExecStop={{ kafka_home }}/bin/kafka-server-stop.sh
+TimeoutStopSec=60
+SuccessExitStatus=143
+
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

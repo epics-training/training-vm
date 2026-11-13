@@ -1,0 +1,21 @@
+---
+# Defaults for Apache Kafka (single node, KRaft mode - no ZooKeeper)
+
+kafka_version: "4.3.2"
+kafka_scala_version: "2.13"
+kafka_sha512: "c2063485f90312bba795052df3e49b8eea337adf97f1111b946c60771c7a2f088055d2ccc7221d72fe30bd6a3f7a58348f14e14240eaddfe60446ea1c033618b"
+
+kafka_base: "/opt/epics-tools/lib"
+kafka_home: "{{ kafka_base }}/kafka"
+kafka_config_dir: "/opt/epics-tools/config/kafka"
+kafka_data_dir: "/var/lib/kafka"
+kafka_log_dir: "/var/log/kafka"
+kafka_user: kafka
+kafka_group: kafka
+
+# Only listen on localhost (training VM, no authentication)
+kafka_listen_host: "localhost"
+kafka_port: 9092
+kafka_controller_port: 9093
+
+kafka_heap_opts: "-Xms256M -Xmx512M"

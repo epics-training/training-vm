@@ -1,0 +1,4 @@
+---
+# Dependencies for Apache Kafka
+dependencies:
+  - role: java
