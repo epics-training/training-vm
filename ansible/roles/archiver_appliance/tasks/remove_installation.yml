@@ -1,0 +1,45 @@
+---
+# Remove a previous Tomcat/Archiver Appliance installation (if any), so that
+# a version change does not leave stale jars behind in lib/ or webapps/.
+# Archived data (storage/), configuration (archappl_conf/) and logs are kept.
+
+- name: Check for an existing Archiver Appliance service
+  become: true
+  ansible.builtin.stat:
+    path: /etc/systemd/system/archiver-appliance.service
+  register: archiver_appliance_service
+
+- name: Stop the Archiver Appliance service
+  become: true
+  ansible.builtin.systemd_service:
+    name: archiver-appliance
+    state: stopped
+  when: not in_container and archiver_appliance_service.stat.exists
+
+- name: Remove previous Tomcat and Archiver Appliance files
+  become: true
+  ansible.builtin.file:
+    path: "{{ tomcat_home }}/{{ item }}"
+    state: absent
+  loop:
+    - bin
+    - conf
+    - lib
+    - temp
+    - webapps
+    - work
+
+- name: Find flag files of previous installations
+  become: true
+  ansible.builtin.find:
+    paths: "{{ tomcat_home }}"
+    patterns: ".installed-*"
+    hidden: true
+  register: archiver_appliance_old_flags
+
+- name: Remove flag files of previous installations
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ archiver_appliance_old_flags.files }}"

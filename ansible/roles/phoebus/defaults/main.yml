@@ -15,3 +15,8 @@ mvn_version: 3.9.14
 mvn_home: "/opt/epics-tools/lib/apache-maven"
 
 epics_services_account: root
+
+# Archiver Appliance retrieval service used by the Data Browser
+# (only configured when the archiver_appliance role is enabled)
+archiver_host: localhost
+archiver_retrieval_port: 17665

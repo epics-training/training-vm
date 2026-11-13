@@ -10,6 +10,8 @@ on:
       - 'ansible/roles/phoebus/**'
       - 'ansible/roles/java/**'
       - 'ansible/roles/archiver_appliance/**'
+      - 'ansible/tests/ci-phoebus-aa.yml'
+      - 'cloud-init/run_ansible_test.sh'
   pull_request:
     paths:
     - '.github/workflows/test-roles-phoebus-aa.yml'
@@ -19,6 +21,8 @@ on:
     - 'ansible/roles/phoebus/**'
     - 'ansible/roles/java/**'
     - 'ansible/roles/archiver_appliance/**'
+    - 'ansible/tests/ci-phoebus-aa.yml'
+    - 'cloud-init/run_ansible_test.sh'
   workflow_dispatch:
     inputs:
       architectures:

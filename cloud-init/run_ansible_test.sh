@@ -135,4 +135,19 @@ if [ "$ANSIBLE_STATUS" -eq 124 ]; then
     echo "ERROR: ansible-playbook run exceeded ${TIMEOUT_MINUTES}m timeout" >&2
 fi
 
+# Optional functional test for this config: ansible/tests/<conf id>.yml,
+# run in the guest after the playbook succeeded.
+if [ "$ANSIBLE_STATUS" -eq 0 ] && [ -f "$ANSIBLE_DIR/tests/${CONF}.yml" ]; then
+    echo "Running functional test tests/${CONF}.yml in guest..."
+    set +e
+    timeout -k 60s 15m \
+        ssh "${SSH_OPTS[@]}" epics-dev@localhost \
+        "cd /home/epics-dev/ansible-src && ansible-playbook -v 'tests/${CONF}.yml'"
+    ANSIBLE_STATUS=$?
+    set -e
+    if [ "$ANSIBLE_STATUS" -eq 124 ]; then
+        echo "ERROR: functional test exceeded 15m timeout" >&2
+    fi
+fi
+
 exit "$ANSIBLE_STATUS"

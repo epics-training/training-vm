@@ -1,0 +1,136 @@
+---
+# CI test for the ci-phoebus-aa configuration, run by
+# cloud-init/run_ansible_test.sh after the playbook succeeded.
+#
+# Checks that the Phoebus Data Browser can fetch data from the Archiver
+# Appliance: takes the archive URL from the installed Phoebus preferences,
+# archives a counter PV served by a temporary IOC, and fetches its data the
+# way the Data Browser does (pbraw protocol = HTTP getData.raw).
+
+- name: "CI test: Data Browser can fetch data from the Archiver Appliance"
+  hosts: all
+  gather_facts: false
+  vars:
+    test_dir: /tmp/ci-aa-test
+    test_pv: "ci:aa:counter"
+    phoebus_preferences: /opt/epics-tools/config/preferences.ini
+    archiver_mgmt_url: "http://localhost:17665/mgmt/bpl"
+  tasks:
+    - name: Read the installed Phoebus preferences
+      ansible.builtin.slurp:
+        src: "{{ phoebus_preferences }}"
+      register: preferences
+
+    - name: Get the Data Browser's default archive URL
+      vars:
+        archives_line: >-
+          {{ preferences.content | b64decode
+             | regex_search('(?m)^org\.csstudio\.trends\.databrowser3/archives=(.*)$', '\1')
+             | default([''], true) | first }}
+      ansible.builtin.set_fact:
+        # first entry of a '*'-separated list, without '|label', '\:' unescaped
+        databrowser_archive: "{{ (archives_line.split('*') | first).split('|') | first | replace('\\:', ':') | trim }}"
+
+    - name: Check that the Data Browser uses a pbraw archive
+      ansible.builtin.assert:
+        that: databrowser_archive is match('pbraw://')
+        fail_msg: "No pbraw archive configured in {{ phoebus_preferences }}: '{{ databrowser_archive }}'"
+
+    - name: Set the retrieval URL and time range for the data requests
+      ansible.builtin.set_fact:
+        retrieval_url: "{{ databrowser_archive | regex_replace('^pbraw://', 'http://') }}"
+        time_range: >-
+          from={{ lookup('ansible.builtin.pipe', 'date -u -d "-10 min" +%Y-%m-%dT%H:%M:%S.000Z') }}&to={{
+          lookup('ansible.builtin.pipe', 'date -u -d "+10 min" +%Y-%m-%dT%H:%M:%S.000Z') }}
+
+    - name: Test with a temporary IOC
+      block:
+        - name: Create the test directory
+          ansible.builtin.file:
+            path: "{{ test_dir }}"
+            state: directory
+            mode: "0755"
+
+        - name: Create the test database
+          ansible.builtin.copy:
+            dest: "{{ test_dir }}/test.db"
+            mode: "0644"
+            content: |
+              record(calc, "{{ test_pv }}") {
+                field(SCAN, "1 second")
+                field(INPA, "{{ test_pv }}")
+                field(CALC, "A+1")
+              }
+
+        # The Archiver Appliance uses PV Access by default, so a PVA server is needed
+        - name: Start the test IOC
+          ansible.builtin.shell:
+            executable: /bin/bash
+            chdir: "{{ test_dir }}"
+            cmd: |
+              [ -f /etc/profile.d/epics-tools.sh ] && source /etc/profile.d/epics-tools.sh
+              IOC=$(command -v softIocPVA || command -v softIocPVX) || exit 1
+              echo "Using $IOC"
+              nohup "$IOC" -S -d test.db </dev/null >ioc.log 2>&1 &
+              echo $! >ioc.pid
+          changed_when: true
+
+        - name: Check that the test IOC serves the test PV over PV Access
+          ansible.builtin.shell:
+            executable: /bin/bash
+            cmd: |
+              [ -f /etc/profile.d/epics-tools.sh ] && source /etc/profile.d/epics-tools.sh
+              pvget -w 2 {{ test_pv }}
+          register: pvget_result
+          until: pvget_result.rc == 0
+          retries: 10
+          delay: 2
+          changed_when: false
+
+        - name: Ask the Archiver Appliance to archive the test PV
+          ansible.builtin.uri:
+            url: "{{ archiver_mgmt_url }}/archivePV?pv={{ test_pv }}&samplingperiod=1&samplingmethod=MONITOR"
+            return_content: true
+
+        - name: Wait until the test PV is being archived
+          ansible.builtin.uri:
+            url: "{{ archiver_mgmt_url }}/getPVStatus?pv={{ test_pv }}"
+            return_content: true
+          register: pv_status
+          until: (pv_status.json | default([{}], true) | first).status | default('') == 'Being archived'
+          retries: 36
+          delay: 5
+
+        - name: Check the archived samples (getData.json)
+          ansible.builtin.uri:
+            url: "{{ retrieval_url }}/data/getData.json?pv={{ test_pv }}&{{ time_range }}"
+            return_content: true
+          register: json_data
+          until: (json_data.json | default([{}], true) | first).data | default([]) | length >= 3
+          retries: 24
+          delay: 5
+
+        - name: Fetch the archived data like the Data Browser does (getData.raw)
+          ansible.builtin.uri:
+            url: "{{ retrieval_url }}/data/getData.raw?pv={{ test_pv }}&{{ time_range }}"
+            dest: "{{ test_dir }}/data.raw"
+
+        - name: Check that getData.raw returned data
+          ansible.builtin.stat:
+            path: "{{ test_dir }}/data.raw"
+          register: raw_data
+          failed_when: raw_data.stat.size | default(0) == 0
+
+        - name: Show the result
+          ansible.builtin.debug:
+            msg: >-
+              {{ retrieval_url }} returned {{ (json_data.json | first).data | length }} samples
+              of {{ test_pv }}; getData.raw returned {{ raw_data.stat.size }} bytes
+
+      always:
+        - name: Stop the test IOC
+          ansible.builtin.shell:
+            cmd: >-
+              [ -f {{ test_dir }}/ioc.pid ] && kill $(cat {{ test_dir }}/ioc.pid);
+              cat {{ test_dir }}/ioc.log 2>/dev/null; true
+          changed_when: false
