@@ -8,6 +8,10 @@
     - absent
     - directory
 
+- name: Show archiver appliance version
+  ansible.builtin.debug:
+    var: archiver_appliance_version
+
 - name: Download and unpack Archiver-Appliance
   become: true
   ansible.builtin.unarchive:
