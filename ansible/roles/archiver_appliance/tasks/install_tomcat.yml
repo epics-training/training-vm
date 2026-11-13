@@ -26,7 +26,9 @@
 - name: Download and install Tomcat
   become: true
   ansible.builtin.unarchive:
-    src: "https://archive.apache.org/dist/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    src: "https://archive.apache.org/dist/tomcat/\
+      tomcat-{{ tomcat_version.split('.')[0] }}/v{{ tomcat_version }}/\
+      bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
     dest: "{{ tomcat_home }}"
     remote_src: true
     owner: "{{ tomcat_user }}"
