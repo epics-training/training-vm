@@ -4,29 +4,35 @@
   ansible.builtin.include_tasks:
     file: install_mariadb.yml
 
-- name: Check if Tomcat installation exists
+- name: Check if the requested Tomcat/Archiver Appliance versions are installed
   become: true
   ansible.builtin.stat:
-    path: "{{ tomcat_home }}/bin"
-  register: tomcat_installation
+    path: "{{ archiver_appliance_version_flag }}"
+  register: archiver_appliance_installation
   changed_when: false
+
+- name: Remove outdated Tomcat/Archiver Appliance installation
+  ansible.builtin.include_tasks:
+    file: remove_installation.yml
+  when: not archiver_appliance_installation.stat.exists
 
 - name: Download and install Tomcat
   ansible.builtin.include_tasks:
     file: install_tomcat.yml
-  when: tomcat_installation.stat.exists == false
-
-- name: Check if Archiver Appliance installation exists
-  become: true
-  ansible.builtin.stat:
-    path: "{{ tomcat_home }}/webapps/mgmt"
-  register: archiver_appliance_installation
-  changed_when: false
+  when: not archiver_appliance_installation.stat.exists
 
 - name: Download and install the Archiver Appliance
   ansible.builtin.include_tasks:
     file: install_appliance.yml
-  when: archiver_appliance_installation.stat.exists == false
+  when: not archiver_appliance_installation.stat.exists
+
+- name: Mark the installed Tomcat/Archiver Appliance versions
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ archiver_appliance_version_flag }}"
+    mode: "0644"
+  when: not archiver_appliance_installation.stat.exists
 
 - name: Ensure storage and configuration directories exist
   become: true

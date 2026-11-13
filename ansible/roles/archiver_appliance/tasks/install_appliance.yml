@@ -1,27 +1,19 @@
 ---
-- name: Ensure unzip is installed (needed to unpack default-package.zip)
-  become: true
-  ansible.builtin.package:
-    name: unzip
-    state: present
-
-- name: Create temporary location for WAR unpacking
+- name: Create empty temporary location for WAR unpacking
   become: true
   ansible.builtin.file:
     path: "/tmp/archappl"
-    state: directory
+    state: "{{ item }}"
+  loop:
+    - absent
+    - directory
 
-- name: Download Archiver-Appliance
-  ansible.builtin.unarchive:
-    src: "https://github.com/archiver-appliance/epicsarchiverap/releases/download/{{ archiver_appliance_version }}/default-package.zip"
-    dest: "/tmp"
-    creates: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
-    remote_src: true
-
-- name: Unpack Archiver-Appliance
+- name: Download and unpack Archiver-Appliance
   become: true
   ansible.builtin.unarchive:
-    src: "/tmp/archappl_v{{ archiver_appliance_version }}.tar.gz"
+    src: "https://github.com/archiver-appliance/epicsarchiverap/releases/\
+      download/{{ archiver_appliance_version }}/\
+      archappl_v{{ archiver_appliance_version }}.tar.gz"
     dest: "/tmp/archappl"
     remote_src: true
     owner: "{{ tomcat_user }}"

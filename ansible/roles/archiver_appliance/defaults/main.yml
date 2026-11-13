@@ -2,11 +2,16 @@
 # Defaults for tomcat and archiver-appliance
 
 tomcat_home: "/opt/epics-tools/lib/tomcat"
-tomcat_version: "9.0.79"
+tomcat_version: "11.0.27"
 tomcat_user: tomcat
 tomcat_group: tomcat
 
-archiver_appliance_version: "2.0.7"
+# 2.2.0+ needs Tomcat >= 10 (Jakarta EE), 2.5.0+ needs Java >= 25
+archiver_appliance_version: "2.5.0"
+
+# Flag file marking the installed versions (a version change forces a reinstall)
+archiver_appliance_version_flag: "{{ tomcat_home }}/.installed-\
+  tomcat-{{ tomcat_version }}-archappl-{{ archiver_appliance_version }}"
 
 archiver_appliance_id: "appliance0"
 archiver_appliance_storage: "{{ tomcat_home }}/storage"
