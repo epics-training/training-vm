@@ -25,3 +25,8 @@ phoebus_docs_src: "/opt/epics-tools/lib/phoebus/docs"
 phoebus_docs_venv: "/opt/epics-tools/lib/phoebus-docs-venv"
 phoebus_docs_python_fallback: >-
   {{ 'python3.12' if is_redhat else 'python3.11' }}
+
+# Archiver Appliance retrieval service used by the Data Browser
+# (only configured when the archiver_appliance role is enabled)
+archiver_host: localhost
+archiver_retrieval_port: 17665
