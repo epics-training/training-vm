@@ -14,6 +14,8 @@ on:
       - 'ansible/roles/phoebus/**'
       - 'ansible/roles/phoebus_alarm/**'
       - 'ansible/roles/kafka/**'
+      - 'ansible/roles/phoebus_alarm_logger/**'
+      - 'ansible/roles/elasticsearch/**'
       - 'ansible/roles/java/**'
       - 'ansible/roles/archiver_appliance/**'
   pull_request:
@@ -24,6 +26,8 @@ on:
     - 'ansible/roles/phoebus/**'
     - 'ansible/roles/phoebus_alarm/**'
     - 'ansible/roles/kafka/**'
+    - 'ansible/roles/phoebus_alarm_logger/**'
+    - 'ansible/roles/elasticsearch/**'
     - 'ansible/roles/java/**'
     - 'ansible/roles/archiver_appliance/**'
   workflow_dispatch:

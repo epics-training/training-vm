@@ -1,0 +1,16 @@
+---
+# galaxy_info is required by Molecule's prerun (role name check)
+galaxy_info:
+  role_name: phoebus_alarm_logger
+  namespace: epics
+  author: Ralph Lange
+  description: Phoebus alarm logger service
+  license: EPICS open license
+  min_ansible_version: "2.15"
+# Dependencies for the Phoebus alarm logger
+# (the alarm logger binaries come from the phoebus role,
+#  which playbook.yml runs whenever phoebus_alarm_logger is enabled)
+dependencies:
+  - role: java
+  - role: elasticsearch
+  - role: phoebus_alarm

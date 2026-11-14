@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Phoebus Alarm Logger ({{ alarm_logger_topics }})
+After=network.target kafka.service elasticsearch.service alarm-server.service
+Requires=kafka.service elasticsearch.service
+
+[Service]
+Type=simple
+User={{ alarm_logger_user }}
+Group={{ alarm_logger_group }}
+WorkingDirectory={{ alarm_logger_home }}
+
+Environment="ALARM_LOGGER_JAVA_OPTS={{ alarm_logger_java_heap_opts }} -Dserver.port={{ alarm_logger_port }}"
+
+ExecStart=/usr/local/bin/alarm-logger -noshell -topics {{ alarm_logger_topics }} -bootstrap.servers {{ alarm_kafka_server }} -es_host {{ alarm_logger_es_host }} -es_port {{ alarm_logger_es_port }}
+SuccessExitStatus=143
+
+LimitNOFILE=65535
+
+# Elasticsearch takes a while to come up after a (re)boot
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

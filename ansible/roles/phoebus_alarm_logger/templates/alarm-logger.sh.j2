@@ -1,0 +1,22 @@
+#!/bin/sh
+# {{ ansible_managed }}
+#
+# Phoebus alarm logger launcher
+#
+# Run 'alarm-logger -help' for options.
+# The service is managed by systemd: 'systemctl status alarm-logger'
+
+export JAVA_HOME={{ java_home }}
+export PATH="$JAVA_HOME/bin:$PATH"
+
+TARGET={{ alarm_logger_target_dir }}
+JAR=$(ls "$TARGET"/service-alarm-logger-*.jar 2>/dev/null | grep -v -e '-sources' -e '-javadoc' | head -n 1)
+
+if [ -z "$JAR" ]; then
+  echo "alarm-logger: no service-alarm-logger-*.jar found in $TARGET" >&2
+  exit 1
+fi
+
+# Spring Boot settings (e.g. -Dserver.port) have to be Java system properties:
+# the alarm logger rejects unknown command line options
+exec java ${ALARM_LOGGER_JAVA_OPTS} -jar "$JAR" "$@"

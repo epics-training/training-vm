@@ -40,7 +40,7 @@
 
     - name: Decide if graphics should be installed
       ansible.builtin.set_fact:
-        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or phoebus_alarm | default(false) | bool or oac_tree | default(false) | bool }}"
+        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or phoebus_alarm | default(false) | bool or phoebus_alarm_logger | default(false) | bool or oac_tree | default(false) | bool }}"
       tags: always
 
     - name: Initial setup
@@ -143,11 +143,14 @@
           include_role:
             name: bluesky
 
-    # Also runs for phoebus_alarm: the Phoebus build produces the alarm server
+    # Also runs for phoebus_alarm(_logger): the Phoebus build produces the alarm services
     - name: Phoebus
       include_role:
         name: phoebus
-      when: (phoebus is defined and phoebus | bool) or (phoebus_alarm is defined and phoebus_alarm | bool)
+      when: >-
+        (phoebus is defined and phoebus | bool) or
+        (phoebus_alarm is defined and phoebus_alarm | bool) or
+        (phoebus_alarm_logger is defined and phoebus_alarm_logger | bool)
       tags: phoebus
 
     - name: Kafka
@@ -168,6 +171,13 @@
         name: elasticsearch
       when: elasticsearch is defined and elasticsearch | bool
       tags: elasticsearch
+
+    # Pulls in the elasticsearch and phoebus_alarm roles as dependencies
+    - name: Phoebus Alarm Logger
+      include_role:
+        name: phoebus_alarm_logger
+      when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
+      tags: phoebus_alarm_logger
 
     - name: OAC Tree
       include_role:

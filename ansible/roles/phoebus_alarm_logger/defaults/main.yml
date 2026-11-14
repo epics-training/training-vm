@@ -1,0 +1,31 @@
+---
+# Defaults for the Phoebus alarm logger
+#
+# Modelled on the alarm logger part of the phoebus_services_phoebus_alarm role
+# of https://github.com/ControlSystemStudio/ansible-phoebus
+#
+# The alarm logger is built by the phoebus role (Phoebus' top-level Maven
+# build includes services/), so this role only runs the already-built
+# service. It reads the alarm messages from Kafka and stores them in
+# Elasticsearch (elasticsearch role, a dependency); its REST API serves the
+# Phoebus "Alarm Log" table. alarm_config_name and alarm_kafka_server come
+# from the phoebus_alarm role (a dependency). The phoebus role uses the same
+# variable names for the client preferences, so setting one of them in a
+# setup file configures client and services consistently.
+
+alarm_logger_user: alarm-logger
+alarm_logger_group: alarm-logger
+alarm_logger_home: "/var/lib/alarm-logger"
+alarm_logger_target_dir: "/opt/epics-tools/lib/phoebus/services/alarm-logger/target"
+alarm_logger_java_heap_opts: "-Xms128M -Xmx512M"
+
+# Comma-separated list of alarm configurations (topics) to log
+alarm_logger_topics: "{{ alarm_config_name }}"
+
+# REST API of the alarm logger (port 9000 is the Phoebus client default)
+alarm_logger_url: "http://localhost:9000"
+# Port of the REST API - taken from that URL
+alarm_logger_port: "{{ alarm_logger_url | urlsplit('port') }}"
+
+alarm_logger_es_host: "{{ elasticsearch_network_host }}"
+alarm_logger_es_port: "{{ elasticsearch_http_port }}"

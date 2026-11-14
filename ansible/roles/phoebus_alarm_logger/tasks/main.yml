@@ -1,0 +1,99 @@
+---
+# Run the Phoebus alarm logger (built by the phoebus role) as a service
+
+- name: Check that the alarm logger has been built
+  ansible.builtin.find:
+    paths: "{{ alarm_logger_target_dir }}"
+    patterns: "service-alarm-logger-*.jar"
+  register: alarm_logger_jars
+
+- name: Fail if the alarm logger jar is missing
+  ansible.builtin.fail:
+    msg: >-
+      No service-alarm-logger-*.jar found in {{ alarm_logger_target_dir }}.
+      The alarm logger is built by the phoebus role - make sure it ran successfully.
+  when: alarm_logger_jars.matched == 0
+
+- name: Ensure alarm-logger group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ alarm_logger_group }}"
+    system: true
+    state: present
+
+- name: Ensure alarm-logger user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ alarm_logger_user }}"
+    group: "{{ alarm_logger_group }}"
+    system: true
+    home: "{{ alarm_logger_home }}"
+    createhome: true
+    shell: /sbin/nologin
+    state: present
+
+- name: Create alarm-logger wrapper
+  become: true
+  ansible.builtin.template:
+    src: alarm-logger.sh.j2
+    dest: /usr/local/bin/alarm-logger
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart alarm-logger
+
+- name: Create alarm-logger systemd service
+  become: true
+  ansible.builtin.template:
+    src: alarm-logger.service.j2
+    dest: /etc/systemd/system/alarm-logger.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart alarm-logger
+
+- name: Manage alarm-logger service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: alarm-logger
+    state: started
+    enabled: true
+    daemon_reload: true
+
+# --- Verify that the alarm logger is actually up and running ---
+
+- name: Apply pending alarm-logger restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that the alarm logger is running
+  when: not in_container
+  block:
+    # The service info reports whether the logger reached Elasticsearch
+    - name: Wait for the alarm logger REST API to report Elasticsearch connected
+      ansible.builtin.uri:
+        url: "{{ alarm_logger_url }}/"
+        return_content: true
+      register: alarm_logger_info
+      until: >-
+        alarm_logger_info.status == 200 and
+        '"Connected"' in alarm_logger_info.content
+      retries: 36
+      delay: 5
+
+    - name: Get alarm-logger service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: alarm-logger
+      register: alarm_logger_service
+
+    - name: Check that alarm-logger is active
+      ansible.builtin.assert:
+        that:
+          - alarm_logger_service.status.ActiveState == 'active'
+          - alarm_logger_service.status.SubState == 'running'
+        fail_msg: >-
+          Service alarm-logger is {{ alarm_logger_service.status.ActiveState }}/{{ alarm_logger_service.status.SubState }}
+          - see 'journalctl -u alarm-logger'
+        success_msg: "Service alarm-logger is running"
+        quiet: true

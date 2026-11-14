@@ -20,9 +20,9 @@ mvn_home: "/opt/epics-tools/lib/apache-maven"
 epics_services_account: root
 
 # Alarm system the client connects to (preferences.ini). The phoebus_alarm
-# role uses the same variable names for the server side, so setting one of
-# them in a setup file (e.g. vars/local.yml) configures client and server
-# consistently.
+# and phoebus_alarm_logger roles use the same variable names for the server
+# side, so setting one of them in a setup file (e.g. vars/local.yml)
+# configures client and services consistently.
 # The alarm configuration name is also the name of its Kafka topic.
 alarm_config_name: "Accelerator"
 # Same as the phoebus_alarm default, so that a kafka_listen_host / kafka_port
@@ -30,6 +30,8 @@ alarm_config_name: "Accelerator"
 # aren't visible here, hence the fallbacks matching them)
 alarm_kafka_server: >-
   {{ kafka_listen_host | default('localhost') }}:{{ kafka_port | default(9092) }}
+# REST API of the alarm logger (port 9000 is the Phoebus client default)
+alarm_logger_url: "http://localhost:9000"
 
 # Documentation build: virtualenv location, and the distro's Python package
 # to use where the system python3 is older than 3.11 (Rocky 9, Ubuntu 22.04)

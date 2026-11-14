@@ -39,6 +39,14 @@ and Kafka address (`alarm_kafka_server`) are role defaults; the `phoebus`
 role uses the same variable names for the client preferences, so setting
 them once in a setup file configures client and server consistently.
 
+### phoebus_alarm_logger
+Phoebus alarm logger as a systemd service: stores the alarm system's
+messages in Elasticsearch (`elasticsearch` role, a dependency) and serves
+them to the Phoebus "Alarm Log" table through its REST API
+(`alarm_logger_url`, default `http://localhost:9000`, shared with the
+`phoebus` role's client preferences like the alarm server's settings).
+Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
