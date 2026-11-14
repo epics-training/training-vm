@@ -1,0 +1,37 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  # Molecule runs the roles directly, bypassing playbook.yml, so the OS and
+  # architecture variables the roles rely on have to be loaded here too.
+  # Same first-found logic as playbook.yml's pre_tasks.
+  pre_tasks:
+    - name: Load OS-specific variables with fallback
+      ansible.builtin.include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_facts['distribution'] }}_\
+              {{ ansible_facts['distribution_major_version'] }}.yml"
+            - "{{ ansible_facts['distribution'] }}.yml"
+            - "{{ ansible_facts['os_family'] }}.yml"
+            - "default.yml"
+          paths:
+            - "{{ playbook_dir }}/../../../../vars/os"
+
+    - name: Load architecture-specific variables with fallback
+      ansible.builtin.include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_facts['architecture'] }}.yml"
+            - "default.yml"
+          paths:
+            - "{{ playbook_dir }}/../../../../vars/arch"
+
+  # m_base provides the IOC and pvget used by the tests; phoebus provides
+  # the Data Browser preferences the tests read the archive URL from.
+  roles:
+    - role: initial_setup
+    - role: m_base
+    - role: phoebus
+    - role: archiver_appliance

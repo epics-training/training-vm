@@ -1,4 +1,12 @@
 ---
+galaxy_info:
+  role_name: archiver_appliance
+  namespace: epics
+  author: Ralph Lange
+  description: Ansible role to install the Archiver Appliance in a training VM
+  license: EPICS open license
+  min_ansible_version: "2.7"
+
 # Dependencies for archiver-appliance
 dependencies:
   - role: java

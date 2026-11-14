@@ -1,0 +1,18 @@
+# Base image plus systemd, so that the role's services (MariaDB, Tomcat)
+# can run inside the test container.
+FROM {{ item.image }}
+
+ENV container=docker
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       systemd systemd-sysv dbus python3 sudo curl ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -f /lib/systemd/system/multi-user.target.wants/getty.target \
+    && systemctl mask systemd-udevd.service systemd-udevd-kernel.socket \
+       systemd-udevd-control.socket getty.target
+
+STOPSIGNAL SIGRTMIN+3
+CMD ["/lib/systemd/systemd"]
