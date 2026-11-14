@@ -1,0 +1,168 @@
+---
+# Install Elasticsearch as a single-node service
+# (follows phoebus_services_elasticsearch of ControlSystemStudio/ansible-phoebus)
+
+- name: Ensure Elasticsearch account exists
+  become: true
+  block:
+    - name: Ensure elasticsearch group exists
+      ansible.builtin.group:
+        name: "{{ elasticsearch_account }}"
+        system: true
+        state: present
+
+    - name: Ensure elasticsearch user exists
+      ansible.builtin.user:
+        name: "{{ elasticsearch_account }}"
+        group: "{{ elasticsearch_account }}"
+        system: true
+        home: "{{ elasticsearch_root }}"
+        createhome: false
+        shell: /sbin/nologin
+        state: present
+
+- name: Ensure Elasticsearch directories exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ elasticsearch_account }}"
+    group: "{{ elasticsearch_account }}"
+    mode: "u=rwX,g=rX,o=rX"
+  loop:
+    - "{{ elasticsearch_root }}"
+    - "{{ elasticsearch_data_dir }}"
+    - "{{ elasticsearch_logs_dir }}"
+    - "{{ elasticsearch_run_dir }}"
+
+- name: Download Elasticsearch {{ elasticsearch_version }}
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ elasticsearch_url }}"
+    dest: "/tmp/elasticsearch-{{ elasticsearch_version }}-{{ arch.elasticsearch }}.tar.gz"
+    checksum: "sha512:{{ elasticsearch_url }}.sha512"
+    mode: "0644"
+  register: elasticsearch_download
+  retries: 3
+  delay: 10
+  until: elasticsearch_download is succeeded
+
+# The release is unpacked in place; on a version change, the old release
+# is removed first so the jars of two versions do not mix in lib/
+# (data/ and logs/ live outside, the configuration is re-created below)
+- name: Check the installed Elasticsearch version
+  ansible.builtin.stat:
+    path: "{{ elasticsearch_release_dir }}/lib/elasticsearch-{{ elasticsearch_version }}.jar"
+  register: elasticsearch_release_jar
+
+- name: Remove a different Elasticsearch version
+  become: true
+  ansible.builtin.file:
+    path: "{{ elasticsearch_release_dir }}"
+    state: absent
+  when: not elasticsearch_release_jar.stat.exists
+
+- name: Ensure Elasticsearch release directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ elasticsearch_release_dir }}"
+    state: directory
+    owner: "{{ elasticsearch_account }}"
+    group: "{{ elasticsearch_account }}"
+    mode: "u=rwX,g=rX,o=rX"
+
+- name: Install Elasticsearch release
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/elasticsearch-{{ elasticsearch_version }}-{{ arch.elasticsearch }}.tar.gz"
+    dest: "{{ elasticsearch_release_dir }}"
+    remote_src: true
+    owner: "{{ elasticsearch_account }}"
+    group: "{{ elasticsearch_account }}"
+    extra_opts:
+      - --strip-components=1
+    creates: "{{ elasticsearch_release_dir }}/lib/elasticsearch-{{ elasticsearch_version }}.jar"
+  notify: Restart Elasticsearch service
+
+- name: Install Elasticsearch configuration
+  become: true
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: "{{ elasticsearch_conf_dir }}/elasticsearch.yml"
+    owner: "{{ elasticsearch_account }}"
+    group: "{{ elasticsearch_account }}"
+    mode: "u=rw,g=r,o=r"
+  notify: Restart Elasticsearch service
+
+- name: Install Elasticsearch systemd unit
+  become: true
+  ansible.builtin.template:
+    src: elasticsearch.service.j2
+    dest: "/etc/systemd/system/{{ elasticsearch_service_name }}.service"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: Restart Elasticsearch service
+
+- name: Enable and start Elasticsearch
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: "{{ elasticsearch_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# --- Verify that Elasticsearch is actually up and running ---
+
+- name: Apply pending Elasticsearch restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that Elasticsearch is running
+  when: not in_container
+  block:
+    - name: Wait for Elasticsearch to accept connections
+      ansible.builtin.wait_for:
+        host: "{{ elasticsearch_network_host }}"
+        port: "{{ elasticsearch_http_port }}"
+        timeout: 180
+
+    - name: Wait for Elasticsearch to report a usable cluster
+      ansible.builtin.uri:
+        url: "http://{{ elasticsearch_network_host }}:{{ elasticsearch_http_port }}\
+          /_cluster/health?wait_for_status=yellow&timeout=10s"
+        return_content: true
+      register: elasticsearch_health
+      until: >-
+        elasticsearch_health.status == 200 and
+        elasticsearch_health.json is defined and
+        elasticsearch_health.json.status in ['green', 'yellow']
+      retries: 24
+      delay: 5
+
+  # Show why - the service journal and Elasticsearch's own log
+  rescue:
+    - name: Collect Elasticsearch diagnostics
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set +e
+          systemctl status {{ elasticsearch_service_name }} --no-pager --lines=0
+          echo "--- journal"
+          journalctl -u {{ elasticsearch_service_name }} --no-pager -n 60
+          echo "--- {{ elasticsearch_logs_dir }}"
+          ls -l {{ elasticsearch_logs_dir }}
+          tail -n 60 {{ elasticsearch_logs_dir }}/{{ elasticsearch_cluster_name }}.log
+      register: elasticsearch_diagnostics
+      changed_when: false
+      failed_when: false
+
+    - name: Show Elasticsearch diagnostics
+      ansible.builtin.debug:
+        var: elasticsearch_diagnostics.stdout_lines
+
+    - name: Fail because Elasticsearch is not running
+      ansible.builtin.fail:
+        msg: >-
+          Elasticsearch did not come up - see the diagnostics above,
+          'journalctl -u {{ elasticsearch_service_name }}' and {{ elasticsearch_logs_dir }}

@@ -9,6 +9,7 @@ catrust: false
 phoebus: false
 phoebus_alarm: false
 kafka: false
+elasticsearch: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

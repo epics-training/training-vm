@@ -163,6 +163,12 @@
       when: phoebus_alarm is defined and phoebus_alarm | bool
       tags: phoebus_alarm
 
+    - name: Elasticsearch
+      include_role:
+        name: elasticsearch
+      when: elasticsearch is defined and elasticsearch | bool
+      tags: elasticsearch
+
     - name: OAC Tree
       include_role:
         name: oac_tree

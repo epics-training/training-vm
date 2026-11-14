@@ -18,14 +18,15 @@ jobs:
       # Don't let a failure on one architecture hide the result on the other
       fail-fast: false
       matrix:
-        # kafka runs in a container with systemd (ansible/molecule/systemd)
-        # and tests the service functionally
+        # kafka and elasticsearch run in a container with systemd
+        # (ansible/molecule/systemd) and test the services functionally
         role:
           - initial_setup
           - m_base
           - phoebus
           - archiver_appliance
           - kafka
+          - elasticsearch
         # The molecule platform image (ubuntu:22.04) is multi-arch, so each
         # runner exercises the role natively on its own architecture
         arch:

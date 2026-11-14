@@ -12,6 +12,8 @@ arch:
   multiarch_tuple: "x86_64-linux-gnu"
   # Architecture token used by the Adoptium/Temurin release assets
   java: "x64"
+  # Architecture token used by the Elasticsearch release archives
+  elasticsearch: "x86_64"
 
 is_x86_64: true
 is_aarch64: false

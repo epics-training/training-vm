@@ -1,0 +1,52 @@
+---
+# Defaults for Elasticsearch (single node, localhost only, no security)
+#
+# Follows the phoebus_services_elasticsearch role of
+# https://github.com/ControlSystemStudio/ansible-phoebus:
+# one service root with release/, data/, logs/ and run/, all owned by the
+# service account; the configuration lives in release/config.
+# Used by the Phoebus alarm logger (phoebus_alarm_logger role).
+#
+# Stays on the 8.x line: Phoebus 6 uses the Elasticsearch 8 Java client,
+# which is not supported against a 9.x server.
+
+elasticsearch_version: "8.19.25"
+# The download is verified against the .sha512 file Elastic publishes next to it
+elasticsearch_url: "https://artifacts.elastic.co/downloads/elasticsearch/\
+  elasticsearch-{{ elasticsearch_version }}-linux-{{ arch.elasticsearch }}.tar.gz"
+
+elasticsearch_root: "/opt/epics-tools/services/elasticsearch"
+elasticsearch_account: elasticsearch
+
+elasticsearch_release_dir: "{{ elasticsearch_root }}/release"
+elasticsearch_conf_dir: "{{ elasticsearch_release_dir }}/config"
+elasticsearch_data_dir: "{{ elasticsearch_root }}/data"
+elasticsearch_logs_dir: "{{ elasticsearch_root }}/logs"
+elasticsearch_run_dir: "{{ elasticsearch_root }}/run"
+
+elasticsearch_cluster_name: "training-vm"
+elasticsearch_node_name: "{{ ansible_facts['hostname'] }}"
+elasticsearch_node_roles:
+  - master
+  - data
+  - ingest
+# Only listen on localhost (training VM, no authentication)
+elasticsearch_network_host: "127.0.0.1"
+elasticsearch_http_port: 9200
+elasticsearch_transport_port: 9300
+elasticsearch_discovery_type: single-node
+elasticsearch_seed_hosts: []
+elasticsearch_initial_master_nodes: []
+elasticsearch_xpack_security_enabled: false
+elasticsearch_xpack_http_ssl_enabled: false
+elasticsearch_xpack_transport_ssl_enabled: false
+
+# Elasticsearch runs on the JDK installed by the java role
+elasticsearch_java_home: "{{ java_home }}"
+# Elasticsearch would otherwise size its heap to half of the RAM
+elasticsearch_java_opts: "-Xms512m -Xmx512m"
+elasticsearch_service_name: elasticsearch
+
+# Set to true when running in a container without systemd: the service is
+# then installed and configured, but not started
+in_container: false

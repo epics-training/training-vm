@@ -1,0 +1,42 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Elasticsearch (single node) for the Phoebus alarm logger
+Documentation=https://www.elastic.co
+Wants=network-online.target
+After=network-online.target
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Environment=ES_HOME={{ elasticsearch_release_dir }}
+Environment="ES_JAVA_OPTS={{ elasticsearch_java_opts }}"
+Environment=DATA_DIR={{ elasticsearch_data_dir }}
+Environment=LOG_DIR={{ elasticsearch_logs_dir }}
+Environment=PID_DIR={{ elasticsearch_run_dir }}
+EnvironmentFile=-/etc/default/elasticsearch
+Environment=ES_JAVA_HOME={{ elasticsearch_java_home }}
+Environment=JAVA_HOME={{ elasticsearch_java_home }}
+
+User={{ elasticsearch_account }}
+Group={{ elasticsearch_account }}
+
+ExecStart={{ elasticsearch_release_dir }}/bin/elasticsearch
+
+Restart=on-failure
+RestartSec=5s
+
+# Connects standard error to journal
+StandardError=journal
+
+# When a JVM receives a SIGTERM signal it exits with code 143
+SuccessExitStatus=143
+
+# Specifies the maximum file descriptor number that can be opened by this process
+LimitNOFILE=65536
+
+# Shutdown delay in seconds, before process is tried to be killed with KILL (if configured)
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
