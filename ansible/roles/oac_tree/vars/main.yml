@@ -9,6 +9,9 @@ oactree_bundle_version: "v1.4"
 required_debs:
   - cmake
   - git
+  # Not needed for building (unit tests are disabled), but sup-mvvm's
+  # installed package config unconditionally does find_dependency(GTest),
+  # so anything using sup-mvvm (sup-gui-core, oac-tree-gui) needs it.
   - libgtest-dev
   - libgmock-dev
   - libxml2-dev
@@ -21,6 +24,9 @@ required_debs:
 required_rpms:
   - cmake
   - git
+  # Not needed for building (unit tests are disabled), but sup-mvvm's
+  # installed package config unconditionally does find_dependency(GTest),
+  # so anything using sup-mvvm (sup-gui-core, oac-tree-gui) needs it.
   - gtest-devel
   - gmock-devel
   - libxml2-devel

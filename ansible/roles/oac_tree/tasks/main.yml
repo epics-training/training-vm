@@ -108,7 +108,34 @@
     dest: "{{ oactree_install_path }}/src/oac-tree-bundle"
     version: "{{ oactree_bundle_version }}"
     recursive: true
+    # The task below patches a tracked file, so a re-clone (forced rebuild)
+    # must be allowed to discard that local modification.
+    force: true
   become: true
+  when: oactree_bundle_flag.stat.exists == false
+
+# Every bundled sub-project builds its gtest/gmock unit tests by default
+# (COA_BUILD_TESTS=ON), roughly doubling the compile work for binaries that
+# are never run on the VM. The bundle's add_local_module() (ExternalProject)
+# only forwards a fixed set of CMAKE_ARGS, so a -D on the top-level cmake call
+# does not reach the sub-projects: add the option to that list instead.
+- name: "Disable unit tests in all bundled sub-projects"
+  ansible.builtin.lineinfile:
+    path: "{{ oactree_install_path }}/src/oac-tree-bundle/cmake/module/cmake_functions.cmake"
+    insertafter: '^\s*-DCMAKE_BUILD_TYPE='
+    firstmatch: true
+    line: "      -DCOA_BUILD_TESTS=OFF"
+  register: oactree_notests_patch
+  become: true
+  when: oactree_bundle_flag.stat.exists == false
+
+# lineinfile silently appends at EOF if insertafter doesn't match, which would
+# leave tests enabled (and the file broken) - catch a changed upstream layout.
+- name: "Verify unit-test patch was applied inside the CMAKE_ARGS list"
+  ansible.builtin.command:
+    cmd: grep -Pzq '\-DCMAKE_BUILD_TYPE=\S+\s+-DCOA_BUILD_TESTS=OFF'
+      {{ oactree_install_path }}/src/oac-tree-bundle/cmake/module/cmake_functions.cmake
+  changed_when: false
   when: oactree_bundle_flag.stat.exists == false
 
 - name: "Create build directory"
@@ -130,9 +157,20 @@
   become: true
   when: oactree_bundle_flag.stat.exists == false
 
+# The bundle's ExternalProject sub-builds share the top-level make's jobserver,
+# so -j here parallelizes all of them. Qt/C++ translation units can take
+# ~1 GB each, so cap the job count by RAM (1.5 GB/job) as well as by CPUs.
+- name: "Determine number of parallel build jobs"
+  ansible.builtin.set_fact:
+    oactree_build_jobs: "{{ [1, [ansible_facts.processor_vcpus, (ansible_facts.memtotal_mb / 1500) | int] | min] | max }}"
+  when: oactree_bundle_flag.stat.exists == false
+
 - name: "Run make (build and install everything - this may take a while)"
-  command: make -j 1 -C {{ oactree_install_path }}/src/oac-tree-bundle/build
+  command: make -j {{ oactree_build_jobs }} -C {{ oactree_install_path }}/src/oac-tree-bundle/build
   register: build_result
+  # parallel builds occasionally fail at random (see m_base build_module.yml)
+  retries: 4
+  until: build_result.rc == 0
   environment:
     EPICS_BASE: "{{ epics_install_path }}/base-{{ epics_base_version }}"
     EPICS_HOST_ARCH: "{{ arch.epics_host_arch }}"
