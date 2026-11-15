@@ -33,6 +33,15 @@ alarm_kafka_server: >-
 # REST API of the alarm logger (port 9000 is the Phoebus client default)
 alarm_logger_url: "http://localhost:9000"
 
+# Olog logbook the client connects to (preferences.ini), when the
+# phoebus_olog or phoebus_olog_webclient role is enabled. Those roles use the
+# same variable names for the service side, so setting them in a setup file
+# configures client and services consistently.
+# Olog's REST API (plain HTTP)
+olog_url: "http://localhost:4180/Olog"
+# Olog web client, as seen from the browser
+olog_webclient_url: "http://localhost:3000"
+
 # Documentation build: virtualenv location, and the distro's Python package
 # to use where the system python3 is older than 3.11 (Rocky 9, Ubuntu 22.04)
 phoebus_docs_src: "/opt/epics-tools/lib/phoebus/docs"

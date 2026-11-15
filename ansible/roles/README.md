@@ -49,6 +49,19 @@ them to the Phoebus "Alarm Log" table through its REST API
 `phoebus` role's client preferences like the alarm server's settings).
 Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
 
+### phoebus_olog
+Olog electronic logbook service (REST API) as a systemd service:
+built with Maven from its release tar (Maven from the `phoebus` role), log entries
+stored in Elasticsearch (`elasticsearch` role), attachments in MongoDB
+(`mongodb` role), both dependencies.
+Plain HTTP at `olog_url` (default `http://localhost:4180/Olog`, shared with
+the `phoebus` role's client preferences like the alarm system's settings),
+HTTPS with Olog's self-signed certificate on port 4181. Built-in accounts `user`/`userPass` and
+`admin`/`adminPass`. When enabled, the `phoebus` role configures the Phoebus
+logbook to use Olog (default logbook `operations`).
+Follows `phoebus_services_phoebus_olog` of
+[ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus).
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
@@ -97,6 +110,7 @@ Follows `phoebus_services_elasticsearch` of
 [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus):
 everything under `/opt/epics-tools/services/elasticsearch` (`release/`
 with its `config/`, `data/`, `logs/`, `run/`), owned by the service account.
+Also the storage of Olog's log entries.
 
 ### mongodb
 MongoDB (single node, localhost only, no authentication)

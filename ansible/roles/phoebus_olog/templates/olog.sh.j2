@@ -1,0 +1,22 @@
+#!/bin/sh
+# {{ ansible_managed }}
+#
+# Olog (electronic logbook) service launcher
+#
+# The service is managed by systemd: 'systemctl status olog'
+
+export JAVA_HOME={{ java_home }}
+export PATH="$JAVA_HOME/bin:$PATH"
+
+TARGET={{ olog_target_dir }}
+JAR=$(ls "$TARGET"/service-olog-*.jar 2>/dev/null | grep -v -e '-sources' -e '-javadoc' -e '\.original$' | head -n 1)
+
+if [ -z "$JAR" ]; then
+  echo "olog: no service-olog-*.jar found in $TARGET" >&2
+  exit 1
+fi
+
+# Olog reads its built-in defaults first, then the overrides in {{ olog_conf_file }}
+exec java ${OLOG_JAVA_OPTS} \
+  -Dspring.config.additional-location=file:{{ olog_conf_file }} \
+  -jar "$JAR" "$@"

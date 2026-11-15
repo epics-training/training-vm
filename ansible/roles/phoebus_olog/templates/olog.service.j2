@@ -1,0 +1,26 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Olog (electronic logbook) service
+Documentation=https://olog.readthedocs.io/en/latest/
+After=network.target elasticsearch.service mongodb.service
+Requires=elasticsearch.service mongodb.service
+
+[Service]
+Type=simple
+User={{ olog_user }}
+Group={{ olog_group }}
+WorkingDirectory={{ olog_home }}
+
+Environment="OLOG_JAVA_OPTS={{ olog_java_heap_opts }}"
+
+ExecStart=/usr/local/bin/olog
+SuccessExitStatus=143
+
+LimitNOFILE=65535
+
+# Elasticsearch takes a while to come up after a (re)boot
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

@@ -12,6 +12,7 @@ phoebus_alarm_logger: false
 kafka: false
 elasticsearch: false
 mongodb: false
+phoebus_olog: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

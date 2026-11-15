@@ -39,10 +39,14 @@ org.csstudio.display.builder.runtime/probe_display=
 org.csstudio.display.builder.runtime/python_path=
 
 # Logbook
+{% if phoebus_olog | default(false) | bool %}
+# Olog (accounts: user/userPass, admin/adminPass)
+org.phoebus.logbook/logbook_factory=olog-es
+org.phoebus.olog.es.api/olog_url={{ olog_url }}
+org.phoebus.logbook.olog.ui/default_logbooks=operations
+{% else %}
 org.phoebus.logbook/logbook_factory=inmemory
-
-# Olog
-#org.phoebus.olog.api/olog_url=https\://epics-services-tst\:33181
+{% endif %}
 
 # Channelfinder
 # org.phoebus.channelfinder/serviceURL=https\://channelfinder:8181/ChannelFinder/

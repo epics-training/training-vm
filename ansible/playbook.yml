@@ -191,6 +191,13 @@
       when: mongodb is defined and mongodb | bool
       tags: mongodb
 
+    # Pulls in the elasticsearch and mongodb roles as dependencies
+    - name: Olog
+      include_role:
+        name: phoebus_olog
+      when: phoebus_olog is defined and phoebus_olog | bool
+      tags: phoebus_olog
+
     - name: OAC Tree
       include_role:
         name: oac_tree

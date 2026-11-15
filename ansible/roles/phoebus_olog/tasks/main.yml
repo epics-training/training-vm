@@ -1,0 +1,196 @@
+---
+# Build Olog from source and run it as a service
+
+# Maven comes from the phoebus role (same installation, if Phoebus is built too)
+- name: Install Maven
+  ansible.builtin.include_role:
+    name: phoebus
+    tasks_from: install_maven.yml
+    public: true
+
+- name: Download Olog {{ olog_version }}
+  ansible.builtin.get_url:
+    url: "{{ olog_download_url }}"
+    dest: "/tmp/phoebus-olog-{{ olog_version }}.tar.gz"
+    mode: "0644"
+  register: olog_download
+  retries: 3
+  delay: 10
+  until: olog_download is succeeded
+
+# The source tree is unpacked from the release tar; on a version change
+# (or over an older git checkout) it is removed first, so no files of
+# two versions mix and the build below starts clean
+- name: Check the unpacked Olog version
+  ansible.builtin.stat:
+    path: "{{ olog_src_dir }}/.release-{{ olog_version }}"
+  register: olog_release_marker
+
+- name: Unpack Olog {{ olog_version }}
+  become: true
+  when: not olog_release_marker.stat.exists
+  block:
+    - name: Remove a different Olog version
+      ansible.builtin.file:
+        path: "{{ olog_src_dir }}"
+        state: absent
+
+    - name: Ensure Olog source directory exists
+      ansible.builtin.file:
+        path: "{{ olog_src_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Extract the Olog release
+      ansible.builtin.unarchive:
+        src: "/tmp/phoebus-olog-{{ olog_version }}.tar.gz"
+        dest: "{{ olog_src_dir }}"
+        remote_src: true
+        extra_opts:
+          - --strip-components=1
+
+    - name: Mark the unpacked Olog version
+      ansible.builtin.copy:
+        content: "{{ olog_version }}\n"
+        dest: "{{ olog_src_dir }}/.release-{{ olog_version }}"
+        mode: "0644"
+
+- name: Check that Olog has been built
+  ansible.builtin.find:
+    paths: "{{ olog_target_dir }}"
+    patterns: "service-olog-*.jar"
+  register: olog_jars
+
+- name: Build Olog (this may take a while)
+  become: true
+  ansible.builtin.command: >-
+    mvn --batch-mode clean install -Pdeployable-jar
+    -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true
+  args:
+    chdir: "{{ olog_src_dir }}"
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+    MVN_HOME: "{{ mvn_home }}"
+    PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: not olog_release_marker.stat.exists or olog_jars.matched == 0
+  changed_when: true
+  notify: Restart olog
+
+- name: Ensure olog group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ olog_group }}"
+    system: true
+    state: present
+
+- name: Ensure olog user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ olog_user }}"
+    group: "{{ olog_group }}"
+    system: true
+    home: "{{ olog_home }}"
+    createhome: true
+    shell: /sbin/nologin
+    state: present
+
+- name: Ensure config directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ olog_conf_file | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Create Olog configuration
+  become: true
+  ansible.builtin.template:
+    src: olog.properties.j2
+    dest: "{{ olog_conf_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart olog
+
+- name: Create olog wrapper
+  become: true
+  ansible.builtin.template:
+    src: olog.sh.j2
+    dest: /usr/local/bin/olog
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart olog
+
+- name: Create olog systemd service
+  become: true
+  ansible.builtin.template:
+    src: olog.service.j2
+    dest: /etc/systemd/system/olog.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart olog
+
+- name: Manage olog service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: olog
+    state: started
+    enabled: true
+    daemon_reload: true
+
+# --- Verify that Olog is actually up and running ---
+
+- name: Apply pending olog restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that Olog is running
+  when: not in_container
+  block:
+    # The service info reports whether Olog reached Elasticsearch
+    # (served as text/plain, so the uri module does not decode the JSON)
+    - name: Wait for the Olog REST API to report Elasticsearch connected
+      ansible.builtin.uri:
+        url: "{{ olog_url }}"
+        return_content: true
+      register: olog_info
+      until: >-
+        olog_info.status == 200 and
+        (olog_info.content | from_json).elastic.status == 'Connected'
+      retries: 36
+      delay: 5
+
+    - name: Get olog service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: olog
+      register: olog_service
+
+    - name: Check that olog is active
+      ansible.builtin.assert:
+        that:
+          - olog_service.status.ActiveState == 'active'
+          - olog_service.status.SubState == 'running'
+        quiet: true
+
+  rescue:
+    - name: Collect olog diagnostics
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set +e
+          systemctl status olog --no-pager --lines=0
+          echo "--- journal"
+          journalctl -u olog --no-pager -n 80
+      register: olog_diagnostics
+      changed_when: false
+      failed_when: false
+
+    - name: Show olog diagnostics
+      ansible.builtin.debug:
+        var: olog_diagnostics.stdout_lines
+
+    - name: Fail because Olog is not running
+      ansible.builtin.fail:
+        msg: "Olog did not come up - see the diagnostics above and 'journalctl -u olog'"

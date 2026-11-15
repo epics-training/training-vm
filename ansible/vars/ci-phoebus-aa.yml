@@ -7,6 +7,7 @@ m_base: true
 phoebus: true
 phoebus_alarm: true
 phoebus_alarm_logger: true
+phoebus_olog: true
 archiver_appliance: true
 
 in_container: false

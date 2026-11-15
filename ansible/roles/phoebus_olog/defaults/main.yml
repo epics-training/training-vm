@@ -1,0 +1,50 @@
+---
+# Defaults for the Olog (electronic logbook) service
+#
+# Follows the phoebus_services_phoebus_olog role of
+# https://github.com/ControlSystemStudio/ansible-phoebus
+#
+# Olog lives in its own repository (not part of the Phoebus build), so this
+# role downloads its release tar (source) and builds it with Maven. Log
+# entries are stored in Elasticsearch (elasticsearch role), attachments in
+# MongoDB (mongodb role), both dependencies. The phoebus (client preferences) and
+# phoebus_olog_webclient roles use the same variable names for olog_url and
+# olog_webclient_url, so setting them in a setup file configures all of them
+# consistently.
+
+# Olog's REST API (plain HTTP), as seen from the clients
+olog_url: "http://localhost:4180/Olog"
+# Olog web client, as seen from the browser (allowed to do CORS requests)
+olog_webclient_url: "http://localhost:3000"
+
+olog_version: "v6.0.3"
+# Release tar of the tag (GitHub publishes no binary release assets)
+olog_download_url: "https://github.com/Olog/phoebus-olog/archive/refs/tags/{{ olog_version }}.tar.gz"
+olog_src_dir: "/opt/epics-tools/lib/phoebus-olog"
+olog_target_dir: "{{ olog_src_dir }}/target"
+
+olog_user: olog
+olog_group: olog
+olog_home: "/var/lib/olog"
+# Overrides of the defaults built into the jar (application.properties)
+olog_conf_file: "/opt/epics-tools/config/olog.properties"
+olog_java_heap_opts: "-Xms128M -Xmx512M"
+
+# Plain HTTP port - taken from the URL the clients use
+olog_http_port: "{{ olog_url | urlsplit('port') }}"
+# HTTPS port (Olog always opens it, with the self-signed certificate in the jar)
+olog_https_port: 4181
+
+# Accounts: the in-memory authentication provider has two built-in users,
+# user/userPass (role USER) and admin/adminPass (role ADMIN)
+olog_authentication_providers: inMemory
+
+# The web client's origin has to be allowed to do CORS requests
+olog_cors_allowed_origins: "{{ olog_webclient_url }}"
+
+olog_es_host: "{{ elasticsearch_network_host }}"
+olog_es_port: "{{ elasticsearch_http_port }}"
+olog_es_cluster_name: "{{ elasticsearch_cluster_name }}"
+
+olog_mongo_host: "{{ mongodb_bind_ip }}"
+olog_mongo_port: "{{ mongodb_port }}"
