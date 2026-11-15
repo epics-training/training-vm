@@ -198,6 +198,13 @@
       when: phoebus_olog is defined and phoebus_olog | bool
       tags: phoebus_olog
 
+    # Pulls in the phoebus_olog role as a dependency
+    - name: Olog Web Client
+      include_role:
+        name: phoebus_olog_webclient
+      when: phoebus_olog_webclient is defined and phoebus_olog_webclient | bool
+      tags: phoebus_olog_webclient
+
     - name: OAC Tree
       include_role:
         name: oac_tree

@@ -1,0 +1,244 @@
+---
+# Build the Olog web client and serve it as a service
+
+# --- Node.js ---
+
+- name: Download Node.js {{ nodejs_version }}
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ nodejs_url }}"
+    dest: "/tmp/{{ nodejs_archive }}"
+    checksum: "sha256:https://nodejs.org/dist/v{{ nodejs_version }}/SHASUMS256.txt"
+    mode: "0644"
+  register: nodejs_download
+  retries: 3
+  delay: 10
+  until: nodejs_download is succeeded
+
+# Unpacked in place; on a version change, the old release is removed first
+- name: Check the installed Node.js version
+  ansible.builtin.stat:
+    path: "{{ nodejs_dir }}/.installed-{{ nodejs_archive }}"
+  register: nodejs_marker
+
+- name: Remove a different Node.js version
+  become: true
+  ansible.builtin.file:
+    path: "{{ nodejs_dir }}"
+    state: absent
+  when: not nodejs_marker.stat.exists
+
+- name: Ensure Node.js directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ nodejs_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Node.js
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ nodejs_archive }}"
+    dest: "{{ nodejs_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    extra_opts:
+      - --strip-components=1
+    creates: "{{ nodejs_dir }}/.installed-{{ nodejs_archive }}"
+
+- name: Mark the installed Node.js version
+  become: true
+  ansible.builtin.copy:
+    content: "{{ nodejs_url }}\n"
+    dest: "{{ nodejs_dir }}/.installed-{{ nodejs_archive }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install the serve static file server
+  become: true
+  ansible.builtin.command: >-
+    {{ nodejs_dir }}/bin/npm install --global --no-fund --no-audit
+    serve@{{ olog_webclient_serve_version }}
+  environment:
+    PATH: "{{ nodejs_dir }}/bin:{{ ansible_env.PATH }}"
+  args:
+    creates: "{{ nodejs_dir }}/lib/node_modules/serve/package.json"
+  notify: Restart olog-webclient
+
+# --- Web client ---
+
+- name: Download Olog web client {{ olog_webclient_version }}
+  ansible.builtin.get_url:
+    url: "{{ olog_webclient_download_url }}"
+    dest: "/tmp/phoebus-olog-web-client-{{ olog_webclient_version }}.tar.gz"
+    mode: "0644"
+  register: olog_webclient_download
+  retries: 3
+  delay: 10
+  until: olog_webclient_download is succeeded
+
+# The source tree is unpacked from the release tar; on a version change
+# (or over an older git checkout) it is removed first, so no files of
+# two versions mix and the build below starts clean
+- name: Check the unpacked Olog web client version
+  ansible.builtin.stat:
+    path: "{{ olog_webclient_src_dir }}/.release-{{ olog_webclient_version }}"
+  register: olog_webclient_release_marker
+
+- name: Unpack Olog web client {{ olog_webclient_version }}
+  become: true
+  when: not olog_webclient_release_marker.stat.exists
+  block:
+    - name: Remove a different Olog web client version
+      ansible.builtin.file:
+        path: "{{ olog_webclient_src_dir }}"
+        state: absent
+
+    - name: Ensure Olog web client source directory exists
+      ansible.builtin.file:
+        path: "{{ olog_webclient_src_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Extract the Olog web client release
+      ansible.builtin.unarchive:
+        src: "/tmp/phoebus-olog-web-client-{{ olog_webclient_version }}.tar.gz"
+        dest: "{{ olog_webclient_src_dir }}"
+        remote_src: true
+        extra_opts:
+          - --strip-components=1
+
+    - name: Mark the unpacked Olog web client version
+      ansible.builtin.copy:
+        content: "{{ olog_webclient_version }}\n"
+        dest: "{{ olog_webclient_src_dir }}/.release-{{ olog_webclient_version }}"
+        mode: "0644"
+
+# Overrides the placeholders in .env.production (vite reads .local last)
+- name: Configure the Olog web client build
+  become: true
+  ansible.builtin.template:
+    src: env.production.local.j2
+    dest: "{{ olog_webclient_src_dir }}/.env.production.local"
+    owner: root
+    group: root
+    mode: "0644"
+  register: olog_webclient_env
+
+- name: Check that the Olog web client has been built
+  ansible.builtin.stat:
+    path: "{{ olog_webclient_build_dir }}/index.html"
+  register: olog_webclient_index
+
+- name: Build the Olog web client (this may take a while)
+  become: true
+  when: >-
+    not olog_webclient_release_marker.stat.exists or olog_webclient_env.changed or
+    not olog_webclient_index.stat.exists
+  environment:
+    PATH: "{{ nodejs_dir }}/bin:{{ ansible_env.PATH }}"
+    NODE_ENV: production
+  notify: Restart olog-webclient
+  block:
+    # Dev dependencies (TypeScript, vite) are needed for the build
+    - name: Install the Olog web client dependencies
+      ansible.builtin.command: npm ci --include=dev --no-fund --no-audit
+      args:
+        chdir: "{{ olog_webclient_src_dir }}"
+      changed_when: true
+
+    - name: Compile the Olog web client
+      ansible.builtin.command: npm run build
+      args:
+        chdir: "{{ olog_webclient_src_dir }}"
+      changed_when: true
+
+# --- Service ---
+
+- name: Ensure olog-webclient group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ olog_webclient_group }}"
+    system: true
+    state: present
+
+- name: Ensure olog-webclient user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ olog_webclient_user }}"
+    group: "{{ olog_webclient_group }}"
+    system: true
+    home: "{{ olog_webclient_src_dir }}"
+    createhome: false
+    shell: /sbin/nologin
+    state: present
+
+- name: Create olog-webclient systemd service
+  become: true
+  ansible.builtin.template:
+    src: olog-webclient.service.j2
+    dest: /etc/systemd/system/olog-webclient.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart olog-webclient
+
+- name: Manage olog-webclient service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: olog-webclient
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Add Olog web client link to the Training-VM homepage
+  when: not in_container and install_graphics | bool
+  ansible.builtin.include_tasks:
+    file: add_homepage_link.yml
+
+# --- Verify that the web client is actually being served ---
+
+- name: Apply pending olog-webclient restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that the Olog web client is served
+  when: not in_container
+  block:
+    - name: Wait for the Olog web client page
+      ansible.builtin.uri:
+        url: "{{ olog_webclient_url }}/"
+        return_content: true
+      register: olog_webclient_page
+      until: >-
+        olog_webclient_page.status == 200 and
+        '<div id="root">' in olog_webclient_page.content
+      retries: 24
+      delay: 5
+
+  rescue:
+    - name: Collect olog-webclient diagnostics
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set +e
+          systemctl status olog-webclient --no-pager --lines=0
+          echo "--- journal"
+          journalctl -u olog-webclient --no-pager -n 40
+      register: olog_webclient_diagnostics
+      changed_when: false
+      failed_when: false
+
+    - name: Show olog-webclient diagnostics
+      ansible.builtin.debug:
+        var: olog_webclient_diagnostics.stdout_lines
+
+    - name: Fail because the Olog web client is not served
+      ansible.builtin.fail:
+        msg: >-
+          The Olog web client is not served at {{ olog_webclient_url }} -
+          see the diagnostics above and 'journalctl -u olog-webclient'

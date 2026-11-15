@@ -16,6 +16,8 @@ arch:
   elasticsearch: "x86_64"
   # Architecture token used by the MongoDB release archives
   mongodb: "x86_64"
+  # Architecture token used by the Node.js release archives
+  nodejs: "x64"
 
 is_x86_64: true
 is_aarch64: false

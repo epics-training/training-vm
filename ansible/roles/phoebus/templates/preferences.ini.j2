@@ -39,11 +39,14 @@ org.csstudio.display.builder.runtime/probe_display=
 org.csstudio.display.builder.runtime/python_path=
 
 # Logbook
-{% if phoebus_olog | default(false) | bool %}
+{% if (phoebus_olog | default(false) | bool) or (phoebus_olog_webclient | default(false) | bool) %}
 # Olog (accounts: user/userPass, admin/adminPass)
 org.phoebus.logbook/logbook_factory=olog-es
 org.phoebus.olog.es.api/olog_url={{ olog_url }}
 org.phoebus.logbook.olog.ui/default_logbooks=operations
+{% if phoebus_olog_webclient | default(false) | bool %}
+org.phoebus.logbook.olog.ui/web_client_root_URL={{ olog_webclient_url }}
+{% endif %}
 {% else %}
 org.phoebus.logbook/logbook_factory=inmemory
 {% endif %}

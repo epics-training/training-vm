@@ -20,6 +20,7 @@ phoebus: true
 phoebus_alarm: true
 phoebus_alarm_logger: true
 phoebus_olog: true
+phoebus_olog_webclient: true
 oac_tree: true
 archiver_appliance: true
 docker: true

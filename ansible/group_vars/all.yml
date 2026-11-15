@@ -13,6 +13,7 @@ kafka: false
 elasticsearch: false
 mongodb: false
 phoebus_olog: false
+phoebus_olog_webclient: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

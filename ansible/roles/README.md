@@ -62,6 +62,15 @@ logbook to use Olog (default logbook `operations`).
 Follows `phoebus_services_phoebus_olog` of
 [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus).
 
+### phoebus_olog_webclient
+Olog web client, built from its release tar with Node.js (installed by the role) and served as a
+systemd service at `olog_webclient_url` (default `http://localhost:3000`,
+shared with the `phoebus_olog` and `phoebus` roles; linked on the
+Training-VM homepage).
+Pulls in `phoebus_olog`. Follows `phoebus_services_phoebus_olog_webclient`
+of [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus),
+but builds once at install time instead of at every service start.
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
@@ -148,6 +157,8 @@ unsupported architecture) and thereby provides:
   archives (`x86_64`, `aarch64`).
 - `arch.mongodb`: architecture token used by the MongoDB release archives
   (`x86_64`, `aarch64`).
+- `arch.nodejs`: architecture token used by the Node.js release archives
+  (`x64`, `arm64`).
 - `is_x86_64` / `is_aarch64`: booleans, for gating a task that genuinely only
   applies to one architecture.
 

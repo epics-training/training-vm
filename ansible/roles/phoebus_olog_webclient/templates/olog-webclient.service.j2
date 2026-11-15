@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Olog web client
+Documentation=https://github.com/Olog/phoebus-olog-web-client
+After=network.target olog.service
+Wants=olog.service
+
+[Service]
+Type=simple
+User={{ olog_webclient_user }}
+Group={{ olog_webclient_group }}
+WorkingDirectory={{ olog_webclient_src_dir }}
+
+Environment=PATH={{ nodejs_dir }}/bin:/usr/bin:/bin
+Environment=NO_UPDATE_CHECK=1
+
+# --single: serve index.html for all routes (single page application)
+ExecStart={{ nodejs_dir }}/bin/serve --single --no-clipboard --no-port-switching --listen {{ olog_webclient_port }} {{ olog_webclient_build_dir }}
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

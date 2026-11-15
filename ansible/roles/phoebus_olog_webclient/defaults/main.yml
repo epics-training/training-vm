@@ -1,0 +1,42 @@
+---
+# Defaults for the Olog web client
+#
+# Follows the phoebus_services_phoebus_olog_webclient role of
+# https://github.com/ControlSystemStudio/ansible-phoebus
+#
+# Unlike ansible-phoebus (which runs npm install + build at every service
+# start), the web client is built once by this role; the service only serves
+# the static build. The Olog URLs are compiled into the build, so changing
+# olog_url (phoebus_olog role) triggers a rebuild.
+
+olog_webclient_version: "v2.8.0"
+# Release tar of the tag (GitHub publishes no binary release assets)
+olog_webclient_download_url: "https://github.com/Olog/phoebus-olog-web-client/archive/refs/tags/{{ olog_webclient_version }}.tar.gz"
+olog_webclient_src_dir: "/opt/epics-tools/lib/phoebus-olog-web-client"
+olog_webclient_build_dir: "{{ olog_webclient_src_dir }}/build"
+
+olog_webclient_user: olog-webclient
+olog_webclient_group: olog-webclient
+
+# HTTP port - taken from the URL the browser uses
+olog_webclient_port: "{{ olog_webclient_url | urlsplit('port') }}"
+
+# Where the browser finds the Olog service
+olog_webclient_backend_url: "{{ olog_url }}"
+olog_webclient_websocket_url: "{{ olog_url | regex_replace('^http', 'ws') }}/web-socket"
+# Appended to the backend URL; Olog serves its Swagger UI at /swagger-ui
+olog_webclient_swagger_url: "/../swagger-ui/index.html"
+olog_webclient_support_href: "https://github.com/Olog/phoebus-olog-web-client"
+olog_webclient_app_title: "Olog (Training VM)"
+
+# Node.js LTS (Vite 7 needs >= 22.12) to build and serve the web client
+nodejs_version: "22.23.5"
+nodejs_dir: "/opt/epics-tools/lib/nodejs"
+nodejs_archive: "node-v{{ nodejs_version }}-linux-{{ arch.nodejs }}.tar.gz"
+nodejs_url: "https://nodejs.org/dist/v{{ nodejs_version }}/{{ nodejs_archive }}"
+# Static file server (with single page application fallback)
+olog_webclient_serve_version: "14.2.8"
+
+# --- Training-VM homepage link ---
+olog_webclient_homepage_link_title: "Olog (electronic logbook)"
+olog_webclient_homepage_link_url: "{{ olog_webclient_url }}"
