@@ -185,6 +185,12 @@
       when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
       tags: phoebus_alarm_logger
 
+    - name: MongoDB
+      include_role:
+        name: mongodb
+      when: mongodb is defined and mongodb | bool
+      tags: mongodb
+
     - name: OAC Tree
       include_role:
         name: oac_tree

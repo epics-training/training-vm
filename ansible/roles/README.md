@@ -98,6 +98,13 @@ Follows `phoebus_services_elasticsearch` of
 everything under `/opt/epics-tools/services/elasticsearch` (`release/`
 with its `config/`, `data/`, `logs/`, `run/`), owned by the service account.
 
+### mongodb
+MongoDB (single node, localhost only, no authentication)
+as a systemd service - the attachment storage of Olog.
+Installed from MongoDB's generic release archive (Ubuntu builds on the
+Debian family, RHEL builds on the Red Hat family), everything under
+`/opt/epics-tools/services/mongodb`.
+
 ### docker
 Installation of Docker or Podman to run containers.
 
@@ -125,6 +132,8 @@ unsupported architecture) and thereby provides:
   (`x64`, `aarch64`).
 - `arch.elasticsearch`: architecture token used by the Elasticsearch release
   archives (`x86_64`, `aarch64`).
+- `arch.mongodb`: architecture token used by the MongoDB release archives
+  (`x86_64`, `aarch64`).
 - `is_x86_64` / `is_aarch64`: booleans, for gating a task that genuinely only
   applies to one architecture.
 

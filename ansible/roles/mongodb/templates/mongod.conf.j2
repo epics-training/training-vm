@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+#
+# MongoDB configuration (single node, localhost only, no authentication)
+# https://www.mongodb.com/docs/manual/reference/configuration-options/
+
+systemLog:
+  destination: file
+  logAppend: true
+  path: {{ mongodb_logs_dir }}/mongod.log
+
+storage:
+  dbPath: {{ mongodb_data_dir }}
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: {{ mongodb_cache_size_gb }}
+
+# Runs in the foreground under systemd
+# (no timeZoneInfo: mongod refuses to start if the time zone database is
+# missing, e.g. in a minimal container - Olog does not need it)
+processManagement:
+  fork: false
+
+net:
+  port: {{ mongodb_port }}
+  bindIp: {{ mongodb_bind_ip }}

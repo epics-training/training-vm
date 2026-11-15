@@ -1,0 +1,52 @@
+---
+# Defaults for MongoDB (single node, localhost only, no authentication)
+#
+# Modelled on the phoebus_services_mongodb role of
+# https://github.com/ControlSystemStudio/ansible-phoebus:
+# one service root with data/, logs/ and run/, owned by the service account.
+# Used by Olog (phoebus_olog role) to store the log entry attachments.
+#
+# Unlike ansible-phoebus (MongoDB's RPM repository, RHEL x86_64 only), this
+# installs the generic release archive, which MongoDB publishes per distro
+# family for x86_64 and aarch64: one install method for all distros of the
+# training VM. Debian has no aarch64 build - its Debian family uses the
+# Ubuntu builds (same glibc/OpenSSL 3/libcurl 4 baseline).
+
+mongodb_version: "8.0.38"
+
+# Distro build of the release archive (see https://www.mongodb.com/try/download)
+mongodb_target: >-
+  {%- if is_debian -%}
+  {{ 'ubuntu2204' if (ansible_facts['distribution'] == 'Ubuntu'
+                      and ansible_facts['distribution_major_version'] | int < 24)
+     else 'ubuntu2404' }}
+  {%- elif ansible_facts['distribution'] != 'Fedora'
+           and ansible_facts['distribution_major_version'] | int >= 10 -%}
+  rhel10
+  {%- else -%}
+  rhel93
+  {%- endif -%}
+
+mongodb_archive: "mongodb-linux-{{ arch.mongodb }}-{{ mongodb_target }}-{{ mongodb_version }}.tgz"
+# The download is verified against the .sha256 file MongoDB publishes next to it
+mongodb_url: "https://fastdl.mongodb.org/linux/{{ mongodb_archive }}"
+
+mongodb_root: "/opt/epics-tools/services/mongodb"
+mongodb_account: mongodb
+
+mongodb_release_dir: "{{ mongodb_root }}/release"
+mongodb_data_dir: "{{ mongodb_root }}/data"
+mongodb_logs_dir: "{{ mongodb_root }}/logs"
+mongodb_conf_file: "{{ mongodb_root }}/mongod.conf"
+
+# Only listen on localhost (training VM, no authentication)
+mongodb_bind_ip: "127.0.0.1"
+mongodb_port: 27017
+# WiredTiger would otherwise take half of the RAM (minus 1 GB) as its cache
+mongodb_cache_size_gb: 0.25
+
+mongodb_service_name: mongodb
+
+# Set to true when running in a container without systemd: the service is
+# then installed and configured, but not started
+in_container: false

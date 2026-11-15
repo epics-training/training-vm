@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+[Unit]
+Description=MongoDB (single node) for Olog
+Documentation=https://www.mongodb.com/docs/manual
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ mongodb_account }}
+Group={{ mongodb_account }}
+
+ExecStart={{ mongodb_release_dir }}/bin/mongod --config {{ mongodb_conf_file }}
+
+Restart=on-failure
+RestartSec=5s
+
+# Recommended limits for mongod as specified in
+# https://www.mongodb.com/docs/manual/reference/ulimit/#recommended-ulimit-settings
+LimitFSIZE=infinity
+LimitCPU=infinity
+LimitAS=infinity
+LimitNOFILE=64000
+LimitNPROC=64000
+LimitMEMLOCK=infinity
+TasksMax=infinity
+TasksAccounting=false
+
+[Install]
+WantedBy=multi-user.target
