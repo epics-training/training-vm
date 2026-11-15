@@ -1,11 +1,15 @@
 name: "Roles: Phoebus & AA"
 
+# Triggers are deliberately limited to this workflow's own roles and CI
+# config: ansible/playbook.yml is left out because most edits to it (e.g.
+# adding an unrelated role) don't affect these roles, and its shared parts
+# (OS/arch detection, initial_setup, m_base) are exercised by the stage-1
+# build, which does trigger on it. Use workflow_dispatch to force a run.
 on:
   push:
     paths:
       - '.github/workflows/test-roles-phoebus-aa.yml'
-      - 'ansible/vars/ci-*.yml'
-      - 'ansible/playbook.yml'
+      - 'ansible/vars/ci-phoebus-aa.yml'
       - 'ansible/requirements.yml'
       - 'ansible/roles/phoebus/**'
       - 'ansible/roles/java/**'
@@ -13,8 +17,7 @@ on:
   pull_request:
     paths:
     - '.github/workflows/test-roles-phoebus-aa.yml'
-    - 'ansible/vars/ci-*.yml'
-    - 'ansible/playbook.yml'
+    - 'ansible/vars/ci-phoebus-aa.yml'
     - 'ansible/requirements.yml'
     - 'ansible/roles/phoebus/**'
     - 'ansible/roles/java/**'

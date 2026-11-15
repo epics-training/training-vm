@@ -45,8 +45,15 @@ jobs:
             const workflow_file = process.env.WORKFLOW_FILE;
             const sha = process.env.TARGET_SHA;
             const branch = process.env.TARGET_BRANCH;
-            const max_retries = 6;
-            const retry_delay_ms = 30000;
+            // A push/PR event creates all its workflow runs at once, so a
+            // stage-1 run triggered by the same event is normally listed
+            // immediately. Only allow for a short API listing lag before
+            // concluding that stage 1 was not triggered for this commit
+            // (its paths filter didn't match) and falling back right away.
+            const max_retries = 2;
+            const retry_delay_ms = 10000;
+            // Poll interval while a same-commit stage-1 run is in progress.
+            const wait_delay_ms = 30000;
 
             let retry_count = 0;
             while (true) {
@@ -71,7 +78,7 @@ jobs:
 
               if (run.status !== "completed") {
                 console.log(`Run ${run.id} is still ${run.status}. Waiting...`);
-                await new Promise(r => setTimeout(r, retry_delay_ms));
+                await new Promise(r => setTimeout(r, wait_delay_ms));
                 continue;
               }
 
