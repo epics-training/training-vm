@@ -12,6 +12,8 @@ on:
       - 'ansible/vars/ci-phoebus-aa.yml'
       - 'ansible/requirements.yml'
       - 'ansible/roles/phoebus/**'
+      - 'ansible/roles/phoebus_alarm/**'
+      - 'ansible/roles/kafka/**'
       - 'ansible/roles/java/**'
       - 'ansible/roles/archiver_appliance/**'
   pull_request:
@@ -20,6 +22,8 @@ on:
     - 'ansible/vars/ci-phoebus-aa.yml'
     - 'ansible/requirements.yml'
     - 'ansible/roles/phoebus/**'
+    - 'ansible/roles/phoebus_alarm/**'
+    - 'ansible/roles/kafka/**'
     - 'ansible/roles/java/**'
     - 'ansible/roles/archiver_appliance/**'
   workflow_dispatch:

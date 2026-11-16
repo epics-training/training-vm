@@ -30,6 +30,15 @@ StreamDevice Device Support.
 ### phoebus
 Control System Studio / Phoebus.
 
+### phoebus_alarm
+Phoebus alarm server as a systemd service.
+It is built by the `phoebus` role, which is therefore always run
+with this role; Kafka comes from the `kafka` role (a dependency).
+The alarm configuration name (`alarm_config_name`, default `Accelerator`)
+and Kafka address (`alarm_kafka_server`) are role defaults; the `phoebus`
+role uses the same variable names for the client preferences, so setting
+them once in a setup file configures client and server consistently.
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
@@ -63,6 +72,10 @@ The CALC (array and string calculation) module.
 
 ### m_sscan
 The SSCAN (multi-dimensional scan record) module.
+
+### kafka
+Apache Kafka message broker (single node, KRaft mode, localhost only)
+as a systemd service - the transport of the Phoebus alarm system.
 
 ### docker
 Installation of Docker or Podman to run containers.

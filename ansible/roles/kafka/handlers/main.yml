@@ -1,0 +1,10 @@
+---
+# Handlers for Apache Kafka
+
+- name: Restart kafka
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: kafka
+    state: restarted
+    daemon_reload: true

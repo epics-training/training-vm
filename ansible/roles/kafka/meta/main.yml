@@ -1,0 +1,12 @@
+---
+# galaxy_info is required by Molecule's prerun (role name check)
+galaxy_info:
+  role_name: kafka
+  namespace: epics
+  author: Ralph Lange
+  description: Apache Kafka (single node, KRaft) for the Phoebus alarm system
+  license: EPICS open license
+  min_ansible_version: "2.15"
+# Dependencies for Apache Kafka
+dependencies:
+  - role: java

@@ -7,6 +7,8 @@ install_graphics: false
 docker: true # for rootful this needs to happen before first reboot
 catrust: false
 phoebus: false
+phoebus_alarm: false
+kafka: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

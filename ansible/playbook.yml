@@ -40,7 +40,7 @@
 
     - name: Decide if graphics should be installed
       ansible.builtin.set_fact:
-        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or oac_tree | default(false) | bool }}"
+        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or phoebus_alarm | default(false) | bool or oac_tree | default(false) | bool }}"
       tags: always
 
     - name: Initial setup
@@ -143,11 +143,25 @@
           include_role:
             name: bluesky
 
+    # Also runs for phoebus_alarm: the Phoebus build produces the alarm server
     - name: Phoebus
       include_role:
         name: phoebus
-      when: phoebus is defined and phoebus | bool
+      when: (phoebus is defined and phoebus | bool) or (phoebus_alarm is defined and phoebus_alarm | bool)
       tags: phoebus
+
+    - name: Kafka
+      include_role:
+        name: kafka
+      when: kafka is defined and kafka | bool
+      tags: kafka
+
+    # Pulls in the kafka role as a dependency
+    - name: Phoebus Alarm Server
+      include_role:
+        name: phoebus_alarm
+      when: phoebus_alarm is defined and phoebus_alarm | bool
+      tags: phoebus_alarm
 
     - name: OAC Tree
       include_role:

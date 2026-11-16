@@ -1,0 +1,21 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  # Molecule runs the roles directly, bypassing playbook.yml, so the
+  # architecture variables (the arch dict, e.g. for the JDK download) have
+  # to be loaded here too - same first-found logic as playbook.yml's
+  # pre_tasks. Everything else comes from the roles' own defaults.
+  pre_tasks:
+    - name: Load architecture-specific variables with fallback
+      ansible.builtin.include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_facts['architecture'] }}.yml"
+            - "default.yml"
+          paths:
+            - "{{ playbook_dir }}/../../../../vars/arch"
+
+  roles:
+    - role: kafka

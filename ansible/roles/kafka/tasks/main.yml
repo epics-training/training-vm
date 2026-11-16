@@ -1,0 +1,129 @@
+---
+# Install Apache Kafka as a single-node (combined broker + controller) KRaft setup
+
+- name: Ensure kafka group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ kafka_group }}"
+    system: true
+    state: present
+
+- name: Ensure kafka user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    system: true
+    createhome: false
+    shell: /sbin/nologin
+    state: present
+
+- name: Download Kafka {{ kafka_version }}
+  become: true
+  ansible.builtin.get_url:
+    url: "https://archive.apache.org/dist/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    checksum: "sha512:{{ kafka_sha512 }}"
+    mode: "0644"
+  register: kafka_download
+  retries: 3
+  delay: 10
+  until: kafka_download is succeeded
+
+# Unpacked into a versioned directory, with kafka_home as a symlink to it,
+# so a version bump does not mix the jars of two versions in libs/
+- name: Unpack Kafka {{ kafka_version }}
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "{{ kafka_base }}"
+    remote_src: true
+    owner: root
+    group: root
+    creates: "{{ kafka_base }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}/bin/kafka-server-start.sh"
+
+- name: Point Kafka symlink to version {{ kafka_version }}
+  become: true
+  ansible.builtin.file:
+    src: "kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+    dest: "{{ kafka_home }}"
+    state: link
+    force: true
+  notify: Restart kafka
+
+- name: Ensure Kafka data, log and config directories exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: "0755"
+  loop:
+    - { path: "{{ kafka_data_dir }}", owner: "{{ kafka_user }}" }
+    - { path: "{{ kafka_log_dir }}", owner: "{{ kafka_user }}" }
+    - { path: "{{ kafka_config_dir }}", owner: root }
+
+- name: Create Kafka server configuration
+  become: true
+  ansible.builtin.template:
+    src: server.properties.j2
+    dest: "{{ kafka_config_dir }}/server.properties"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart kafka
+
+- name: Format Kafka storage (only once)
+  become: true
+  ansible.builtin.shell:
+    cmd: >-
+      {{ kafka_home }}/bin/kafka-storage.sh format --standalone
+      --cluster-id "$({{ kafka_home }}/bin/kafka-storage.sh random-uuid)"
+      --config {{ kafka_config_dir }}/server.properties
+    creates: "{{ kafka_data_dir }}/meta.properties"
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+    LOG_DIR: "{{ kafka_log_dir }}"
+
+- name: Ensure Kafka data and logs are owned by the kafka user
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+  loop:
+    - "{{ kafka_data_dir }}"
+    - "{{ kafka_log_dir }}"
+
+- name: Create Kafka systemd service
+  become: true
+  ansible.builtin.template:
+    src: kafka.service.j2
+    dest: /etc/systemd/system/kafka.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart kafka
+
+- name: Manage Kafka service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: kafka
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Add Kafka tools to the PATH
+  become: true
+  ansible.builtin.copy:
+    content: |
+      # Apache Kafka command line tools (Phoebus alarm system)
+      export PATH="$PATH:{{ kafka_home }}/bin"
+    dest: /etc/profile.d/kafka.sh
+    owner: root
+    group: root
+    mode: "0644"

@@ -16,6 +16,7 @@ m_areadetector: true
 
 catrust: false
 phoebus: true
+phoebus_alarm: true
 oac_tree: true
 archiver_appliance: true
 docker: true
