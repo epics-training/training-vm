@@ -40,7 +40,7 @@
 
     - name: Decide if graphics should be installed
       ansible.builtin.set_fact:
-        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or phoebus_alarm | default(false) | bool or phoebus_alarm_logger | default(false) | bool or oac_tree | default(false) | bool }}"
+        install_graphics: "{{ install_graphics | bool or phoebus | default(false) | bool or phoebus_alarm | default(false) | bool or phoebus_alarm_logger | default(false) | bool or phoebus_save_restore | default(false) | bool or oac_tree | default(false) | bool }}"
       tags: always
 
     - name: Initial setup
@@ -149,14 +149,16 @@
           include_role:
             name: bluesky
 
-    # Also runs for phoebus_alarm(_logger): the Phoebus build produces the alarm services
+    # Also runs for phoebus_alarm(_logger) and phoebus_save_restore:
+    # the Phoebus build produces the services
     - name: Phoebus
       include_role:
         name: phoebus
       when: >-
         (phoebus is defined and phoebus | bool) or
         (phoebus_alarm is defined and phoebus_alarm | bool) or
-        (phoebus_alarm_logger is defined and phoebus_alarm_logger | bool)
+        (phoebus_alarm_logger is defined and phoebus_alarm_logger | bool) or
+        (phoebus_save_restore is defined and phoebus_save_restore | bool)
       tags: phoebus
 
     - name: Kafka
@@ -184,6 +186,13 @@
         name: phoebus_alarm_logger
       when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
       tags: phoebus_alarm_logger
+
+    # Pulls in the elasticsearch role as a dependency
+    - name: Phoebus Save-and-Restore
+      include_role:
+        name: phoebus_save_restore
+      when: phoebus_save_restore is defined and phoebus_save_restore | bool
+      tags: phoebus_save_restore
 
     - name: OAC Tree
       include_role:

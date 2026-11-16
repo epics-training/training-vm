@@ -1,0 +1,133 @@
+---
+# Run the Phoebus save-and-restore service (built by the phoebus role)
+
+# server.port is taken from the URL: without an explicit port it would be
+# undefined, and the unprivileged service user cannot bind ports below 1024
+- name: Check that save_restore_url names a usable port
+  ansible.builtin.assert:
+    that:
+      - save_restore_url | urlsplit('scheme') == 'http'
+      - save_restore_url | urlsplit('port') is not none
+      - save_restore_url | urlsplit('port') | int >= 1024
+    fail_msg: >-
+      save_restore_url ({{ save_restore_url }}) must be an http:// URL with an
+      explicit port of 1024 or above, e.g. http://localhost:8080/save-restore
+    quiet: true
+
+- name: Check that the save-and-restore service has been built
+  ansible.builtin.find:
+    paths: "{{ save_restore_target_dir }}"
+    patterns: "service-save-and-restore-*.jar"
+  register: save_restore_jars
+
+- name: Fail if the save-and-restore jar is missing
+  ansible.builtin.fail:
+    msg: >-
+      No service-save-and-restore-*.jar found in {{ save_restore_target_dir }}.
+      The save-and-restore service is built by the phoebus role - make sure it ran successfully.
+  when: save_restore_jars.matched == 0
+
+- name: Ensure save-and-restore group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ save_restore_group }}"
+    system: true
+    state: present
+
+# Needs a home directory: Phoebus keeps user settings/state under ~/.phoebus
+- name: Ensure save-and-restore user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ save_restore_user }}"
+    group: "{{ save_restore_group }}"
+    system: true
+    home: "{{ save_restore_home }}"
+    createhome: true
+    shell: /sbin/nologin
+    state: present
+
+- name: Ensure save-and-restore configuration directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ save_restore_conf_dir }}"
+    state: directory
+    owner: root
+    group: "{{ save_restore_group }}"
+    mode: "0750"
+
+# Contains the demo passwords: readable by the service only
+- name: Create save-and-restore properties
+  become: true
+  ansible.builtin.template:
+    src: save-and-restore.properties.j2
+    dest: "{{ save_restore_conf_dir }}/save-and-restore.properties"
+    owner: root
+    group: "{{ save_restore_group }}"
+    mode: "0640"
+  notify: Restart save-and-restore
+
+- name: Create save-and-restore wrapper
+  become: true
+  ansible.builtin.template:
+    src: save-and-restore.sh.j2
+    dest: /usr/local/bin/save-and-restore
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart save-and-restore
+
+- name: Create save-and-restore systemd service
+  become: true
+  ansible.builtin.template:
+    src: save-and-restore.service.j2
+    dest: /etc/systemd/system/save-and-restore.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart save-and-restore
+
+- name: Manage save-and-restore service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: save-and-restore
+    state: started
+    enabled: true
+    daemon_reload: true
+
+# --- Verify that the save-and-restore service is actually up and running ---
+
+- name: Apply pending save-and-restore restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that the save-and-restore service is running
+  when: not in_container
+  block:
+    # The service info reports whether the service reached Elasticsearch
+    - name: Wait for the save-and-restore REST API to report Elasticsearch connected
+      ansible.builtin.uri:
+        url: "{{ save_restore_url | regex_replace('/+$', '') }}/"
+        return_content: true
+      register: save_restore_info
+      until: >-
+        save_restore_info.status == 200 and
+        '"Connected"' in save_restore_info.content
+      retries: 36
+      delay: 5
+
+    - name: Get save-and-restore service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: save-and-restore
+      register: save_restore_service
+
+    - name: Check that save-and-restore is active
+      ansible.builtin.assert:
+        that:
+          - save_restore_service.status.ActiveState == 'active'
+          - save_restore_service.status.SubState == 'running'
+        fail_msg: >-
+          Service save-and-restore is {{ save_restore_service.status.ActiveState }}/{{ save_restore_service.status.SubState }}
+          - see 'journalctl -u save-and-restore'
+        success_msg: "Service save-and-restore is running"
+        quiet: true

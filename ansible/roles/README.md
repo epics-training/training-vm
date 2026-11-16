@@ -49,6 +49,19 @@ them to the Phoebus "Alarm Log" table through its REST API
 `phoebus` role's client preferences like the alarm server's settings).
 Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
 
+### phoebus_save_restore
+Phoebus save-and-restore service as a systemd service: stores
+configurations and snapshots in Elasticsearch (`elasticsearch` role, a
+dependency) and serves the Phoebus "Save & Restore" application through its
+REST API (`save_restore_url`, default `http://localhost:8080/save-restore`,
+shared with the `phoebus` role's client preferences like the alarm
+settings). Built by the `phoebus` role.
+Takes snapshots and restores through CA/PVA with the EPICS defaults; other
+EPICS settings go into `save_restore_epics_env` (`EPICS_*` environment
+variables), as the service does not read the client's `preferences.ini`.
+Reading needs no login; creating and changing needs one of the built-in demo
+users (`user`/`userPass`, `admin`/`adminPass`).
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
@@ -92,7 +105,8 @@ as a systemd service - the transport of the Phoebus alarm system.
 
 ### elasticsearch
 Elasticsearch (single node, localhost only, security disabled)
-as a systemd service - the storage of the Phoebus alarm logger.
+as a systemd service - the storage of the Phoebus alarm logger and
+save-and-restore service.
 Follows `phoebus_services_elasticsearch` of
 [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus):
 everything under `/opt/epics-tools/services/elasticsearch` (`release/`

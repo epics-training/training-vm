@@ -18,10 +18,12 @@ jobs:
       # Don't let a failure on one architecture hide the result on the other
       fail-fast: false
       matrix:
-        # kafka, elasticsearch and phoebus_alarm_logger run in a container
-        # with systemd (ansible/molecule/systemd) and test the services
-        # functionally; phoebus_alarm_logger builds Phoebus and covers the
-        # whole alarm system (Kafka, alarm server, Elasticsearch, logger)
+        # kafka, elasticsearch, phoebus_alarm_logger and phoebus_save_restore
+        # run in a container with systemd (ansible/molecule/systemd) and test
+        # the services functionally; phoebus_alarm_logger builds Phoebus and
+        # covers the whole alarm system (Kafka, alarm server, Elasticsearch,
+        # logger), phoebus_save_restore builds Phoebus and covers the
+        # save-and-restore service with Elasticsearch
         role:
           - initial_setup
           - m_base
@@ -31,6 +33,7 @@ jobs:
           - kafka
           - elasticsearch
           - phoebus_alarm_logger
+          - phoebus_save_restore
         # The molecule platform image (ubuntu:22.04) is multi-arch, so each
         # runner exercises the role natively on its own architecture
         arch:

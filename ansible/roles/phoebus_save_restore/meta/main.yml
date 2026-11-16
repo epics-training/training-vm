@@ -1,0 +1,15 @@
+---
+# galaxy_info is required by Molecule's prerun (role name check)
+galaxy_info:
+  role_name: phoebus_save_restore
+  namespace: epics
+  author: Ralph Lange
+  description: Phoebus save-and-restore service
+  license: EPICS open license
+  min_ansible_version: "2.15"
+# Dependencies for the Phoebus save-and-restore service
+# (the service binaries come from the phoebus role,
+#  which playbook.yml runs whenever phoebus_save_restore is enabled)
+dependencies:
+  - role: java
+  - role: elasticsearch

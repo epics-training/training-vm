@@ -1,0 +1,28 @@
+#!/bin/sh
+# {{ ansible_managed }}
+#
+# Phoebus save-and-restore service launcher
+#
+# Run 'save-and-restore -help' for options.
+# The service is managed by systemd: 'systemctl status save-and-restore'
+
+export JAVA_HOME={{ java_home }}
+export PATH="$JAVA_HOME/bin:$PATH"
+
+TARGET={{ save_restore_target_dir }}
+JAR=$(ls "$TARGET"/service-save-and-restore-*.jar 2>/dev/null | grep -v -e '-sources' -e '-javadoc' | head -n 1)
+
+if [ -z "$JAR" ]; then
+  echo "save-and-restore: no service-save-and-restore-*.jar found in $TARGET" >&2
+  exit 1
+fi
+
+# Settings in {{ save_restore_conf_dir }}/save-and-restore.properties
+# override the defaults packaged with the service.
+# EPICS access: CA and PVA use the EPICS_* environment variables
+# (jca.use_env), defaultProtocol applies to PV names without ca:// or pva://
+exec java ${SAVE_RESTORE_JAVA_OPTS} \
+  -Djca.use_env=true \
+  -DdefaultProtocol={{ save_restore_default_protocol }} \
+  -Dspring.config.additional-location=file:{{ save_restore_conf_dir }}/save-and-restore.properties \
+  -jar "$JAR" "$@"
