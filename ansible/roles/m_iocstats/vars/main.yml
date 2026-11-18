@@ -1,0 +1,11 @@
+---
+iocstats_version: "4.0.1"
+
+m_iocstats_modules:
+  - id: iocstats
+    name: "iocStats module"
+    version: "{{ iocstats_version }}"
+    url: "https://github.com/epics-modules/iocstats/archive/refs/tags/{{ iocstats_version }}.tar.gz"
+    release_var: "IOCSTATS"
+    release_sortkey: "10"
+    pre_hook: "iocstats_prep.yml"

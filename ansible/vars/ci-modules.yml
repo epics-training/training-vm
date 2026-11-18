@@ -6,6 +6,7 @@
 m_base: true
 m_areadetector: true
 m_seq: true
+m_iocstats: true
 m_opcua: true
 m_stream: true
 m_p4p: true

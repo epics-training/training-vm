@@ -73,6 +73,12 @@
       when: m_autosave is defined and m_autosave | bool
       tags: m_autosave
 
+    - name: iocStats
+      include_role:
+        name: m_iocstats
+      when: m_iocstats is defined and m_iocstats | bool
+      tags: m_iocstats
+
     - name: SScan
       include_role:
         name: m_sscan

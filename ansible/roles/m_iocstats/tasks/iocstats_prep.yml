@@ -1,0 +1,12 @@
+---
+# iocStats-4.0.1's devIocStatsAnalog.c declares its dsets with untyped
+# DEVSUPFUN entries, which GCC >= 14 rejects (-Wincompatible-pointer-types).
+# Downgrade it to warning and use gnu17 standard to make it compile.
+# Drop this once upstream releases typed dset support (PRs #84, #67, #90).
+- name: "{{ module.name }} pre-build hook | Allow legacy untyped DEVSUPFUN casts"
+  ansible.builtin.blockinfile:
+    path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/CONFIG_SITE"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      USR_CFLAGS_Linux += -std=gnu17 -Wno-error=incompatible-pointer-types
+  become: true

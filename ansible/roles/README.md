@@ -78,6 +78,9 @@ The AutoSaveRestore (EPICS Process Database persistence) module.
 ### m_calc
 The CALC (array and string calculation) module.
 
+### m_iocstats
+The iocStats (IOC health and resource monitoring) module.
+
 ### m_sscan
 The SSCAN (multi-dimensional scan record) module.
 

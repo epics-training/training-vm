@@ -13,6 +13,7 @@ m_seq: true
 m_opcua: true
 m_stream: true
 m_areadetector: true
+m_iocstats: true
 
 catrust: false
 phoebus: true

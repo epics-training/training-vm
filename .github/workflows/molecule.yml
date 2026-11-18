@@ -25,6 +25,7 @@ jobs:
         role:
           - initial_setup
           - m_base
+          - m_iocstats
           - phoebus
           - archiver_appliance
           - kafka
