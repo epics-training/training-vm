@@ -8,7 +8,7 @@
 # (Fedora 44, Ubuntu 26.04) now makes this a hard type error (both directly,
 # as "conflicting types", and indirectly via -Wincompatible-pointer-types
 # when the RSET struct is initialized) - same root cause as the busy/seq/
-# sscan fixes (see m_areadetector/tasks/busy_prep.yml, m_seq/tasks/seq_prep.yml,
+# sscan fixes (see m_busy/tasks/busy_prep.yml, m_seq/tasks/seq_prep.yml,
 # m_sscan/tasks/sscan_prep.yml).
 - name: "{{ module.name }} pre-build hook | Allow legacy K&R-style declarations"
   ansible.builtin.blockinfile:

@@ -1,18 +1,9 @@
 ---
-busy_version: "1.7.4"
 adcore_version: "3.13"
 adsimdetector_version: "2.11"
 adpvadriver_version: "1.6"
 
 m_areadetector_modules:
-  - id: busy
-    name: "Busy Record"
-    version: "{{ busy_version }}"
-    url: "https://github.com/epics-modules/busy/archive/refs/tags/R{{ busy_version | replace('.', '-') }}.tar.gz"
-    release_var: "BUSY"
-    release_sortkey: "10"
-    pre_hook: "busy_prep.yml"
-
   - id: adcore
     name: "AreaDetector - Core"
     version: "{{ adcore_version }}"

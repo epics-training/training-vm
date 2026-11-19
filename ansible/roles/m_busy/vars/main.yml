@@ -1,0 +1,11 @@
+---
+busy_version: "1.7.4"
+
+m_busy_modules:
+  - id: busy
+    name: "Busy Record"
+    version: "{{ busy_version }}"
+    url: "https://github.com/epics-modules/busy/archive/refs/tags/R{{ busy_version | replace('.', '-') }}.tar.gz"
+    release_var: "BUSY"
+    release_sortkey: "10"
+    pre_hook: "busy_prep.yml"

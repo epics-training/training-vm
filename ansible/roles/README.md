@@ -4,11 +4,13 @@
 
 ### m_areadetector
 The AreaDetector image processing framework
-(modules Core, SimDetector and PVADriver)
-and their dependency Busy.
+(modules Core, SimDetector and PVADriver).
 
 ### m_base
 EPICS Base C++ and PVXS.
+
+### m_busy
+The Busy record (a dependency of AreaDetector).
 
 ### m_opcua
 OPC UA Device Support and the open62541 low-level driver.
