@@ -1,0 +1,185 @@
+---
+# Install MongoDB as a single-node service
+# (modelled on phoebus_services_mongodb of ControlSystemStudio/ansible-phoebus)
+
+# mongod links against libcurl; on the Debian family the curl package pulls
+# in the right (release-specific) library package. On the Red Hat family
+# libcurl is always there (dnf needs it) - and installing curl would
+# conflict with the default curl-minimal.
+- name: Install MongoDB runtime dependencies
+  become: true
+  ansible.builtin.package:
+    name: curl
+    state: present
+  when: is_debian
+
+- name: Ensure MongoDB account exists
+  become: true
+  block:
+    - name: Ensure mongodb group exists
+      ansible.builtin.group:
+        name: "{{ mongodb_account }}"
+        system: true
+        state: present
+
+    - name: Ensure mongodb user exists
+      ansible.builtin.user:
+        name: "{{ mongodb_account }}"
+        group: "{{ mongodb_account }}"
+        system: true
+        home: "{{ mongodb_root }}"
+        createhome: false
+        shell: /sbin/nologin
+        state: present
+
+- name: Ensure MongoDB directories exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mongodb_account }}"
+    group: "{{ mongodb_account }}"
+    mode: "u=rwX,g=rX,o=rX"
+  loop:
+    - "{{ mongodb_root }}"
+    - "{{ mongodb_data_dir }}"
+    - "{{ mongodb_logs_dir }}"
+
+- name: Download MongoDB {{ mongodb_version }} ({{ mongodb_target }})
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ mongodb_url }}"
+    dest: "/tmp/{{ mongodb_archive }}"
+    checksum: "sha256:{{ mongodb_url }}.sha256"
+    mode: "0644"
+  register: mongodb_download
+  retries: 3
+  delay: 10
+  until: mongodb_download is succeeded
+
+# The release is unpacked in place; on a version (or distro build) change,
+# the old release is removed first (data/ and logs/ live outside)
+- name: Check the installed MongoDB release
+  ansible.builtin.stat:
+    path: "{{ mongodb_release_dir }}/.installed-{{ mongodb_archive }}"
+  register: mongodb_release_marker
+
+- name: Remove a different MongoDB release
+  become: true
+  ansible.builtin.file:
+    path: "{{ mongodb_release_dir }}"
+    state: absent
+  when: not mongodb_release_marker.stat.exists
+
+- name: Ensure MongoDB release directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ mongodb_release_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install MongoDB release
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ mongodb_archive }}"
+    dest: "{{ mongodb_release_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    extra_opts:
+      - --strip-components=1
+    creates: "{{ mongodb_release_dir }}/.installed-{{ mongodb_archive }}"
+  notify: Restart MongoDB service
+
+- name: Mark the installed MongoDB release
+  become: true
+  ansible.builtin.copy:
+    content: "{{ mongodb_url }}\n"
+    dest: "{{ mongodb_release_dir }}/.installed-{{ mongodb_archive }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install MongoDB configuration
+  become: true
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongodb_conf_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart MongoDB service
+
+- name: Install MongoDB systemd unit
+  become: true
+  ansible.builtin.template:
+    src: mongodb.service.j2
+    dest: "/etc/systemd/system/{{ mongodb_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart MongoDB service
+
+- name: Enable and start MongoDB
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: "{{ mongodb_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# --- Verify that MongoDB is actually up and running ---
+
+- name: Apply pending MongoDB restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that MongoDB is running
+  when: not in_container
+  block:
+    - name: Wait for MongoDB to accept connections
+      ansible.builtin.wait_for:
+        host: "{{ mongodb_bind_ip }}"
+        port: "{{ mongodb_port }}"
+        timeout: 120
+
+    - name: Get MongoDB service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: "{{ mongodb_service_name }}"
+      register: mongodb_service
+
+    - name: Check that MongoDB is active
+      ansible.builtin.assert:
+        that:
+          - mongodb_service.status.ActiveState == 'active'
+          - mongodb_service.status.SubState == 'running'
+        quiet: true
+
+  # Show why - the service journal and MongoDB's own log
+  rescue:
+    - name: Collect MongoDB diagnostics
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set +e
+          systemctl status {{ mongodb_service_name }} --no-pager --lines=0
+          echo "--- journal"
+          journalctl -u {{ mongodb_service_name }} --no-pager -n 60
+          echo "--- {{ mongodb_logs_dir }}/mongod.log"
+          tail -n 60 {{ mongodb_logs_dir }}/mongod.log
+      register: mongodb_diagnostics
+      changed_when: false
+      failed_when: false
+
+    - name: Show MongoDB diagnostics
+      ansible.builtin.debug:
+        var: mongodb_diagnostics.stdout_lines
+
+    - name: Fail because MongoDB is not running
+      ansible.builtin.fail:
+        msg: >-
+          MongoDB did not come up - see the diagnostics above,
+          'journalctl -u {{ mongodb_service_name }}' and {{ mongodb_logs_dir }}

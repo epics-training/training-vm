@@ -14,6 +14,10 @@ arch:
   java: "aarch64"
   # Architecture token used by the Elasticsearch release archives
   elasticsearch: "aarch64"
+  # Architecture token used by the MongoDB release archives
+  mongodb: "aarch64"
+  # Architecture token used by the Node.js release archives
+  nodejs: "arm64"
 
 is_x86_64: false
 is_aarch64: true

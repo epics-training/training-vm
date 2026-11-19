@@ -1,0 +1,10 @@
+---
+# Handlers for the Olog web client
+
+- name: Restart olog-webclient
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: olog-webclient
+    state: restarted
+    daemon_reload: true

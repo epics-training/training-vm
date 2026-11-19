@@ -49,6 +49,28 @@ them to the Phoebus "Alarm Log" table through its REST API
 `phoebus` role's client preferences like the alarm server's settings).
 Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
 
+### phoebus_olog
+Olog electronic logbook service (REST API) as a systemd service:
+built with Maven from its release tar (Maven from the `phoebus` role), log entries
+stored in Elasticsearch (`elasticsearch` role), attachments in MongoDB
+(`mongodb` role), both dependencies.
+Plain HTTP at `olog_url` (default `http://localhost:4180/Olog`, shared with
+the `phoebus` role's client preferences like the alarm system's settings),
+HTTPS with Olog's self-signed certificate on port 4181. Built-in accounts `user`/`userPass` and
+`admin`/`adminPass`. When enabled, the `phoebus` role configures the Phoebus
+logbook to use Olog (default logbook `operations`).
+Follows `phoebus_services_phoebus_olog` of
+[ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus).
+
+### phoebus_olog_webclient
+Olog web client, built from its release tar with Node.js (installed by the role) and served as a
+systemd service at `olog_webclient_url` (default `http://localhost:3000`,
+shared with the `phoebus_olog` and `phoebus` roles; linked on the
+Training-VM homepage).
+Pulls in `phoebus_olog`. Follows `phoebus_services_phoebus_olog_webclient`
+of [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus),
+but builds once at install time instead of at every service start.
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 
@@ -97,6 +119,14 @@ Follows `phoebus_services_elasticsearch` of
 [ansible-phoebus](https://github.com/ControlSystemStudio/ansible-phoebus):
 everything under `/opt/epics-tools/services/elasticsearch` (`release/`
 with its `config/`, `data/`, `logs/`, `run/`), owned by the service account.
+Also the storage of Olog's log entries.
+
+### mongodb
+MongoDB (single node, localhost only, no authentication)
+as a systemd service - the attachment storage of Olog.
+Installed from MongoDB's generic release archive (Ubuntu builds on the
+Debian family, RHEL builds on the Red Hat family), everything under
+`/opt/epics-tools/services/mongodb`.
 
 ### docker
 Installation of Docker or Podman to run containers.
@@ -125,6 +155,10 @@ unsupported architecture) and thereby provides:
   (`x64`, `aarch64`).
 - `arch.elasticsearch`: architecture token used by the Elasticsearch release
   archives (`x86_64`, `aarch64`).
+- `arch.mongodb`: architecture token used by the MongoDB release archives
+  (`x86_64`, `aarch64`).
+- `arch.nodejs`: architecture token used by the Node.js release archives
+  (`x64`, `arm64`).
 - `is_x86_64` / `is_aarch64`: booleans, for gating a task that genuinely only
   applies to one architecture.
 

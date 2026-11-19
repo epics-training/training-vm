@@ -5,7 +5,8 @@
 # https://github.com/ControlSystemStudio/ansible-phoebus:
 # one service root with release/, data/, logs/ and run/, all owned by the
 # service account; the configuration lives in release/config.
-# Used by the Phoebus alarm logger (phoebus_alarm_logger role).
+# Used by the Phoebus alarm logger (phoebus_alarm_logger role) and Olog
+# (phoebus_olog role).
 #
 # Stays on the 8.x line: Phoebus 6 uses the Elasticsearch 8 Java client,
 # which is not supported against a 9.x server.

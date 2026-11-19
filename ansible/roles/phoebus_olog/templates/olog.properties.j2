@@ -1,0 +1,31 @@
+# {{ ansible_managed }}
+#
+# Olog configuration for the training VM
+#
+# Only overrides: Olog reads its built-in defaults (application.properties in
+# the jar) first, then this file (spring.config.additional-location).
+# See https://github.com/Olog/phoebus-olog/blob/{{ olog_version }}/src/main/resources/application.properties
+
+# HTTPS (self-signed certificate built into the jar)
+server.port={{ olog_https_port }}
+
+# Plain HTTP - used by the Phoebus client and the web client
+server.http.enable=true
+server.http.port={{ olog_http_port }}
+
+# Authentication: built-in accounts user/userPass and admin/adminPass
+authenticationProviders={{ olog_authentication_providers }}
+
+# Origins allowed to do CORS requests (the web client)
+cors.allowed.origins={{ olog_cors_allowed_origins }}
+
+# Elasticsearch (log entries, logbooks, tags, properties, levels)
+elasticsearch.network.host={{ olog_es_host }}
+elasticsearch.http.port={{ olog_es_port }}
+elasticsearch.cluster.name={{ olog_es_cluster_name }}
+elasticsearch.create.indices=true
+
+# MongoDB GridFS (attachments)
+mongo.database=ologAttachments
+mongo.host={{ olog_mongo_host }}
+mongo.port={{ olog_mongo_port }}

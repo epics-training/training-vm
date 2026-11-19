@@ -185,6 +185,26 @@
       when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
       tags: phoebus_alarm_logger
 
+    - name: MongoDB
+      include_role:
+        name: mongodb
+      when: mongodb is defined and mongodb | bool
+      tags: mongodb
+
+    # Pulls in the elasticsearch and mongodb roles as dependencies
+    - name: Olog
+      include_role:
+        name: phoebus_olog
+      when: phoebus_olog is defined and phoebus_olog | bool
+      tags: phoebus_olog
+
+    # Pulls in the phoebus_olog role as a dependency
+    - name: Olog Web Client
+      include_role:
+        name: phoebus_olog_webclient
+      when: phoebus_olog_webclient is defined and phoebus_olog_webclient | bool
+      tags: phoebus_olog_webclient
+
     - name: OAC Tree
       include_role:
         name: oac_tree
