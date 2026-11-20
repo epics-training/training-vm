@@ -14,9 +14,13 @@
     file: build_docs.yml
   when: phoebus_repo.changed | bool
 
+# Maven Central downloads fail now and then, sometimes for minutes: Maven
+# retries each request, and the whole build is retried a few minutes apart.
+# -U makes a retry download again instead of using the cached failure.
 - name: Build the common phoebus binaries (this may take a while)
   command: >-
-    mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true
+    mvn -B -U clean install -DskipTests=true -Dmaven.javadoc.skip=true
+    -Daether.connector.http.retryHandler.count=5
     -Dopenjfx.version={{ phoebus_openjfx_version }}
   become: true
   args:
@@ -25,6 +29,10 @@
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  register: phoebus_build
+  until: phoebus_build.rc == 0
+  retries: 4
+  delay: 180
   when: phoebus_repo.changed | bool
 
 - name: ensure config directory exists for phoebus
