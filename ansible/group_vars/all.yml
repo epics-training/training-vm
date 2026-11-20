@@ -11,6 +11,7 @@ phoebus_alarm: false
 phoebus_alarm_logger: false
 kafka: false
 elasticsearch: false
+channelfinder: false
 oac_tree: false
 archiver_appliance: false
 bluesky: false

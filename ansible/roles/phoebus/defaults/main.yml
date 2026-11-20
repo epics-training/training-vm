@@ -30,6 +30,9 @@ alarm_kafka_server: >-
 # REST API of the alarm logger (port 9000 is the Phoebus client default)
 alarm_logger_url: "http://localhost:9000"
 
+# ChannelFinder REST API (shared with the channelfinder role)
+channelfinder_url: "http://localhost:8080/ChannelFinder"
+
 # Documentation build: virtualenv location, and the distro's Python package
 # to use where the system python3 is older than 3.11 (Rocky 9, Ubuntu 22.04)
 phoebus_docs_src: "/opt/epics-tools/lib/phoebus/docs"

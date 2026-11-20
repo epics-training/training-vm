@@ -19,6 +19,7 @@ m_stream: true
 # phoebus: true
 # phoebus_alarm: true
 # phoebus_alarm_logger: true
+# channelfinder: true
 # archiver_appliance: true
 # docker: true
 # bluesky: true

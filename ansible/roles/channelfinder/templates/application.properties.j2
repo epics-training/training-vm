@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+# Overrides the defaults packaged in the service jar
+
+# HTTPS (bundled self-signed certificate) and HTTP
+server.port={{ channelfinder_https_port }}
+server.http.enable=true
+server.http.port={{ channelfinder_http_port }}
+
+# Demo authentication
+demo_auth.enabled=true
+demo_auth.users={{ channelfinder_admin_user }},{{ channelfinder_user }}
+demo_auth.pwds={{ channelfinder_admin_password }},{{ channelfinder_user_password }}
+demo_auth.roles=ADMIN,USER
+
+# Elasticsearch; indices are created on startup
+elasticsearch.host_urls={{ channelfinder_es_url }}
+elasticsearch.create.indices=true
+
+# Archiver Appliance integration
+aa.enabled={{ channelfinder_aa_enabled | bool | lower }}
+aa.urls={'default': '{{ channelfinder_aa_url }}'}

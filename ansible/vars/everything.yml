@@ -20,6 +20,7 @@ catrust: false
 phoebus: true
 phoebus_alarm: true
 phoebus_alarm_logger: true
+channelfinder: true
 oac_tree: true
 archiver_appliance: true
 docker: true

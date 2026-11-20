@@ -56,6 +56,18 @@ them to the Phoebus "Alarm Log" table through its REST API
 `phoebus` role's client preferences like the alarm server's settings).
 Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
 
+### channelfinder
+[ChannelFinder](https://github.com/ChannelFinder/ChannelFinderService)
+directory service as a systemd service, built from its source release with
+Maven (`maven` role), storing its directory in Elasticsearch
+(`elasticsearch` role, a dependency).
+REST API and admin web page on `channelfinder_url` (default
+`http://localhost:8080/ChannelFinder`, shared with the `phoebus` role's
+client preferences), HTTPS on port 8443; demo accounts `admin`/`adminPass`
+and `user`/`userPass`. When the `archiver_appliance` role is enabled,
+channels with an `archive` property are added to the archiver.
+The service also runs an EPICS PVA RPC server (`cfService:query`).
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 

@@ -1,12 +1,14 @@
 ---
 # Overrides for CI testing on GitHub Actions
 
-# Phoebus, Alarm System, Archiver Appliance and dependencies
+# Phoebus, Alarm System, ChannelFinder, Archiver Appliance
+# and dependencies
 
 m_base: true
 phoebus: true
 phoebus_alarm: true
 phoebus_alarm_logger: true
+channelfinder: true
 archiver_appliance: true
 
 in_container: false

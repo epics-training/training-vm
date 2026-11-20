@@ -191,6 +191,13 @@
       when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
       tags: phoebus_alarm_logger
 
+    # Pulls in the elasticsearch role as a dependency
+    - name: ChannelFinder
+      include_role:
+        name: channelfinder
+      when: channelfinder is defined and channelfinder | bool
+      tags: channelfinder
+
     - name: OAC Tree
       include_role:
         name: oac_tree
