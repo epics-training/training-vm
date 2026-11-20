@@ -79,6 +79,12 @@
       when: m_iocstats is defined and m_iocstats | bool
       tags: m_iocstats
 
+    - name: RecSync reccaster
+      include_role:
+        name: m_reccaster
+      when: m_reccaster is defined and m_reccaster | bool
+      tags: m_reccaster
+
     - name: SScan
       include_role:
         name: m_sscan

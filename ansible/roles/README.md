@@ -15,6 +15,13 @@ The Busy record (a dependency of AreaDetector).
 ### m_opcua
 OPC UA Device Support and the open62541 low-level driver.
 
+### m_reccaster
+The reccaster module of [RecSync](https://github.com/ChannelFinder/recsync):
+linked into an IOC, it uploads the IOC's records (with their info tags and
+some environment variables) to a recceiver (`recceiver` role), which feeds
+them into ChannelFinder. The EPICS module is the `client/` directory of the
+recsync release (see `subdir` below); the demo IOC is not built.
+
 ### m_p4p
 Python wrapper for PVAccess (PVXS-based) and PVA Gateway.
 
@@ -164,6 +171,9 @@ Each dictionary in `epics_modules_to_build` should have the following keys:
 - `post_hook`: (Optional) Name of task file to run after the build. Must be in `/tasks/` directory.
 - `args`: (Optional) Additional arguments to pass to `make`.
 - `exclude`: (Optional) List of patterns to exclude when extracting the tarball.
+- `subdir`: (Optional) Subdirectory of the unpacked source tree that is the
+  module's EPICS top (where it is configured and built, and what `RELEASE.local`
+  points to), e.g. `client` for recsync's reccaster module.
 
 ## Usage Example
 

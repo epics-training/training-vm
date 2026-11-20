@@ -1,0 +1,15 @@
+---
+# The recceiver role installs the server part of the same release
+recsync_version: "1.9.6"
+
+m_reccaster_modules:
+  - id: recsync
+    name: "RecSync reccaster module"
+    version: "{{ recsync_version }}"
+    url: "https://github.com/ChannelFinder/recsync/archive/refs/tags/{{ recsync_version }}.tar.gz"
+    # The EPICS module is recsync's client/ directory
+    subdir: client
+    release_var: "RECCASTER"
+    release_sortkey: "10"
+    # Leave out the demo IOC
+    args: -j {{ ansible_facts.processor_vcpus }} SKIPDEMO=YES

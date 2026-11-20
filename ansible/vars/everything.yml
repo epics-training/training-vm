@@ -14,6 +14,7 @@ m_opcua: true
 m_stream: true
 m_areadetector: true
 m_iocstats: true
+m_reccaster: true
 
 catrust: false
 phoebus: true

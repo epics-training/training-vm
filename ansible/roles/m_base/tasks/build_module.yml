@@ -27,6 +27,12 @@
   become: true
   when: ansible_facts['os_family'] == 'RedHat' and module.required_rpms is defined
 
+# EPICS top: the source tree, or its module.subdir (e.g. recsync's client/)
+- name: "{{ module.name }} | Determine module top directory"
+  ansible.builtin.set_fact:
+    module_top: >-
+      {{ epics_install_path }}/{{ module.id }}-{{ module.version }}{{ '/' + module.subdir if module.subdir is defined else '' }}
+
 - name: "{{ module.name }} | Check target directory"
   ansible.builtin.stat:
     path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}"
@@ -75,7 +81,7 @@
 
     - name: "{{ module.name }} rebuild | Remove SUPPORT definition from configure/RELEASE"
       ansible.builtin.lineinfile:
-        path: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/RELEASE"
+        path: "{{ module_top }}/configure/RELEASE"
         state: absent
         regexp: "^SUPPORT="
       become: true
@@ -83,7 +89,7 @@
     - name: "{{ module.name }} rebuild | Link RELEASE.local"
       ansible.builtin.file:
         src: "{{ epics_install_path }}/RELEASE.local"
-        dest: "{{ epics_install_path }}/{{ module.id }}-{{ module.version }}/configure/RELEASE.local"
+        dest: "{{ module_top }}/configure/RELEASE.local"
         state: link
       become: true
       when: module.id != 'base'
@@ -93,7 +99,7 @@
       when: module.pre_hook is defined
 
     - name: "{{ module.name }} rebuild | Compile from sources (this may take a while)"
-      command: make {{ module.args | default('') }} -C {{ epics_install_path }}/{{ module.id }}-{{ module.version }} all
+      command: make {{ module.args | default('') }} -C {{ module_top }} all
       register: build_result
       become: true
       # the -j cpus occasionally fails !!
@@ -101,7 +107,7 @@
       until: build_result.rc == 0
 
     - name: "{{ module.name }} rebuild | Clean intermediate build files"
-      command: make -C {{ epics_install_path }}/{{ module.id }}-{{ module.version }} clean
+      command: make -C {{ module_top }} clean
       become: true
 
     - name: "{{ module.name }} rebuild | Run post-build hook"
@@ -121,7 +127,7 @@
 
 - name: "{{ module.name }} | Create RELEASE.local fragment"
   copy:
-    content: "{{ module.release_var }}={{ epics_install_path }}/{{ module.id }}-{{ module.version }}\n"
+    content: "{{ module.release_var }}={{ module_top }}\n"
     dest: "{{ epics_install_path }}/RELEASE.local.d/{{ module.release_sortkey }}-{{ module.id }}"
   become: true
   when: module_built_flag.stat.exists == true or build_result.rc | default(0) == 0
@@ -134,7 +140,7 @@
 
 - name: "{{ module.name }} | Create epics-tools.sh fragment"
   copy:
-    content: "PATH={{ epics_install_path }}/{{ module.id }}-{{ module.version }}/bin/{{ arch.epics_host_arch }}:$PATH\n"
+    content: "PATH={{ module_top }}/bin/{{ arch.epics_host_arch }}:$PATH\n"
     dest: "{{ epics_install_path }}/epics-tools.sh.d/{{ module.release_sortkey }}-{{ module.id }}"
   become: true
   when: module.add_to_path is defined

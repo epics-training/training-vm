@@ -26,6 +26,7 @@ jobs:
           - initial_setup
           - m_base
           - m_iocstats
+          - m_reccaster
           - phoebus
           - archiver_appliance
           - kafka
