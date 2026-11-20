@@ -4,7 +4,7 @@ galaxy_info:
   role_name: elasticsearch
   namespace: epics
   author: Ralph Lange
-  description: Elasticsearch (single node) for the Phoebus alarm logger
+  description: Elasticsearch (single node) for the Phoebus services
   license: EPICS open license
   min_ansible_version: "2.15"
 # Elasticsearch runs on the JDK installed by the java role

@@ -1,0 +1,61 @@
+---
+# Defaults for the Phoebus save-and-restore service
+#
+# Modelled on the phoebus_services_save_restore role of
+# https://github.com/ControlSystemStudio/ansible-phoebus
+#
+# The service is built by the phoebus role (Phoebus' top-level Maven build
+# includes services/), so this role only runs the already-built service.
+# It stores its data in Elasticsearch (elasticsearch role, a dependency) and
+# serves the Phoebus "Save & Restore" application through its REST API.
+# The phoebus role uses the same variable name (save_restore_url) for the
+# client preferences, so setting it in a setup file configures client and
+# service consistently.
+
+save_restore_user: save-and-restore
+save_restore_group: save-and-restore
+# Working directory: the service reads EPICS settings from settings.ini there
+save_restore_home: "/var/lib/save-and-restore"
+save_restore_conf_dir: "/etc/save-and-restore"
+save_restore_target_dir: "/opt/epics-tools/lib/phoebus/services/save-and-restore/target"
+save_restore_java_heap_opts: "-Xms128M -Xmx512M"
+
+# EPICS (CA/PVA) access for taking snapshots and restoring on the server side.
+# The service does not read the Phoebus client's preferences.ini: as
+# documented for the service, it takes its EPICS settings from the EPICS_*
+# environment variables (for CA because the wrapper sets -Djca.use_env=true).
+# Default protocol for PV names without a ca:// or pva:// prefix
+save_restore_default_protocol: ca
+# EPICS_* environment variables of the service, e.g.
+#   save_restore_epics_env:
+#     EPICS_CA_ADDR_LIST: "192.168.1.255"
+#     EPICS_CA_AUTO_ADDR_LIST: "NO"
+#     EPICS_PVA_ADDR_LIST: "192.168.1.255"
+#     EPICS_PVA_AUTO_ADDR_LIST: "NO"
+# Empty: the EPICS defaults (automatic address lists), which find the IOCs
+# running on the VM
+save_restore_epics_env: {}
+
+# REST API of the service (port 8080 and /save-restore are the Phoebus
+# client defaults). Must be http:// with an explicit, unprivileged port
+# (checked by the role), as the service runs as an unprivileged user.
+save_restore_url: "http://localhost:8080/save-restore"
+# Port and context path of the REST API - taken from that URL
+save_restore_port: "{{ save_restore_url | urlsplit('port') }}"
+save_restore_context_path: >-
+  {{ save_restore_url | urlsplit('path') | regex_replace('/+$', '') }}
+
+save_restore_es_host: "{{ elasticsearch_network_host }}"
+save_restore_es_port: "{{ elasticsearch_http_port }}"
+
+# Authentication: the built-in demo users (training VM, localhost only).
+# Reading needs no credentials; creating, changing and deleting does.
+# With authorization_permitall every authenticated user may do everything.
+save_restore_auth_impl: demo
+save_restore_demo_user: user
+save_restore_demo_user_password: userPass
+save_restore_demo_admin: admin
+save_restore_demo_admin_password: adminPass
+save_restore_demo_readonly: johndoe
+save_restore_demo_readonly_password: "1234"
+save_restore_authorization_permitall: true

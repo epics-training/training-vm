@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+#
+# Phoebus save-and-restore service - overrides of the defaults packaged with
+# the service (application.properties in the jar)
+
+# REST API (the Phoebus client's jmasar.service.url)
+server.port={{ save_restore_port }}
+server.servlet.contextPath={{ save_restore_context_path }}
+
+# Elasticsearch
+elasticsearch.network.host={{ save_restore_es_host }}
+elasticsearch.http.port={{ save_restore_es_port }}
+elasticsearch.http.protocol=http
+
+# The packaged default (DEBUG) floods the journal
+logging.level.org.springframework=INFO
+
+# Authentication: ad, ldap, ldap_embedded or demo (built-in users below)
+auth.impl={{ save_restore_auth_impl }}
+demo.user={{ save_restore_demo_user }}
+demo.user.password={{ save_restore_demo_user_password }}
+demo.admin={{ save_restore_demo_admin }}
+demo.admin.password={{ save_restore_demo_admin_password }}
+demo.readOnly={{ save_restore_demo_readonly }}
+demo.readOnly.password={{ save_restore_demo_readonly_password }}
+
+# Bypass authorization (but not authentication!)
+authorization.permitall={{ save_restore_authorization_permitall | bool | lower }}

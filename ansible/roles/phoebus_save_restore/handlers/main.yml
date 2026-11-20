@@ -1,0 +1,10 @@
+---
+# Handlers for the Phoebus save-and-restore service
+
+- name: Restart save-and-restore
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: save-and-restore
+    state: restarted
+    daemon_reload: true

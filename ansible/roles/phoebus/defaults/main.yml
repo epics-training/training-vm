@@ -33,6 +33,11 @@ alarm_kafka_server: >-
 # REST API of the alarm logger (port 9000 is the Phoebus client default)
 alarm_logger_url: "http://localhost:9000"
 
+# REST API of the save-and-restore service the client uses (the Phoebus
+# client default). The phoebus_save_restore role uses the same variable
+# name, so setting it in a setup file configures client and service.
+save_restore_url: "http://localhost:8080/save-restore"
+
 # Documentation build: virtualenv location, and the distro's Python package
 # to use where the system python3 is older than 3.11 (Rocky 9, Ubuntu 22.04)
 phoebus_docs_src: "/opt/epics-tools/lib/phoebus/docs"

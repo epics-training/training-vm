@@ -1,0 +1,46 @@
+---
+dependency:
+  name: galaxy
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../resources/converge.yml
+  inventory:
+    host_vars:
+      phoebus-save-restore-systemd:
+        # Real systemd in the container: run the services as on a VM
+        in_container: false
+        # Same as the EPICS defaults; set to check that they reach the service
+        save_restore_epics_env:
+          EPICS_CA_AUTO_ADDR_LIST: "YES"
+          EPICS_PVA_AUTO_ADDR_LIST: "YES"
+    group_vars:
+      all:
+
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  directory: ../resources/tests/
+driver:
+  name: docker
+# Container with systemd as PID 1 (shared image definition in ansible/molecule/systemd)
+platforms:
+  - name: phoebus-save-restore-systemd
+    image: ubuntu:22.04
+    # relative to the scenario directory
+    dockerfile: ../../../../molecule/systemd/Dockerfile.j2
+    pre_build_image: false
+    command: /lib/systemd/systemd
+    privileged: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    tmpfs:
+      - /run
+      - /run/lock
