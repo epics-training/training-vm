@@ -17,6 +17,7 @@ on:
       - 'ansible/roles/phoebus_alarm_logger/**'
       - 'ansible/roles/elasticsearch/**'
       - 'ansible/roles/java/**'
+      - 'ansible/roles/maven/**'
       - 'ansible/roles/archiver_appliance/**'
   pull_request:
     paths:
@@ -29,6 +30,7 @@ on:
     - 'ansible/roles/phoebus_alarm_logger/**'
     - 'ansible/roles/elasticsearch/**'
     - 'ansible/roles/java/**'
+    - 'ansible/roles/maven/**'
     - 'ansible/roles/archiver_appliance/**'
   workflow_dispatch:
     inputs:

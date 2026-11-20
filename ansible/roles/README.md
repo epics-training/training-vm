@@ -107,6 +107,9 @@ One-off role called at the first run in a freshly provisioned VM.
 ### java
 Java SDK needed for Phoebus and Services.
 
+### maven
+Apache Maven to build Phoebus and the ChannelFinder service.
+
 # Writing architecture-independent roles
 
 The playbook supports both `x86_64` and `aarch64` (ARM64) targets.
