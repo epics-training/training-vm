@@ -68,6 +68,16 @@ and `user`/`userPass`. When the `archiver_appliance` role is enabled,
 channels with an `archive` property are added to the archiver.
 The service also runs an EPICS PVA RPC server (`cfService:query`).
 
+### recceiver
+[RecSync](https://github.com/ChannelFinder/recsync) recceiver (the
+Python/Twisted server of the same recsync release as `m_reccaster`) as a
+systemd service, in a virtualenv under `/opt/epics-tools/services/recceiver`.
+It announces itself to the IOCs on the VM (`recceiver_addrlist`, default
+`127.255.255.255:5049`, the loopback broadcast address), collects the
+records of the IOCs built with reccaster and pushes them, with properties
+like `iocName`, `recordType`, `pvStatus` and the `archive` info tag, into
+ChannelFinder (`channelfinder` role, a dependency).
+
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
 

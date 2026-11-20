@@ -19,6 +19,7 @@ on:
       - 'ansible/roles/java/**'
       - 'ansible/roles/maven/**'
       - 'ansible/roles/channelfinder/**'
+      - 'ansible/roles/recceiver/**'
       - 'ansible/roles/archiver_appliance/**'
   pull_request:
     paths:
@@ -33,6 +34,7 @@ on:
     - 'ansible/roles/java/**'
     - 'ansible/roles/maven/**'
     - 'ansible/roles/channelfinder/**'
+    - 'ansible/roles/recceiver/**'
     - 'ansible/roles/archiver_appliance/**'
   workflow_dispatch:
     inputs:

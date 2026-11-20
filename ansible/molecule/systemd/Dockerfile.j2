@@ -1,7 +1,7 @@
 # Molecule platform image with systemd as PID 1
 #
 # Shared by the Molecule scenarios that test services (kafka, elasticsearch,
-# phoebus_alarm_logger, channelfinder):
+# phoebus_alarm_logger, channelfinder, recceiver):
 # with a real systemd the roles run with in_container=false, i.e. exactly as on a VM,
 # and the tests can check that the services are actually running and working.
 # Needs a privileged container sharing the host's cgroup namespace - see the

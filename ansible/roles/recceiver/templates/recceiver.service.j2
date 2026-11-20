@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+[Unit]
+Description=RecSync recceiver (IOC records to ChannelFinder)
+Documentation=https://github.com/ChannelFinder/recsync
+After=network.target channelfinder.service
+Requires=channelfinder.service
+
+[Service]
+Type=simple
+User={{ recceiver_account }}
+Group={{ recceiver_account }}
+WorkingDirectory={{ recceiver_root }}
+
+ExecStart={{ recceiver_venv }}/bin/twistd --nodaemon --pidfile= recceiver -f {{ recceiver_conf }}
+
+# ChannelFinder is slow to come up after a boot
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

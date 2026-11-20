@@ -1,0 +1,195 @@
+---
+# Install the recceiver in a virtualenv and run it as a service
+
+- name: Install Python virtualenv support
+  become: true
+  ansible.builtin.package:
+    name: >-
+      {{ ['python3-venv', 'python3-pip']
+         if ansible_facts['os_family'] == 'Debian'
+         else ['python3', 'python3-pip'] }}
+    state: present
+
+- name: Ensure recceiver group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ recceiver_account }}"
+    system: true
+    state: present
+
+- name: Ensure recceiver user exists
+  become: true
+  ansible.builtin.user:
+    name: "{{ recceiver_account }}"
+    group: "{{ recceiver_account }}"
+    system: true
+    home: "{{ recceiver_root }}"
+    createhome: false
+    shell: /sbin/nologin
+    state: present
+
+- name: Ensure recceiver service directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ recceiver_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download recsync {{ recceiver_version }}
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ recceiver_download_url }}"
+    dest: "/tmp/recsync-{{ recceiver_version }}.tar.gz"
+    mode: "0644"
+  register: recceiver_download
+  retries: 3
+  delay: 10
+  until: recceiver_download is succeeded
+
+- name: Find older recsync source trees
+  ansible.builtin.find:
+    paths: "{{ recceiver_root }}"
+    patterns: "recsync-*"
+    file_type: directory
+    excludes: "{{ recceiver_src_dir | basename }}"
+  register: recceiver_old_sources
+
+- name: Remove older recsync source trees
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ recceiver_old_sources.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+
+- name: Ensure recsync source directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ recceiver_src_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Unpack recsync {{ recceiver_version }}
+  become: true
+  ansible.builtin.unarchive:
+    src: "/tmp/recsync-{{ recceiver_version }}.tar.gz"
+    dest: "{{ recceiver_src_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    extra_opts:
+      - --strip-components=1
+    creates: "{{ recceiver_src_dir }}/server/pyproject.toml"
+
+# The recceiver's pyproject.toml needs a recent pip
+- name: Create the recceiver virtualenv with an up-to-date pip
+  become: true
+  ansible.builtin.pip:
+    name: pip
+    state: latest # noqa package-latest
+    virtualenv: "{{ recceiver_venv }}"
+    virtualenv_command: python3 -m venv
+
+# pip always reinstalls from a source directory: check the version first
+- name: Check the recceiver version in the virtualenv
+  ansible.builtin.command: "{{ recceiver_venv }}/bin/pip show recceiver"
+  register: recceiver_installed
+  changed_when: false
+  failed_when: false
+
+- name: Install the recceiver into its virtualenv
+  become: true
+  ansible.builtin.pip:
+    name: "{{ recceiver_src_dir }}/server"
+    virtualenv: "{{ recceiver_venv }}"
+  when: >-
+    ('Version: ' + recceiver_version) not in
+    recceiver_installed.stdout_lines | default([])
+  notify: Restart recceiver
+
+# Contains the ChannelFinder password
+- name: Create recceiver configuration
+  become: true
+  ansible.builtin.template:
+    src: recceiver.conf.j2
+    dest: "{{ recceiver_conf }}"
+    owner: root
+    group: "{{ recceiver_account }}"
+    mode: "0640"
+  notify: Restart recceiver
+
+- name: Create recceiver systemd service
+  become: true
+  ansible.builtin.template:
+    src: recceiver.service.j2
+    dest: /etc/systemd/system/recceiver.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart recceiver
+
+- name: Manage recceiver service
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: recceiver
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Apply pending recceiver restarts before verifying
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify that the recceiver is running
+  when: not in_container
+  block:
+    # On startup, the recceiver creates its properties in ChannelFinder
+    - name: Wait for the recceiver to register its properties in ChannelFinder
+      ansible.builtin.uri:
+        url: "{{ recceiver_cf_url }}/resources/properties/recceiverID"
+      register: recceiver_property
+      until: recceiver_property.status == 200
+      retries: 24
+      delay: 5
+
+    - name: Get recceiver service state
+      become: true
+      ansible.builtin.systemd_service:
+        name: recceiver
+      register: recceiver_service
+
+    - name: Check that recceiver is active
+      ansible.builtin.assert:
+        that:
+          - recceiver_service.status.ActiveState == 'active'
+          - recceiver_service.status.SubState == 'running'
+        fail_msg: >-
+          Service recceiver is {{ recceiver_service.status.ActiveState }}/{{ recceiver_service.status.SubState }}
+        success_msg: "Service recceiver is running"
+        quiet: true
+
+  rescue:
+    - name: Collect recceiver diagnostics
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set +e
+          systemctl status recceiver --no-pager --lines=0
+          echo "--- journal"
+          journalctl -u recceiver --no-pager -n 60
+      register: recceiver_diagnostics
+      changed_when: false
+      failed_when: false
+
+    - name: Show recceiver diagnostics
+      ansible.builtin.debug:
+        var: recceiver_diagnostics.stdout_lines
+
+    - name: Fail because the recceiver is not running
+      ansible.builtin.fail:
+        msg: >-
+          The recceiver did not come up - see the diagnostics above
+          and 'journalctl -u recceiver'

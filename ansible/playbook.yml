@@ -198,6 +198,13 @@
       when: channelfinder is defined and channelfinder | bool
       tags: channelfinder
 
+    # Pulls in the channelfinder role as a dependency
+    - name: RecSync recceiver
+      include_role:
+        name: recceiver
+      when: recceiver is defined and recceiver | bool
+      tags: recceiver
+
     - name: OAC Tree
       include_role:
         name: oac_tree
