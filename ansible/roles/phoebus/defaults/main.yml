@@ -14,9 +14,6 @@ phoebus_java_initial_heapsize: "256M"
 phoebus_java_max_heapsize: "1024M"
 phoebus_java_heap_tuning_opts: "-XX:MaxHeapFreeRatio=10 -XX:MinHeapFreeRatio=5 -XX:-ShrinkHeapInSteps"
 
-mvn_version: 3.9.14
-mvn_home: "/opt/epics-tools/lib/apache-maven"
-
 epics_services_account: root
 
 # Alarm system the client connects to (preferences.ini). The phoebus_alarm
@@ -32,6 +29,9 @@ alarm_kafka_server: >-
   {{ kafka_listen_host | default('localhost') }}:{{ kafka_port | default(9092) }}
 # REST API of the alarm logger (port 9000 is the Phoebus client default)
 alarm_logger_url: "http://localhost:9000"
+
+# ChannelFinder REST API (shared with the channelfinder role)
+channelfinder_url: "http://localhost:8080/ChannelFinder"
 
 # Documentation build: virtualenv location, and the distro's Python package
 # to use where the system python3 is older than 3.11 (Rocky 9, Ubuntu 22.04)

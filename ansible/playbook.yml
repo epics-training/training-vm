@@ -79,6 +79,12 @@
       when: m_iocstats is defined and m_iocstats | bool
       tags: m_iocstats
 
+    - name: RecSync reccaster
+      include_role:
+        name: m_reccaster
+      when: m_reccaster is defined and m_reccaster | bool
+      tags: m_reccaster
+
     - name: SScan
       include_role:
         name: m_sscan
@@ -184,6 +190,20 @@
         name: phoebus_alarm_logger
       when: phoebus_alarm_logger is defined and phoebus_alarm_logger | bool
       tags: phoebus_alarm_logger
+
+    # Pulls in the elasticsearch role as a dependency
+    - name: ChannelFinder
+      include_role:
+        name: channelfinder
+      when: channelfinder is defined and channelfinder | bool
+      tags: channelfinder
+
+    # Pulls in the channelfinder role as a dependency
+    - name: RecSync recceiver
+      include_role:
+        name: recceiver
+      when: recceiver is defined and recceiver | bool
+      tags: recceiver
 
     - name: OAC Tree
       include_role:

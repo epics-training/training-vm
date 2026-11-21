@@ -1,0 +1,32 @@
+# {{ ansible_managed }}
+# All options: {{ recceiver_src_dir }}/server/recceiver_full.conf
+
+[recceiver]
+loglevel = {{ recceiver_loglevel }}
+
+# Announcement (broadcast) addresses
+addrlist = {{ recceiver_addrlist }}
+
+# TCP address for the IOCs (port 0: random)
+bind = {{ recceiver_bind }}
+
+announceInterval = {{ recceiver_announce_interval }}
+
+procs = {{ recceiver_procs }}
+
+[cf]
+baseUrl = {{ recceiver_cf_url }}
+cfUsername = {{ recceiver_cf_username }}
+cfPassword = {{ recceiver_cf_password }}
+verifySSL = False
+
+infotags = {{ recceiver_cf_infotags }}
+environment_vars = {{ recceiver_cf_environment_vars }}
+alias = {{ recceiver_cf_alias | bool }}
+recordType = {{ recceiver_cf_record_type | bool }}
+recordDesc = {{ recceiver_cf_record_desc | bool }}
+iocConnectionInfo = True
+
+# Mark the channels Inactive on stop and start (IOCs re-upload)
+cleanOnStart = True
+cleanOnStop = True

@@ -15,6 +15,13 @@ The Busy record (a dependency of AreaDetector).
 ### m_opcua
 OPC UA Device Support and the open62541 low-level driver.
 
+### m_reccaster
+The reccaster module of [RecSync](https://github.com/ChannelFinder/recsync):
+linked into an IOC, it uploads the IOC's records (with their info tags and
+some environment variables) to a recceiver (`recceiver` role), which feeds
+them into ChannelFinder. The EPICS module is the `client/` directory of the
+recsync release (see `subdir` below); the demo IOC is not built.
+
 ### m_p4p
 Python wrapper for PVAccess (PVXS-based) and PVA Gateway.
 
@@ -48,6 +55,28 @@ them to the Phoebus "Alarm Log" table through its REST API
 (`alarm_logger_url`, default `http://localhost:9000`, shared with the
 `phoebus` role's client preferences like the alarm server's settings).
 Built by the `phoebus` role and pulls in `phoebus_alarm` (alarm server, Kafka).
+
+### channelfinder
+[ChannelFinder](https://github.com/ChannelFinder/ChannelFinderService)
+directory service as a systemd service, built from its source release with
+Maven (`maven` role), storing its directory in Elasticsearch
+(`elasticsearch` role, a dependency).
+REST API and admin web page on `channelfinder_url` (default
+`http://localhost:8080/ChannelFinder`, shared with the `phoebus` role's
+client preferences), HTTPS on port 8443; demo accounts `admin`/`adminPass`
+and `user`/`userPass`. When the `archiver_appliance` role is enabled,
+channels with an `archive` property are added to the archiver.
+The service also runs an EPICS PVA RPC server (`cfService:query`).
+
+### recceiver
+[RecSync](https://github.com/ChannelFinder/recsync) recceiver (the
+Python/Twisted server of the same recsync release as `m_reccaster`) as a
+systemd service, in a virtualenv under `/opt/epics-tools/services/recceiver`.
+It announces itself to the IOCs on the VM (`recceiver_addrlist`, default
+`127.255.255.255:5049`, the loopback broadcast address), collects the
+records of the IOCs built with reccaster and pushes them, with properties
+like `iocName`, `recordType`, `pvStatus` and the `archive` info tag, into
+ChannelFinder (`channelfinder` role, a dependency).
 
 ### archiver_appliance
 Minimal install of the EPICS Archiver Appliance.
@@ -107,6 +136,9 @@ One-off role called at the first run in a freshly provisioned VM.
 ### java
 Java SDK needed for Phoebus and Services.
 
+### maven
+Apache Maven to build Phoebus and the ChannelFinder service.
+
 # Writing architecture-independent roles
 
 The playbook supports both `x86_64` and `aarch64` (ARM64) targets.
@@ -161,6 +193,9 @@ Each dictionary in `epics_modules_to_build` should have the following keys:
 - `post_hook`: (Optional) Name of task file to run after the build. Must be in `/tasks/` directory.
 - `args`: (Optional) Additional arguments to pass to `make`.
 - `exclude`: (Optional) List of patterns to exclude when extracting the tarball.
+- `subdir`: (Optional) Subdirectory of the unpacked source tree that is the
+  module's EPICS top (where it is configured and built, and what `RELEASE.local`
+  points to), e.g. `client` for recsync's reccaster module.
 
 ## Usage Example
 

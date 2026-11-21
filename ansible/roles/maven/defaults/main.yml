@@ -1,0 +1,4 @@
+---
+# Apache Maven
+mvn_version: 3.9.14
+mvn_home: "/opt/epics-tools/lib/apache-maven"

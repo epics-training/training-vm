@@ -1,0 +1,10 @@
+---
+# Handlers for the recceiver
+
+- name: Restart recceiver
+  become: true
+  when: not in_container
+  ansible.builtin.systemd_service:
+    name: recceiver
+    state: restarted
+    daemon_reload: true

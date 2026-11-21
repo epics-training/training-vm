@@ -14,11 +14,14 @@ m_opcua: true
 m_stream: true
 m_areadetector: true
 m_iocstats: true
+m_reccaster: true
 
 catrust: false
 phoebus: true
 phoebus_alarm: true
 phoebus_alarm_logger: true
+channelfinder: true
+recceiver: true
 oac_tree: true
 archiver_appliance: true
 docker: true

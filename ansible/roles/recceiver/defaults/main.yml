@@ -1,0 +1,42 @@
+---
+# RecSync recceiver (Python/Twisted), from the same recsync release as
+# the reccaster module (m_reccaster role). Pushes the IOCs' records into
+# ChannelFinder.
+
+recceiver_version: "1.9.6"
+recceiver_download_url: "https://github.com/ChannelFinder/recsync/archive/refs/tags/{{ recceiver_version }}.tar.gz"
+
+recceiver_account: recceiver
+recceiver_root: "/opt/epics-tools/services/recceiver"
+recceiver_src_dir: "{{ recceiver_root }}/recsync-{{ recceiver_version }}"
+recceiver_venv: "{{ recceiver_root }}/venv"
+recceiver_conf: "{{ recceiver_root }}/recceiver.conf"
+
+recceiver_loglevel: INFO
+
+# Where to announce the recceiver (comma-separated): the default reaches
+# the IOCs on the VM; add 255.255.255.255:5049 for the local network
+recceiver_addrlist: "127.255.255.255:5049"
+# TCP address for the IOCs (port 0: random, announced)
+recceiver_bind: "0.0.0.0:0"
+recceiver_announce_interval: 15.0
+
+# Processing chain ('show' would log every record)
+recceiver_procs: cf
+
+# ChannelFinder connection
+recceiver_cf_url: "{{ channelfinder_url }}"
+recceiver_cf_username: "{{ channelfinder_admin_user }}"
+recceiver_cf_password: "{{ channelfinder_admin_password }}"
+
+# Extra channel properties: record info tags (archive/archiver feed the
+# Archiver Appliance integration) ...
+recceiver_cf_infotags: "archive archiver"
+# ... and IOC environment variables, as VARIABLE:PropertyName
+recceiver_cf_environment_vars: "ENGINEER:Engineer,EPICS_BASE:EpicsVersion,PWD:WorkingDirectory"
+recceiver_cf_alias: true
+recceiver_cf_record_type: true
+recceiver_cf_record_desc: true
+
+# true: install and configure the service, but don't start it
+in_container: false

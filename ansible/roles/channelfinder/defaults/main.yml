@@ -1,0 +1,39 @@
+---
+# ChannelFinder directory service
+# (after phoebus_services_cf of ControlSystemStudio/ansible-phoebus)
+#
+# channelfinder_url is shared with the phoebus role (client preferences)
+# and used by the recceiver role.
+
+# 5.x builds and runs with JDK 25 and the Elasticsearch 8 client
+channelfinder_version: "5.1.0"
+# Source release (there are no binary releases)
+channelfinder_download_url: "https://github.com/ChannelFinder/ChannelFinderService/\
+  archive/refs/tags/ChannelFinder-{{ channelfinder_version }}.tar.gz"
+channelfinder_src_dir: "/opt/epics-tools/lib/channelfinder-{{ channelfinder_version }}"
+
+channelfinder_account: channelfinder
+channelfinder_root: "/opt/epics-tools/services/channelfinder"
+channelfinder_jar: "{{ channelfinder_root }}/ChannelFinder-{{ channelfinder_version }}.jar"
+channelfinder_java_heap_opts: "-Xms128m -Xmx512m"
+
+# REST API (plain HTTP), as the Phoebus client expects it
+channelfinder_url: "http://localhost:8080/ChannelFinder"
+channelfinder_http_port: "{{ channelfinder_url | urlsplit('port') }}"
+# HTTPS, with the self-signed certificate bundled with the service
+channelfinder_https_port: 8443
+
+# Demo authentication (the service's default accounts)
+channelfinder_admin_user: admin
+channelfinder_admin_password: adminPass
+channelfinder_user: user
+channelfinder_user_password: userPass
+
+channelfinder_es_url: "http://{{ elasticsearch_network_host }}:{{ elasticsearch_http_port }}"
+
+# Add channels with an 'archive' property to the Archiver Appliance
+channelfinder_aa_enabled: "{{ archiver_appliance | default(false) | bool }}"
+channelfinder_aa_url: "http://localhost:17665"
+
+# true: install and configure the service, but don't start it
+in_container: false
